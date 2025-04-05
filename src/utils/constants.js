@@ -22,6 +22,7 @@ export const API_CHECK_ZCASH_PARAMS = 'zcashparamsexist'
 export const API_DL_ZCASH_PARAMS = 'zcparamsdl'
 export const API_GET_ADDRESSES = "get_addresses"
 export const API_GET_BLOCK = 'get_block'
+export const API_GET_CREDENTIALS_BY_SCOPE = 'get_credentials_by_scope'
 export const API_GET_CURRENCY = 'get_currency'
 export const API_GET_IDENTITIES = 'get_identities'
 export const API_GET_IDENTITY = 'get_identity'

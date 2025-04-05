@@ -22,7 +22,7 @@
     "react-redux": "7.1.1",
     "react-router": "3.2.1",
     "redux": "3.6.0",
-    "verus-typescript-primitives": "https://github.com/VerusCoin/verus-typescript-primitives.git"
+    "verus-typescript-primitives": "git+https://github.com/mcstoer/verus-typescript-primitives.git#credential-class"
   },
   "scripts": {
     "start": "npx webpack-dashboard -t 'verus-desktop-authenticator' -- npx webpack-dev-server --colors --no-info --mode development",

@@ -20,6 +20,7 @@ import {
   LoginConsentDecision, LoginConsentResponse
 } from 'verus-typescript-primitives';
 import BigNumber from 'bignumber.js';
+import { getCredentialsByScope } from '../../../rpc/calls/getCredentials';
 
 class Login extends React.Component {
   constructor(props) {
@@ -65,10 +66,20 @@ class Login extends React.Component {
       userActions.map(action => this.props.dispatch(action))
 
       if (this.props.canLoginOrGiveConsent()) {
+
+        const loginIdentity = this.props.activeIdentity.identity.identityaddress;
+
+        // Get the associated credentials based on the signing id.
+        const credentials = await getCredentialsByScope(
+          request.chainTicker,
+          loginIdentity,
+          request.signedBy.identity.identityaddress
+        );
+
         try {
           let response = new LoginConsentResponse({
             system_id: request.system_id,
-            signing_id: this.props.activeIdentity.identity.identityaddress,
+            signing_id: loginIdentity,
             decision: new LoginConsentDecision({
               decision_id: request.challenge.challenge_id,
               request: request,
@@ -76,6 +87,7 @@ class Login extends React.Component {
                 .dividedBy(1000)
                 .decimalPlaces(0)
                 .toNumber(),
+              credentials: credentials,
             })
           });
   
