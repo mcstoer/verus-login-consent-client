@@ -9745,11 +9745,7 @@ verror@1.10.0:
 
 "verus-typescript-primitives@git+https://github.com/mcstoer/verus-typescript-primitives.git#credential-class":
   version "1.0.0"
-<<<<<<< HEAD
-  resolved "https://github.com/VerusCoin/verus-typescript-primitives.git#ca149bcef98d226ffc6eccfd4bd089620ca2c965"
-=======
   resolved "git+https://github.com/mcstoer/verus-typescript-primitives.git#4368bf8780c00e779f83cd1c37a0412d10449aa4"
->>>>>>> 5521869 (Add fetching of credentials use in the scope that matches the signing id.)
   dependencies:
     base64url "3.0.1"
     bech32 "2.0.0"
