@@ -69,14 +69,14 @@ class Login extends React.Component {
 
         const loginIdentity = this.props.activeIdentity.identity.identityaddress;
 
-        // Get the associated credentials based on the signing id.
-        const credentials = await getCredentialsByScope(
-          request.chainTicker,
-          loginIdentity,
-          request.signedBy.identity.identityaddress
-        );
-
         try {
+          // Get the associated credentials based on the signing id.
+          const credentials = await getCredentialsByScope(
+            request.chainTicker,
+            loginIdentity,
+            request.signedBy.identity.identityaddress
+          );
+
           let response = new LoginConsentResponse({
             system_id: request.system_id,
             signing_id: loginIdentity,
