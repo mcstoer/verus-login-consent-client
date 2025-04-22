@@ -23,6 +23,8 @@ import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import { VerusIdLogo } from "../../../images";
+import Checkbox from '@mui/material/Checkbox';
+import FormControlLabel from '@mui/material/FormControlLabel';
 
 const Login = (props) => {
   // eslint-disable-next-line react/prop-types
@@ -32,6 +34,7 @@ const Login = (props) => {
   const [loading, setLoading] = useState(false);
   const identities = useSelector((state) => state.identity.identities);
   const activeIdentity = useSelector((state) => state.identity.activeIdentity);
+  const [includeCredentials, setIncludeCredentials] = useState(true);
 
   // See if the webhook exists.
   let canProvision = request.challenge.provisioning_info && request.challenge.provisioning_info.some(x => {
@@ -66,12 +69,15 @@ const Login = (props) => {
       const loginIdentity = activeIdentity.identity.identityaddress;
 
       try {
-        // Get the associated credentials based on the signing id.
-        const credentials = await getCredentialsByScope(
-          request.chainTicker,
-          loginIdentity,
-          request.signedBy.identity.identityaddress
-        );
+        let credentials = [];
+        if (includeCredentials) {
+          // Get the associated credentials based on the signing id.
+          credentials = await getCredentialsByScope(
+            request.chainTicker,
+            loginIdentity,
+            request.signedBy.identity.identityaddress
+          );
+        }
 
         let response = new LoginConsentResponse({
           system_id: request.system_id,
@@ -198,6 +204,19 @@ const Login = (props) => {
                 );
               })}
             </Select>
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+              <FormControlLabel
+                control={
+                  <Checkbox 
+                    checked={includeCredentials}
+                    onChange={(e) => setIncludeCredentials(e.target.checked)}
+                    color="primary"
+                  />
+                }
+                label="Include Credentials"
+                style={{ marginTop: 8 }}
+              />
+            </div>
           </FormControl>
         </div>
         <div
