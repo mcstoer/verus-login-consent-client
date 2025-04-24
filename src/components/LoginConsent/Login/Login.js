@@ -6,17 +6,15 @@ import {
   EXTERNAL_ACTION,
   EXTERNAL_CHAIN_START,
   REDIRECT,
-  PROVISIONING_FORM
+  PROVISIONING_FORM,
+  CREDENTIALS_REVIEW
 } from '../../../utils/constants';
 import { checkAndUpdateIdentities, setActiveVerusId } from '../../../redux/reducers/identity/identity.actions';
-import { signResponse } from '../../../rpc/calls/signResponse';
 import { setError } from '../../../redux/reducers/error/error.actions';
 import { 
   ID_ADDRESS_VDXF_KEY,
   LOGIN_CONSENT_ID_PROVISIONING_WEBHOOK_VDXF_KEY,
-  LoginConsentDecision, LoginConsentResponse
 } from 'verus-typescript-primitives';
-import BigNumber from 'bignumber.js';
 import { getCredentialsByScope } from '../../../rpc/calls/getCredentials';
 import Button from '@mui/material/Button';
 import MenuItem from '@mui/material/MenuItem';
@@ -25,6 +23,8 @@ import Select from '@mui/material/Select';
 import { VerusIdLogo } from "../../../images";
 import Checkbox from '@mui/material/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
+import { setCredentials } from '../../../redux/reducers/credentials/credentials.actions';
+import { createAndSignLoginResponse } from '../../../utils/loginResponse';
 
 const Login = (props) => {
   // eslint-disable-next-line react/prop-types
@@ -36,7 +36,7 @@ const Login = (props) => {
   const activeIdentity = useSelector((state) => state.identity.activeIdentity);
   const [includeCredentials, setIncludeCredentials] = useState(true);
 
-  // See if the webhook exists.
+  // The provisioning webhook needs to exist for provisioning.
   let canProvision = request.challenge.provisioning_info && request.challenge.provisioning_info.some(x => {
     return (
       x.vdxfkey === LOGIN_CONSENT_ID_PROVISIONING_WEBHOOK_VDXF_KEY.vdxfid
@@ -69,37 +69,39 @@ const Login = (props) => {
       const loginIdentity = activeIdentity.identity.identityaddress;
 
       try {
-        let credentials = [];
         if (includeCredentials) {
           // Get the associated credentials based on the signing id.
-          credentials = await getCredentialsByScope(
-            request.chainTicker,
+
+          let credentials = [];
+          try {
+            credentials = await getCredentialsByScope(
+              request.chainTicker,
+              loginIdentity,
+              request.signedBy.identity.identityaddress
+            );
+          } catch (e) {
+            // Ignore the error if it means that there are no credentials to be fetched.
+            if (!e.message.includes("No z-address found for identity")) {
+              throw e;
+            }
+          } 
+          
+          dispatch(setCredentials(credentials));
+          
+          setLoading(false);
+          dispatch(setNavigationPath(CREDENTIALS_REVIEW));
+        } else {
+
+          const signedResponse = await createAndSignLoginResponse(
+            request,
             loginIdentity,
-            request.signedBy.identity.identityaddress
+            []
           );
+          
+          setRequestResult(signedResponse, () => {
+            dispatch(setNavigationPath(REDIRECT));
+          });
         }
-
-        let response = new LoginConsentResponse({
-          system_id: request.system_id,
-          signing_id: loginIdentity,
-          decision: new LoginConsentDecision({
-            decision_id: request.challenge.challenge_id,
-            request: request,
-            created_at: BigNumber(Date.now())
-              .dividedBy(1000)
-              .decimalPlaces(0)
-              .toNumber(),
-            credentials: credentials,
-          })
-        });
-
-        response.chainTicker = request.chainTicker;
-        
-        const sigRes = await signResponse(response);
-        
-        setRequestResult(sigRes, () => {
-          dispatch(setNavigationPath(REDIRECT));
-        });
       } catch(e) {
         setLoading(false);
         dispatch(setError(e));

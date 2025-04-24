@@ -11,7 +11,7 @@ export const ConsentRender = function () {
   const { sigBlockInfo, signedBy, signingRevocationIdentity, signingRecoveryIdentity } = request;
   const { time } = sigBlockInfo;
   // Convert the fully qualified name into a nicer format for VRSC.
-  const signerConvertedFqn = convertFqnToDisplayFormat(signedBy.fullyqualifiedname);
+  const signerFqn = convertFqnToDisplayFormat(signedBy.fullyqualifiedname);
 
   return (
     <div
@@ -41,14 +41,14 @@ export const ConsentRender = function () {
             justifyContent: "center",
           }}
         >
-          {signerConvertedFqn}{` is requesting login with VerusID`}
+          {signerFqn}{` is requesting login with VerusID`}
         </div>
 
         <RequestCard
           chainName={request.chainName}
           systemId={request.system_id}
           signedBy={signedBy}
-          signerConvertedFqn={signerConvertedFqn}
+          signerFqn={signerFqn}
           revocationIdentity={signingRevocationIdentity}
           recoveryIdentity={signingRecoveryIdentity}
           time={time}

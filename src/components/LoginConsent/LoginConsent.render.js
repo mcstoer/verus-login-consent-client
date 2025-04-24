@@ -8,8 +8,9 @@ import {
   PROVISIONING_FORM,
   PROVISIONING_CONFIRM,
   PROVISIONING_RESULT,
-} from '../../utils/constants'
-import ExternalAction from './ExternalAction/ExternalAction'
+  CREDENTIALS_REVIEW,
+} from '../../utils/constants';
+import ExternalAction from './ExternalAction/ExternalAction';
 import Loading from '../Loading';
 import Error from './Error/Error';
 import Login from './Login/Login';
@@ -19,6 +20,7 @@ import Consent from './Consent/Consent';
 import ProvisionIdentityForm from './ProvisionIdentity/ProvisionIdentityForm/ProvisionIdentityForm';
 import ProvisionIdentityConfirm from './ProvisionIdentity/ProvisionIdentityConfirm/ProvisionIdentityConfirm';
 import ProvisionIdentityResult from './ProvisionIdentity/ProvisionIdentityResult/ProvisionIdentityResult';
+import CredentialsReview from './CredentialsReview/CredentialsReview';
 
 export const LoginConsentRender = function() {
   const COMPONENT_PROPS = {
@@ -29,7 +31,7 @@ export const LoginConsentRender = function() {
     canLoginOrGiveConsent: this.canLoginOrGiveConsent,
     handleRequest: this.handleRequest,
     checkRequest: this.checkRequest
-  }
+  };
 
   const COMPONENT_MAP = {
     [EXTERNAL_ACTION]: (
@@ -49,6 +51,11 @@ export const LoginConsentRender = function() {
     ),
     [CONSENT_TO_SCOPE]: (
       <Consent 
+        {...COMPONENT_PROPS}
+      />
+    ),
+    [CREDENTIALS_REVIEW]: (
+      <CredentialsReview
         {...COMPONENT_PROPS}
       />
     ),
@@ -85,6 +92,6 @@ export const LoginConsentRender = function() {
   ) : (
     <Loading />
   );
-}
+};
 
 
