@@ -2,9 +2,9 @@ import { API_GET_CREDENTIALS_BY_SCOPE, NATIVE, POST } from "../../utils/constant
 import { getApiData } from "../callCreator";
 
 /**
- * Gets the credentials from the address belonging to the scope.
+ * Gets the credentials from the address belonging to the scope filtered by the credentialKeys.
  */
-export const getCredentialsByScope = async (chainId, address, scope) => {
+export const getCredentialsByScope = async (chainId, address, scope, credentialKeys) => {
   try {
     const res = await getApiData(
       NATIVE,
@@ -13,6 +13,7 @@ export const getCredentialsByScope = async (chainId, address, scope) => {
         coin: chainId,
         address: address,
         scope: scope,
+        credentialKeys: credentialKeys
       },
       POST,
       true

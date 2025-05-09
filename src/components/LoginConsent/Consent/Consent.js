@@ -6,6 +6,8 @@ import {
 } from './Consent.render';
 import { EXTERNAL_ACTION, EXTERNAL_CHAIN_START, SCOPES, SELECT_LOGIN_ID } from '../../../utils/constants';
 import { checkAndUpdateIdentities } from '../../../redux/reducers/identity/identity.actions';
+import { SUPPORTED_CREDENTIALS, CREDENTIALS } from '../../../utils/constants';
+import PropTypes from 'prop-types';
 
 class Consent extends React.Component {
   constructor(props) {
@@ -19,6 +21,8 @@ class Consent extends React.Component {
       for (const permission of requestedPermissions) {
         if (SCOPES[permission.vdxfkey]) {
           permissionsDescriptions.push(SCOPES[permission.vdxfkey].description);
+        } else if (SUPPORTED_CREDENTIALS.includes(permission.vdxfkey) && CREDENTIALS[permission.vdxfkey]) {
+          permissionsDescriptions.push("Get " + CREDENTIALS[permission.vdxfkey].description + " credential");
         }
       }
     }
@@ -57,6 +61,13 @@ class Consent extends React.Component {
     return ConsentRender.call(this);
   }
 }
+
+Consent.propTypes = {
+  loginConsentRequest: PropTypes.object.isRequired,
+  dispatch: PropTypes.func.isRequired,
+  canLoginOrGiveConsent: PropTypes.func.isRequired,
+  completeLoginConsent: PropTypes.func.isRequired,
+};
 
 const mapStateToProps = (state) => {
   return {

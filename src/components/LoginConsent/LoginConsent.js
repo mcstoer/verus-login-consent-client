@@ -17,6 +17,7 @@ import {
   CONSENT_TO_SCOPE,
   SUPPORTED_SCOPES,
   VERUS_LOGIN_CONSENT_UI,
+  SUPPORTED_CREDENTIALS,
 } from "../../utils/constants";
 import { 
   LoginConsentRender
@@ -132,7 +133,10 @@ class LoginConsent extends React.Component {
       }
 
       for (const requestedPermission of request.challenge.requested_access) {
-        if (!SUPPORTED_SCOPES.includes(requestedPermission.vdxfkey)) {
+        if (
+          !SUPPORTED_SCOPES.includes(requestedPermission.vdxfkey) && 
+          !SUPPORTED_CREDENTIALS.includes(requestedPermission.vdxfkey)
+        ) {
           throw new Error(
             'Unrecognized requested permission ' +
               requestedPermission.vdxfkey,

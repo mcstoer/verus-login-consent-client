@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import PropTypes from 'prop-types';
 import { setNavigationPath } from '../../../redux/reducers/navigation/navigation.actions';
-import { REDIRECT, SELECT_LOGIN_ID } from '../../../utils/constants';
+import { REDIRECT, SELECT_LOGIN_ID, SUPPORTED_CREDENTIALS, CREDENTIALS } from '../../../utils/constants';
 import { IDENTITY_CREDENTIAL_PLAINLOGIN } from 'verus-typescript-primitives';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
@@ -11,9 +11,9 @@ import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 import { VerusIdLogo } from "../../../images";
 import { PlainLoginCredential, UnknownCredential } from './Credential';
-import { convertFqnToDisplayFormat } from '../../../utils/fullyqualifiedname';
-import IdentityInformation from '../../../containers/RequestCard/IdentityInformation';
 import { createAndSignLoginResponse } from '../../../utils/loginResponse';
+import Alert from '@mui/material/Alert';
+import AlertTitle from '@mui/material/AlertTitle';
 
 const CredentialsReview = (props) => {
   const { setRequestResult } = props;
@@ -28,7 +28,16 @@ const CredentialsReview = (props) => {
     return [];
   });
 
-  const signerFqn = convertFqnToDisplayFormat(request.signedBy.fullyqualifiedname);
+  // Calculate requested and missing credentials
+  const requestedCredentialKeys = request.challenge.requested_access
+    .filter(item => SUPPORTED_CREDENTIALS.includes(item.vdxfkey))
+    .map(item => item.vdxfkey);
+
+  const fetchedCredentialKeys = credentials.map(credential => credential.credentialKey);
+
+  const missingCredentialKeys = requestedCredentialKeys.filter(
+    key => !fetchedCredentialKeys.includes(key)
+  );
 
   const cancel = () => {
     dispatch(setNavigationPath(SELECT_LOGIN_ID));
@@ -99,7 +108,7 @@ const CredentialsReview = (props) => {
             padding: 16,
           }}
         >
-          Review Included Credentials
+          Review included credentials
         </div>
 
         <Card square sx={{
@@ -110,34 +119,43 @@ const CredentialsReview = (props) => {
           maxHeight: '54vh',
         }}> 
           <List>
-            <IdentityInformation
-              label="Recipient"
-              signedBy={request.signedBy}
-              signerFqn={signerFqn}
-              chainName={request.chainName}
-              systemId={request.system_id}
-              revocationIdentity={request.signingRevocationIdentity}
-              recoveryIdentity={request.signingRecoveryIdentity}
-            />
-            {credentials.length > 0 ? (
+            {/* Display fetched credentials */}
+            {credentials.length > 0 && (
               <>
-                <ListItem>
-                  <ListItemText primary="Credentials" disableTypography sx={{ fontWeight: 'bold', pr: 4 }}/>
-                </ListItem>
-                <List component="div" sx={{ pl: 2 }}>
+                <List component="div">
                   {credentials.map((credential, index) => renderCredentialComponent(credential, index))}
                 </List>
               </>
-            ) : (
+            )}
+
+            {requestedCredentialKeys.length === 0 && (
               <ListItem>
-                <ListItemText 
-                  primary="No credentials to include" 
-                  disableTypography 
+                <ListItemText
+                  primary="No credentials requested by the application."
+                  disableTypography
                 />
               </ListItem>
             )}
+
+            {requestedCredentialKeys.length > 0 && credentials.length === 0 && (
+              <ListItem>
+                <ListItemText
+                  primary="No credentials available to include."
+                  disableTypography
+                />
+              </ListItem>
+            )}
+
           </List>
         </Card>
+
+        {/* Inform the user if there are missing credentials */}
+        {missingCredentialKeys.length > 0 && (
+          <Alert severity="warning" sx={{ mt: 2, width: '90%', textAlign: 'left' }}>
+            <AlertTitle>The following requested credentials were not found:</AlertTitle>
+            {missingCredentialKeys.map(key => CREDENTIALS[key] ? CREDENTIALS[key].description : key).join(', ')}
+          </Alert>
+        )}
 
         <div
           style={{

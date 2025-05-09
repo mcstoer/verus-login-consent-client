@@ -7,7 +7,8 @@ import {
   EXTERNAL_CHAIN_START,
   REDIRECT,
   PROVISIONING_FORM,
-  CREDENTIALS_REVIEW
+  CREDENTIALS_REVIEW,
+  SUPPORTED_CREDENTIALS
 } from '../../../utils/constants';
 import { checkAndUpdateIdentities, setActiveVerusId } from '../../../redux/reducers/identity/identity.actions';
 import { setError } from '../../../redux/reducers/error/error.actions';
@@ -34,7 +35,16 @@ const Login = (props) => {
   const [loading, setLoading] = useState(false);
   const identities = useSelector((state) => state.identity.identities);
   const activeIdentity = useSelector((state) => state.identity.activeIdentity);
-  const [includeCredentials, setIncludeCredentials] = useState(true);
+  
+  // Check if there are any credentials requested
+  const requestedCredentialKeys = request.challenge.requested_access
+    .filter(item => SUPPORTED_CREDENTIALS.includes(item.vdxfkey))
+    .map(item => item.vdxfkey);
+  
+  const hasRequestedCredentials = requestedCredentialKeys.length > 0;
+  
+  // Only enable the checkbox if credentials are requested
+  const [includeCredentials, setIncludeCredentials] = useState(hasRequestedCredentials);
 
   // The provisioning webhook needs to exist for provisioning.
   let canProvision = request.challenge.provisioning_info && request.challenge.provisioning_info.some(x => {
@@ -69,15 +79,15 @@ const Login = (props) => {
       const loginIdentity = activeIdentity.identity.identityaddress;
 
       try {
-        if (includeCredentials) {
+        if (includeCredentials && hasRequestedCredentials) {
           // Get the associated credentials based on the signing id.
-
           let credentials = [];
           try {
             credentials = await getCredentialsByScope(
               request.chainTicker,
               loginIdentity,
-              request.signedBy.identity.identityaddress
+              request.signedBy.identity.identityaddress,
+              requestedCredentialKeys // Pass the requested credentials
             );
           } catch (e) {
             // Ignore the error if it means that there are no credentials to be fetched.
@@ -91,7 +101,6 @@ const Login = (props) => {
           setLoading(false);
           dispatch(setNavigationPath(CREDENTIALS_REVIEW));
         } else {
-
           const signedResponse = await createAndSignLoginResponse(
             request,
             loginIdentity,
@@ -207,17 +216,19 @@ const Login = (props) => {
               })}
             </Select>
             <div style={{ display: 'flex', justifyContent: 'center' }}>
-              <FormControlLabel
-                control={
-                  <Checkbox 
-                    checked={includeCredentials}
-                    onChange={(e) => setIncludeCredentials(e.target.checked)}
-                    color="primary"
-                  />
-                }
-                label="Include Credentials"
-                style={{ marginTop: 8 }}
-              />
+              {hasRequestedCredentials && (
+                <FormControlLabel
+                  control={
+                    <Checkbox 
+                      checked={includeCredentials}
+                      onChange={(e) => setIncludeCredentials(e.target.checked)}
+                      color="primary"
+                    />
+                  }
+                  label="Include Credentials"
+                  style={{ marginTop: 8 }}
+                />
+              )}
             </div>
           </FormControl>
         </div>
