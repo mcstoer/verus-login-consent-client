@@ -5,7 +5,7 @@ import stylisticJs from '@stylistic/eslint-plugin-js';
 
 /** @type {import('eslint').Linter.Config[]} */
 export default [
-  {files: ["**/*.{js,mjs,cjs,jsx}"]},
+  {files: ["**/*.{js,mjs,cjs,jsx,ts,tsx}"]},
   {
     plugins: {
       '@stylistic/js': stylisticJs

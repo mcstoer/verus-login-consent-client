@@ -2,7 +2,7 @@ import './App.css';
 import LoginConsent from './components/LoginConsent/LoginConsent';
 import { MOCK_IPC } from './env';
 import { handleIpc } from './ipc/handlers';
-import { SIMULATED_IPC_COIN_REQUEST, SIMULATED_IPC_INIT, SIMULATED_IPC_LOGIN_CONSENT_REQUEST } from "./__tests__/mocks";
+import { SIMULATED_IPC_COIN_REQUEST, SIMULATED_IPC_INIT, SIMULATED_IPC_LOGIN_CONSENT_REQUEST } from "./utils/mocks";
 
 if (MOCK_IPC) {
   setTimeout(() => {

@@ -1,13 +1,13 @@
 const webpack = require('webpack');
 const path = require('path');
 
-const DashboardPlugin = require('webpack-dashboard/plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 
-const nodeEnv = process.env.NODE_ENV || 'development';
-const isProduction = nodeEnv === 'production';
+const mode = process.env.NODE_ENV || 'development';
+const isProduction = mode === 'production';
 
 const jsSourcePath = path.join(__dirname, './src');
 const buildPath = path.join(__dirname, './build');
@@ -33,12 +33,7 @@ const plugins = [
    * perhaps you perform logging in your development build but not in the release build.
    * That's the sort of scenario the DefinePlugin facilitates.
    */
-  new webpack.DefinePlugin({
-    "process.env": {
-      NODE_ENV: JSON.stringify(nodeEnv),
-    },
-  }),
-  new webpack.NamedModulesPlugin(),
+  new webpack.DefinePlugin({}),
   new HtmlWebpackPlugin({
     template: path.join(wwwPath, "index.html"),
     path: buildPath,
@@ -50,20 +45,43 @@ const plugins = [
   new webpack.ProvidePlugin({
     React: "react",
   }),
+  new webpack.ProvidePlugin({
+    process: 'process/browser.js',
+    Buffer: ['buffer', 'Buffer']
+  }),
+  new ForkTsCheckerWebpackPlugin({
+    typescript: {
+      configFile: path.resolve(__dirname, 'tsconfig.json')
+    },
+    async: true
+  }),
 ];
 
 // Common rules
 const rules = [
   {
-    test: /\.(js|jsx)$/,
+    test: /\.(ts|tsx|js|jsx)$/,
     exclude: /node_modules/,
     use: {
       loader: 'babel-loader',
-    },
+      options: {
+        presets: [
+          '@babel/preset-env',
+          '@babel/preset-react',
+          '@babel/preset-typescript'
+        ]
+      }
+    }
   },
   {
     test: /\.woff(2)?(\?v=[0-9]\.[0-9]\.[0-9])?$/,
-    loader: 'url-loader?limit=10000&mimetype=application/font-woff',
+    use: [{
+      loader: 'url-loader',
+      options: {
+        limit: 10000,
+        mimetype: 'application/font-woff'
+      }
+    }]
   },
   {
     test: /\.(ttf|eot|svg|png)(\?v=[0-9]\.[0-9]\.[0-9])?$/,
@@ -97,12 +115,6 @@ if (isProduction) {
     },
   );
 } else {
-  // Development plugins
-  plugins.push(
-    new webpack.HotModuleReplacementPlugin(),
-    new DashboardPlugin(),
-  );
-
   // Development rules
   rules.push(
     {
@@ -119,21 +131,28 @@ if (isProduction) {
 }
 
 module.exports = {
+  mode,
   devtool: isProduction ? 'eval' : 'source-map',
   context: jsSourcePath,
   entry: {
-    js: ['@babel/polyfill', './index.js'],
+    js: ['core-js/stable', 'regenerator-runtime/runtime', './index.js'],
   },
   output: {
     path: buildPath,
-    publicPath: '',
-    filename: 'app.js',
+    filename: "app.js"
   },
   module: {
     rules,
   },
   resolve: {
-    extensions: ['.webpack-loader.js', '.web-loader.js', '.loader.js', '.js', '.jsx'],
+    fallback: {
+      buffer: require.resolve('buffer'),
+      stream: require.resolve('stream-browserify'),
+      crypto: require.resolve('crypto-browserify'),
+      util: require.resolve('util'),
+      assert: require.resolve('assert')
+    },
+    extensions: ['.ts', '.tsx', '.js', '.jsx', '.webpack-loader.js', '.web-loader.js', '.loader.js'],
     modules: [
       path.resolve(__dirname, 'node_modules'),
       'node_modules',
@@ -142,49 +161,28 @@ module.exports = {
   },
   plugins,
   devServer: {
-    contentBase: isProduction ? './build' : './src',
-    historyApiFallback: true,
     port: 3001,
-    compress: isProduction,
-    inline: !isProduction,
-    hot: !isProduction,
-    stats: {
-      assets: true,
-      children: false,
-      chunks: false,
-      hash: false,
-      modules: false,
-      publicPath: false,
-      timings: true,
-      version: false,
-      warnings: true,
-      colors: {
-        green: '\u001b[32m',
-      },
+    static: {
+      directory: isProduction ? './build' : './src'
     },
+    client: {
+      overlay: true
+    }
   },
   optimization: {
+    moduleIds: 'named',
+    chunkIds: 'named',
+    emitOnErrors: true,
+    minimize: isProduction,
     minimizer: [
-      new UglifyJSPlugin({
-        sourceMap: true,
-        uglifyOptions: {
-          warnings: false,
-          compress: {
-            conditionals: true,
-            unused: true,
-            comparisons: true,
-            sequences: true,
-            dead_code: true,
-            evaluate: true,
-            if_return: true,
-            join_vars: true,
-          },
-          output: {
-            comments: false,
-          },
-        },
-      }),
-    ],
+      new TerserPlugin()
+    ]
   },
-  stats: { children: false },
+  stats: { 
+    children: false,
+    colors: true,
+    modules: false,
+    entrypoints: false,
+    chunks: false
+  },
 };

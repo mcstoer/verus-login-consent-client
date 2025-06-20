@@ -44,7 +44,7 @@ const ProvisionIdentityForm = () => {
   const [loading, setLoading] = useState(false);
   const [parentName, setParentName] = useState('');
   const [publicAddresses, setPublicAddresses] = useState([]);
-  const [selectedPublicAddress, setSelectedPublicAddress] = useState(initialPrimaryAddress);
+  const [selectedPublicAddress, setSelectedPublicAddress] = useState('');
 
   const [formError, setFormError] = useState({
     error: false,
@@ -82,6 +82,10 @@ const ProvisionIdentityForm = () => {
       // Extract just the r-address from the address object.
       const publicAddresses = publicAddressObjects.map(addressObj => addressObj.address);
       setPublicAddresses(publicAddresses);
+
+      if (initialPrimaryAddress && publicAddresses.includes(initialPrimaryAddress)) {
+        setSelectedPublicAddress(initialPrimaryAddress);
+      }
     
       const provIdKey = address || fqn || null;
   
@@ -118,7 +122,7 @@ const ProvisionIdentityForm = () => {
             } catch {
               // If the given fully qualified name doesn't exist, then
               // it is not valid and should be ignored.
-              if (idKey.data === provFqn.data) {
+              if (provFqn && idKey.data === provFqn.data) {
                 setProvFqn(null);
               }
             }
@@ -340,9 +344,9 @@ const ProvisionIdentityForm = () => {
                 <FormControl fullWidth>
                   <InputLabel id='address-select-label'>Select a Primary Address</InputLabel>
                   <Select
+                    labelId="address-select-label"
                     label='Select a Primary Address'
                     value={selectedPublicAddress}
-                    displayEmpty
                     style={{
                       textAlign: 'start',
                       paddingTop: 2,

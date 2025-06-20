@@ -4,7 +4,7 @@ import {
   IPC_INIT_MESSAGE,
   IPC_ORIGIN_DEV,
   IPC_PUSH_MESSAGE,
-} from "../utils/constants";
+} from "./constants";
 import base64url from "base64url";
 
 export const SIMULATED_IPC_INIT = {

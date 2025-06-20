@@ -3,7 +3,7 @@ import Card from '@mui/material/Card';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
-import { unixToDate } from '../../utils/math';
+import { unixToDate } from '../../utils/math.ts';
 import IdentityInformation from './IdentityInformation';
 
 export function RequestCard(props) {

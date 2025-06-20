@@ -1,5 +1,5 @@
-export const unixToDate = (unixTime) => {
-  const options = {
+export const unixToDate = (unixTime: number): string => {
+  const options: Intl.DateTimeFormatOptions = {
     weekday: "short",
     year: "numeric",
     month: "short",
@@ -10,4 +10,4 @@ export const unixToDate = (unixTime) => {
     hour12: false,
   };
   return (new Date(unixTime*1000)).toLocaleString('en-US', options);
-}
+};

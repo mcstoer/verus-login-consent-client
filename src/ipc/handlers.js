@@ -1,5 +1,5 @@
 import { DEVMODE, MOCK_IPC } from "../env"
-import { RPC_PASSWORD, RPC_PORT } from "../__tests__/mocks"
+import { RPC_PASSWORD, RPC_PORT } from "../utils/mocks"
 import { setRpcLoginConsentRequest, setRpcExpiryMargin, setRpcPassword, setRpcPort, setRpcPostEncryption, setRpcWindowId } from "../redux/reducers/rpc/rpc.actions"
 import store from "../redux/store"
 import { IPC_LOGIN_CONSENT_REQUEST_METHOD, IPC_INIT_MESSAGE, IPC_ORIGIN_DEV, IPC_ORIGIN_PRODUCTION, IPC_PUSH_MESSAGE, IPC_ORIGIN_DEV_LOCALHOST } from "../utils/constants"
