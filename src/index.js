@@ -1,3 +1,5 @@
+import 'buffer';
+import './utils/bn-polyfill';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { createHashRouter, RouterProvider } from 'react-router-dom';

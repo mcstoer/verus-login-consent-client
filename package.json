@@ -27,7 +27,7 @@
     "redux": "3.6.0",
     "stream-browserify": "3.0.0",
     "util": "0.12.5",
-    "verus-typescript-primitives": "git+https://github.com/mcstoer/verus-typescript-primitives.git#credential-class"
+    "verus-typescript-primitives": "git+https://github.com/mcstoer/verus-typescript-primitives.git#credential-class-iur"
   },
   "scripts": {
     "start": "npx webpack serve --mode development",
@@ -77,6 +77,7 @@
     "style-loader": "2.0.0",
     "terser-webpack-plugin": "5.3.14",
     "typescript": "5.8.3",
+    "typescript-eslint": "8.33.1",
     "webpack": "5.99.9",
     "webpack-cli": "5.1.4",
     "webpack-dev-server": "5.0.3"
@@ -87,6 +88,8 @@
     "acorn": "8.14.0",
     "async": "2.6.4",
     "blake2b-wasm": "https://github.com/VerusCoin/blake2b-wasm",
+    "base64url": "3.0.1",
+    "bn.js": "5.2.1",
     "bs58check": "2.0.0",
     "lodash": "4.17.21",
     "lodash-es": "4.17.21",
@@ -122,6 +125,8 @@
     "json5": "2.2.3",
     "word-wrap": "1.2.5",
     "schema-utils": "4.3.2",
-    "ajv-keywords": "5.1.0"
+    "ajv-keywords": "5.1.0",
+    "create-hash": "1.2.0",
+    "bech32": "2.0.0"
   }
 }
