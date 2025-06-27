@@ -1,0 +1,1 @@
+export const SET_SIGNATURE_INFO = 'SET_SIGNATURE_INFO';

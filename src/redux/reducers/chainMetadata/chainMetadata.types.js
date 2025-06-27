@@ -1,0 +1,2 @@
+export const SET_CHAIN_METADATA = 'SET_CHAIN_METADATA';
+export const SET_MAIN_CHAIN = 'SET_MAIN_CHAIN';

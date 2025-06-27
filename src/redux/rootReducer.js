@@ -6,6 +6,8 @@ import { origin } from './reducers/origin/origin.reducer';
 import { error } from './reducers/error/error.reducer';
 import { provision } from './reducers/provision/provision.reducer';
 import { credentials } from './reducers/credentials/credentials.reducer';
+import signatureInfo from './reducers/signatureInfo/signatureInfo.reducer';
+import chainMetadata from './reducers/chainMetadata/chainMetadata.reducer';
 
 const rootReducer = combineReducers({
   navigation,
@@ -14,7 +16,9 @@ const rootReducer = combineReducers({
   origin,
   error,
   provision,
-  credentials
+  credentials,
+  signatureInfo,
+  chainMetadata,
 });
 
 export default rootReducer;
