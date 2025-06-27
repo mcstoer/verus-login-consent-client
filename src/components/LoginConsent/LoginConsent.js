@@ -33,13 +33,13 @@ class LoginConsent extends React.Component {
 
     this.state = {
       requestResult: null
-    }
+    };
 
-    this.completeLoginConsent = this.completeLoginConsent.bind(this)
-    this.getRequestResult = this.getRequestResult.bind(this)
-    this.canLoginOrGiveConsent = this.canLoginOrGiveConsent.bind(this)
-    this.handleRequest = this.handleRequest.bind(this)
-    this.checkRequest = this.checkRequest.bind(this)
+    this.completeLoginConsent = this.completeLoginConsent.bind(this);
+    this.getRequestResult = this.getRequestResult.bind(this);
+    this.canLoginOrGiveConsent = this.canLoginOrGiveConsent.bind(this);
+    this.handleRequest = this.handleRequest.bind(this);
+    this.checkRequest = this.checkRequest.bind(this);
   }
 
   async componentDidUpdate(lastProps) {
@@ -72,44 +72,48 @@ class LoginConsent extends React.Component {
   async handleRequest() {
     let { request } = this.props.loginConsentRequest;
 
-      const mainChain = request.mainChain;
+    const mainChain = request.mainChain;
 
-      // Check if the main daemon is running.
-      const chainActions = await checkAndUpdateChainInfo(mainChain);
-      chainActions.map((action) => this.props.dispatch(action));
+    // Check if the main daemon is running.
+    const chainActions = await checkAndUpdateChainInfo(mainChain);
+    chainActions.map((action) => this.props.dispatch(action));
 
-      request.chainTicker = mainChain;
+    request.chainTicker = mainChain;
 
-      if (!this.canLoginOrGiveConsent()) {
-        this.props.dispatch(setRpcLoginConsentRequest({
-          request: request
-        }));
-        this.props.dispatch(setExternalAction(EXTERNAL_CHAIN_START));
-        this.props.dispatch(setNavigationPath(EXTERNAL_ACTION));
-        return;
-      }
+    // Add a small delay so that the Redux store is updated since 
+    // React 18 has concurrent rendering.
+    await new Promise(resolve => setTimeout(resolve, 0));
 
-      // Get information on the system of the request.
-      const currencyInfo = await getCurrency(mainChain, request.system_id);
+    if (!this.canLoginOrGiveConsent()) {
+      this.props.dispatch(setRpcLoginConsentRequest({
+        request: request
+      }));
+      this.props.dispatch(setExternalAction(EXTERNAL_CHAIN_START));
+      this.props.dispatch(setNavigationPath(EXTERNAL_ACTION));
+      return;
+    }
 
-      request.chainName = currencyInfo.name;
-      request.chainTicker = currencyInfo.name.toUpperCase();
+    // Get information on the system of the request.
+    const currencyInfo = await getCurrency(mainChain, request.system_id);
 
-      const actions = await checkAndUpdateAll(request.chainTicker);
-      actions.map((action) => this.props.dispatch(action));
+    request.chainName = currencyInfo.name;
+    request.chainTicker = currencyInfo.name.toUpperCase();
 
-      if (this.canLoginOrGiveConsent()) {
-        this.props.dispatch(setRpcLoginConsentRequest({
-          request: request
-        }));
+    const actions = await checkAndUpdateAll(request.chainTicker);
+    actions.map((action) => this.props.dispatch(action));
 
-        await this.checkRequest(request);
+    if (this.canLoginOrGiveConsent()) {
+      this.props.dispatch(setRpcLoginConsentRequest({
+        request: request
+      }));
 
-        this.props.dispatch(setNavigationPath(CONSENT_TO_SCOPE));
-      } else {
-        this.props.dispatch(setExternalAction(EXTERNAL_CHAIN_START));
-        this.props.dispatch(setNavigationPath(EXTERNAL_ACTION));
-      }
+      await this.checkRequest(request);
+
+      this.props.dispatch(setNavigationPath(CONSENT_TO_SCOPE));
+    } else {
+      this.props.dispatch(setExternalAction(EXTERNAL_CHAIN_START));
+      this.props.dispatch(setNavigationPath(EXTERNAL_ACTION));
+    }
   }
 
   // Checks request for signature authenticity, and other things that would immediately disqualify

@@ -1,7 +1,7 @@
 import 'buffer';
 import './utils/bn-polyfill';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { createHashRouter, RouterProvider } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import store from './redux/store';
@@ -19,15 +19,15 @@ const router = createHashRouter([
   }
 ]);
 
-document.addEventListener('DOMContentLoaded', () => {
-  ReactDOM.render(
-    <Provider store={store}>
-      <ThemeProvider theme={mainTheme}>
-        <ErrorBoundary>
-          <RouterProvider router={router} />
-        </ErrorBoundary>
-      </ThemeProvider>
-    </Provider>,
-    document.getElementById('app')
-  );
-});
+const container = document.getElementById('app');
+const root = createRoot(container);
+
+root.render(
+  <Provider store={store}>
+    <ThemeProvider theme={mainTheme}>
+      <ErrorBoundary>
+        <RouterProvider router={router} />
+      </ErrorBoundary>
+    </ThemeProvider>
+  </Provider>
+);
