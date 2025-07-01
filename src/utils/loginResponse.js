@@ -30,7 +30,7 @@ export const createAndSignLoginResponse = async (chainId, request, loginIdentity
     })
   });
 
-  // Include the chainTicker to tell the main app which chain to sign the response on.
+  // Include the chainId to tell the main app which chain to sign the response on.
   const signedResponse = await signResponse(chainId, response);
 
   return signedResponse;

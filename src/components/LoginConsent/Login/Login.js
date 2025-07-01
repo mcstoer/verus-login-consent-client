@@ -32,7 +32,7 @@ const Login = (props) => {
   const { canLoginOrGiveConsent, setRequestResult } = props;
   const dispatch = useDispatch();
   const { request } = useSelector((state) => state.rpc.loginConsentRequest);
-  const chainMetadata = useSelector((state) => state.chainMetadata);
+  const chainId = useSelector((state) => state.chainMetadata.chainId);
   const signatureInfo = useSelector((state) => state.signatureInfo);
   const [loading, setLoading] = useState(false);
   const identities = useSelector((state) => state.identity.identities);
@@ -74,8 +74,7 @@ const Login = (props) => {
   const tryLogin = async() => {
     setLoading(true);
 
-    const chainTicker = chainMetadata.chainTicker;
-    const userActions = await checkAndUpdateIdentities(chainTicker);
+    const userActions = await checkAndUpdateIdentities(chainId);
     userActions.map(action => dispatch(action));
 
     if (canLoginOrGiveConsent()) {
@@ -87,7 +86,7 @@ const Login = (props) => {
           let credentials = [];
           try {
             credentials = await getCredentialsByScope(
-              chainTicker,
+              chainId,
               loginIdentity,
               signatureInfo.signedBy.identity.identityaddress,
               requestedCredentialKeys // Pass the requested credentials
@@ -105,7 +104,7 @@ const Login = (props) => {
           dispatch(setNavigationPath(CREDENTIALS_REVIEW));
         } else {
           const signedResponse = await createAndSignLoginResponse(
-            chainTicker,
+            chainId,
             request,
             loginIdentity,
             []

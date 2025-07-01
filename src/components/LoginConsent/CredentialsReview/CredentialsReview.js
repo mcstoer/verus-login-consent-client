@@ -19,7 +19,7 @@ const CredentialsReview = (props) => {
   const { setRequestResult } = props;
   const dispatch = useDispatch();
   const { request } = useSelector((state) => state.rpc.loginConsentRequest);
-  const chainMetadata = useSelector((state) => state.chainMetadata);
+  const chainId = useSelector((state) => state.chainMetadata.chainId);
   const [loading, setLoading] = useState(false);
   const activeIdentity = useSelector((state) => state.identity.activeIdentity);
   const credentials = useSelector((state) => {
@@ -48,7 +48,7 @@ const CredentialsReview = (props) => {
     setLoading(true);
     const loginIdentity = activeIdentity.identity.identityaddress;
     const signedResponse = await createAndSignLoginResponse(
-      chainMetadata.chainTicker,
+      chainId,
       request,
       loginIdentity,
       credentials

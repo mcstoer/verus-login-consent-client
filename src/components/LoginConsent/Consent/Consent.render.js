@@ -6,7 +6,7 @@ import { convertFqnToDisplayFormat } from "../../../utils/fullyqualifiedname";
 
 export const ConsentRender = function () {
   const { loading } = this.state;
-  const { loginConsentRequest, chainMetadata, signatureInfo } = this.props;
+  const { loginConsentRequest, chainName, signatureInfo } = this.props;
   const { request } = loginConsentRequest;
   const { sigBlockInfo, signedBy, signingRevocationIdentity, signingRecoveryIdentity } = signatureInfo;
   const { time } = sigBlockInfo;
@@ -45,7 +45,7 @@ export const ConsentRender = function () {
         </div>
 
         <RequestCard
-          chainName={chainMetadata.chainName}
+          chainName={chainName}
           systemId={request.system_id}
           signedBy={signedBy}
           signerFqn={signerFqn}

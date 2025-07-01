@@ -54,9 +54,7 @@ export const handleIpc = async (event) => {
         // Add the name of daemon guaranteed to be is running on desktop so 
         // it can be used to look up other chains.
         store.dispatch(
-          setMainChain({
-            mainChain: data.data.origin_app_info.main_chain_ticker
-          })
+          setMainChain(data.data.origin_app_info.main_chain_ticker)
         );
 
         store.dispatch(

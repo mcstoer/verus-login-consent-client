@@ -98,7 +98,7 @@ const ProvisionIdentityResult = () => {
   const dispatch = useDispatch();
 
   const { request } = useSelector((state) => state.rpc.loginConsentRequest);
-  const chainMetadata = useSelector((state) => state.chainMetadata);
+  const chainId = useSelector((state) => state.chainMetadata.chainId);
   const provisioningResponse = useSelector((state) => state.provision.provisioningResponse);
   const requestedFqn = useSelector((state) => state.provision.requestedFqn);
   const requestedId = useSelector((state) => state.provision.requestedId);
@@ -133,7 +133,7 @@ const ProvisionIdentityResult = () => {
   useInterval(
     async () => await checkForNewId(
       dispatch,
-      chainMetadata.chainTicker,
+      chainId,
       requestedId,
       setCheckForId,
       setCheckForProvisioningStatus,

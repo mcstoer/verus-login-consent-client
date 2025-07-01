@@ -74,7 +74,7 @@ class LoginConsent extends React.Component {
   async handleRequest() {
     let { request } = this.props.loginConsentRequest;
 
-    const mainChain = this.props.chainMetadata.mainChain.mainChain;
+    const mainChain = this.props.mainChain;
 
     // Check if the main daemon is running.
     const chainActions = await checkAndUpdateChainInfo(mainChain);
@@ -86,7 +86,7 @@ class LoginConsent extends React.Component {
 
     if (!this.canLoginOrGiveConsent()) {
       this.props.dispatch(setChainMetadata({
-        chainTicker: mainChain
+        chainId: mainChain
       }));
       this.props.dispatch(setExternalAction(EXTERNAL_CHAIN_START));
       this.props.dispatch(setNavigationPath(EXTERNAL_ACTION));
@@ -95,15 +95,15 @@ class LoginConsent extends React.Component {
 
     // Get information on the system of the request.
     const currencyInfo = await getCurrency(mainChain, request.system_id);
-    const chainTicker = currencyInfo.name.toUpperCase();
+    const chainId = currencyInfo.name.toUpperCase();
 
     // Store chain metadata in dedicated reducer
     this.props.dispatch(setChainMetadata({
       chainName: currencyInfo.name,
-      chainTicker: chainTicker,
+      chainId: chainId,
     }));
 
-    const actions = await checkAndUpdateAll(chainTicker);
+    const actions = await checkAndUpdateAll(chainId);
     actions.map((action) => this.props.dispatch(action));
 
     if (this.canLoginOrGiveConsent()) {
@@ -122,7 +122,7 @@ class LoginConsent extends React.Component {
     try {
       // Typescript sanity check
       const request = new LoginConsentRequest(req);
-      const chainTicker = this.props.chainMetadata.chainTicker;
+      const chainId = this.props.chainId;
 
       if (request.challenge.context != null) {
         if (Object.keys(request.challenge.context.kv).length !== 0) {
@@ -131,7 +131,7 @@ class LoginConsent extends React.Component {
       }
       
       // Check request signature
-      const verificatonCheck = await verifyRequest(chainTicker, req);
+      const verificatonCheck = await verifyRequest(chainId, req);
       if (!verificatonCheck.verified) {
         throw new Error(verificatonCheck.message);
       }
@@ -155,15 +155,15 @@ class LoginConsent extends React.Component {
       }
 
       // Get the signing identity for displaying later.
-      const signedBy = await getIdentity(chainTicker, request.signing_id);
+      const signedBy = await getIdentity(chainId, request.signing_id);
 
       // Get information on the signature for displaying later.
-      const sigInfo = await getSignatureInfo(chainTicker, request.system_id, request.signature.signature, signedBy.identity.identityaddress);
-      const sigBlockInfo = await getBlock(chainTicker, sigInfo.height.toString());
+      const sigInfo = await getSignatureInfo(chainId, request.system_id, request.signature.signature, signedBy.identity.identityaddress);
+      const sigBlockInfo = await getBlock(chainId, sigInfo.height.toString());
 
       // Get the identities of the revocation and recovery i-addresses to display for anti-phishing.
-      const signingRevocationIdentity  = await getIdentity(chainTicker, signedBy.identity.revocationauthority);
-      const signingRecoveryIdentity = await getIdentity(chainTicker, signedBy.identity.recoveryauthority);
+      const signingRevocationIdentity  = await getIdentity(chainId, signedBy.identity.revocationauthority);
+      const signingRecoveryIdentity = await getIdentity(chainId, signedBy.identity.recoveryauthority);
 
       // Store signature information in dedicated reducer
       this.props.dispatch(setSignatureInfo({
@@ -228,7 +228,9 @@ LoginConsent.propTypes = {
   loginConsentRequest: PropTypes.object,
   chainInfo: PropTypes.object,
   apiErrors: PropTypes.object,
-  chainMetadata: PropTypes.object,
+  chainId: PropTypes.string,
+  chainName: PropTypes.string,
+  mainChain: PropTypes.string,
   signatureInfo: PropTypes.object
 };
 
@@ -246,7 +248,9 @@ const mapStateToProps = (state) => {
     loginConsentRequest: state.rpc.loginConsentRequest,
     chainInfo: state.identity.chainInfo,
     apiErrors: state.error.apiErrors,
-    chainMetadata: state.chainMetadata,
+    chainId: state.chainMetadata.chainId,
+    chainName: state.chainMetadata.chainName,
+    mainChain: state.chainMetadata.mainChain,
     signatureInfo: state.signatureInfo
   };
 };
