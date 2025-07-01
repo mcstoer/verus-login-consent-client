@@ -8,7 +8,7 @@ import {
 import { signResponse } from '../rpc/calls/signResponse';
 
 // Creates a LoginConsentResponse using a LoginConsentRequest and signs it by calling the main app.
-export const createAndSignLoginResponse = async (request, loginIdentity, credentials) => {
+export const createAndSignLoginResponse = async (chainId, request, loginIdentity, credentials) => {
 
   const context = new Context();
   for (const cred of credentials) {
@@ -31,8 +31,7 @@ export const createAndSignLoginResponse = async (request, loginIdentity, credent
   });
 
   // Include the chainTicker to tell the main app which chain to sign the response on.
-  response.chainTicker = request.chainTicker;
-  const signedResponse = await signResponse(response);
+  const signedResponse = await signResponse(chainId, response);
 
   return signedResponse;
 };

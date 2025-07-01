@@ -1,11 +1,13 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { LoginConsentRequest } from 'verus-typescript-primitives';
 import { setError } from '../../redux/reducers/error/error.actions';
 import { checkAndUpdateAll, checkAndUpdateChainInfo } from '../../redux/reducers/identity/identity.actions';
 import { setExternalAction, setNavigationPath } from '../../redux/reducers/navigation/navigation.actions';
 import { setOriginApp } from '../../redux/reducers/origin/origin.actions';
-import { setRpcLoginConsentRequest } from '../../redux/reducers/rpc/rpc.actions';
+import { setChainMetadata } from '../../redux/reducers/chainMetadata/chainMetadata.actions';
+import { setSignatureInfo } from '../../redux/reducers/signatureInfo/signatureInfo.actions';
 import { closePlugin } from '../../rpc/calls/closePlugin';
 import { getPlugin } from '../../rpc/calls/getPlugin';
 import { verifyRequest } from '../../rpc/calls/verifyRequest';
@@ -72,21 +74,19 @@ class LoginConsent extends React.Component {
   async handleRequest() {
     let { request } = this.props.loginConsentRequest;
 
-    const mainChain = request.mainChain;
+    const mainChain = this.props.chainMetadata.mainChain.mainChain;
 
     // Check if the main daemon is running.
     const chainActions = await checkAndUpdateChainInfo(mainChain);
     chainActions.map((action) => this.props.dispatch(action));
-
-    request.chainTicker = mainChain;
 
     // Add a small delay so that the Redux store is updated since 
     // React 18 has concurrent rendering.
     await new Promise(resolve => setTimeout(resolve, 0));
 
     if (!this.canLoginOrGiveConsent()) {
-      this.props.dispatch(setRpcLoginConsentRequest({
-        request: request
+      this.props.dispatch(setChainMetadata({
+        chainTicker: mainChain
       }));
       this.props.dispatch(setExternalAction(EXTERNAL_CHAIN_START));
       this.props.dispatch(setNavigationPath(EXTERNAL_ACTION));
@@ -95,18 +95,18 @@ class LoginConsent extends React.Component {
 
     // Get information on the system of the request.
     const currencyInfo = await getCurrency(mainChain, request.system_id);
+    const chainTicker = currencyInfo.name.toUpperCase();
 
-    request.chainName = currencyInfo.name;
-    request.chainTicker = currencyInfo.name.toUpperCase();
+    // Store chain metadata in dedicated reducer
+    this.props.dispatch(setChainMetadata({
+      chainName: currencyInfo.name,
+      chainTicker: chainTicker,
+    }));
 
-    const actions = await checkAndUpdateAll(request.chainTicker);
+    const actions = await checkAndUpdateAll(chainTicker);
     actions.map((action) => this.props.dispatch(action));
 
     if (this.canLoginOrGiveConsent()) {
-      this.props.dispatch(setRpcLoginConsentRequest({
-        request: request
-      }));
-
       await this.checkRequest(request);
 
       this.props.dispatch(setNavigationPath(CONSENT_TO_SCOPE));
@@ -122,6 +122,7 @@ class LoginConsent extends React.Component {
     try {
       // Typescript sanity check
       const request = new LoginConsentRequest(req);
+      const chainTicker = this.props.chainMetadata.chainTicker;
 
       if (request.challenge.context != null) {
         if (Object.keys(request.challenge.context.kv).length !== 0) {
@@ -130,8 +131,7 @@ class LoginConsent extends React.Component {
       }
       
       // Check request signature
-      const verificatonCheck = await verifyRequest(req);
-
+      const verificatonCheck = await verifyRequest(chainTicker, req);
       if (!verificatonCheck.verified) {
         throw new Error(verificatonCheck.message);
       }
@@ -155,27 +155,25 @@ class LoginConsent extends React.Component {
       }
 
       // Get the signing identity for displaying later.
-      const signedBy = await getIdentity(req.chainTicker, request.signing_id);
-      req.signedBy = signedBy;
+      const signedBy = await getIdentity(chainTicker, request.signing_id);
 
       // Get information on the signature for displaying later.
-      const sigInfo = await getSignatureInfo(req.chainTicker, request.system_id, request.signature.signature, signedBy.identity.identityaddress);
-      const sigBlockInfo = await getBlock(req.chainTicker, sigInfo.height.toString());
-      req.sigBlockInfo = sigBlockInfo;
+      const sigInfo = await getSignatureInfo(chainTicker, request.system_id, request.signature.signature, signedBy.identity.identityaddress);
+      const sigBlockInfo = await getBlock(chainTicker, sigInfo.height.toString());
 
       // Get the identities of the revocation and recovery i-addresses to display for anti-phishing.
-      const signingRevocationIdentity  = await getIdentity(req.chainTicker, signedBy.identity.revocationauthority);
-      req.signingRevocationIdentity = signingRevocationIdentity;
+      const signingRevocationIdentity  = await getIdentity(chainTicker, signedBy.identity.revocationauthority);
+      const signingRecoveryIdentity = await getIdentity(chainTicker, signedBy.identity.recoveryauthority);
 
-      const signingRecoveryIdentity = await getIdentity(req.chainTicker, signedBy.identity.recoveryauthority);
-      req.signingRecoveryIdentity = signingRecoveryIdentity;
-
-      this.props.dispatch(setRpcLoginConsentRequest({
-        request: req
+      // Store signature information in dedicated reducer
+      this.props.dispatch(setSignatureInfo({
+        signedBy: signedBy,
+        sigBlockInfo: sigBlockInfo,
+        signingRevocationIdentity: signingRevocationIdentity,
+        signingRecoveryIdentity: signingRecoveryIdentity
       }));
-
     } catch(e) {
-      console.error(e)
+      console.error(e);
       this.props.dispatch(setError(new Error(e.message)));
     }
   }
@@ -183,7 +181,7 @@ class LoginConsent extends React.Component {
   getRequestResult(res, cb) {
     this.setState({
       requestResult: res
-    }, () => cb())
+    }, () => cb());
   }
 
   canLoginOrGiveConsent() {
@@ -207,7 +205,7 @@ class LoginConsent extends React.Component {
           : { error: error != null ? error.message : error }
       );
     } catch(e) {
-      this.props.dispatch(setError(e))
+      this.props.dispatch(setError(e));
     }
   } 
 
@@ -215,6 +213,24 @@ class LoginConsent extends React.Component {
     return LoginConsentRender.call(this);
   }
 }
+
+LoginConsent.propTypes = {
+  dispatch: PropTypes.func.isRequired,
+  path: PropTypes.string,
+  pathArray: PropTypes.array,
+  port: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  originAppId: PropTypes.string,
+  originApp: PropTypes.object,
+  originAppBuiltin: PropTypes.bool,
+  error: PropTypes.object,
+  rpcPassword: PropTypes.string,
+  windowId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  loginConsentRequest: PropTypes.object,
+  chainInfo: PropTypes.object,
+  apiErrors: PropTypes.object,
+  chainMetadata: PropTypes.object,
+  signatureInfo: PropTypes.object
+};
 
 const mapStateToProps = (state) => {
   return {
@@ -229,7 +245,9 @@ const mapStateToProps = (state) => {
     windowId: state.rpc.windowId,
     loginConsentRequest: state.rpc.loginConsentRequest,
     chainInfo: state.identity.chainInfo,
-    apiErrors: state.error.apiErrors
+    apiErrors: state.error.apiErrors,
+    chainMetadata: state.chainMetadata,
+    signatureInfo: state.signatureInfo
   };
 };
 

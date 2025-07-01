@@ -1,10 +1,11 @@
-import { DEVMODE, MOCK_IPC } from "../env"
-import { RPC_PASSWORD, RPC_PORT } from "../utils/mocks"
-import { setRpcLoginConsentRequest, setRpcExpiryMargin, setRpcPassword, setRpcPort, setRpcPostEncryption, setRpcWindowId } from "../redux/reducers/rpc/rpc.actions"
-import store from "../redux/store"
-import { IPC_LOGIN_CONSENT_REQUEST_METHOD, IPC_INIT_MESSAGE, IPC_ORIGIN_DEV, IPC_ORIGIN_PRODUCTION, IPC_PUSH_MESSAGE, IPC_ORIGIN_DEV_LOCALHOST } from "../utils/constants"
-import { setOriginAppId, setOriginAppBuiltin } from "../redux/reducers/origin/origin.actions"
-import { setError } from "../redux/reducers/error/error.actions"
+import { DEVMODE, MOCK_IPC } from "../env";
+import { RPC_PASSWORD, RPC_PORT } from "../utils/mocks";
+import { setRpcLoginConsentRequest, setRpcExpiryMargin, setRpcPassword, setRpcPort, setRpcPostEncryption, setRpcWindowId } from "../redux/reducers/rpc/rpc.actions";
+import { setMainChain } from "../redux/reducers/chainMetadata/chainMetadata.actions";
+import store from "../redux/store";
+import { IPC_LOGIN_CONSENT_REQUEST_METHOD, IPC_INIT_MESSAGE, IPC_ORIGIN_DEV, IPC_ORIGIN_PRODUCTION, IPC_PUSH_MESSAGE, IPC_ORIGIN_DEV_LOCALHOST } from "../utils/constants";
+import { setOriginAppId, setOriginAppBuiltin } from "../redux/reducers/origin/origin.actions";
+import { setError } from "../redux/reducers/error/error.actions";
 
 export const handleIpc = async (event) => {
   try {
@@ -13,7 +14,7 @@ export const handleIpc = async (event) => {
       ((!DEVMODE && event.origin === IPC_ORIGIN_PRODUCTION) ||
         (DEVMODE && event.origin === IPC_ORIGIN_DEV || 
         (DEVMODE && event.origin === IPC_ORIGIN_DEV_LOCALHOST)
-      ))
+        ))
     ) {
       const data = JSON.parse(event.data);
 
@@ -52,7 +53,11 @@ export const handleIpc = async (event) => {
 
         // Add the name of daemon guaranteed to be is running on desktop so 
         // it can be used to look up other chains.
-        data.data.request.mainChain = data.data.origin_app_info.main_chain_ticker;
+        store.dispatch(
+          setMainChain({
+            mainChain: data.data.origin_app_info.main_chain_ticker
+          })
+        );
 
         store.dispatch(
           setRpcLoginConsentRequest({
@@ -66,7 +71,7 @@ export const handleIpc = async (event) => {
       console.log(`[IPC] recieved event message from unapproved origin (${event.origin}), blocked`);
     }
   } catch(e) {
-    console.error(e)
+    console.error(e);
     store.dispatch(setError(new Error(e.message)));
   }
-}
+};

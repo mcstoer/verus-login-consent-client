@@ -38,8 +38,7 @@ class Consent extends React.Component {
 
   tryLogin() {
     this.setState({ loading: true }, async () => {
-      const { request } = this.props.loginConsentRequest;
-      const userActions = await checkAndUpdateIdentities(request.chainTicker);
+      const userActions = await checkAndUpdateIdentities(this.props.chainMetadata.chainTicker);
       userActions.map(action => this.props.dispatch(action));
 
       if (this.props.canLoginOrGiveConsent()) {
@@ -67,6 +66,7 @@ Consent.propTypes = {
   dispatch: PropTypes.func.isRequired,
   canLoginOrGiveConsent: PropTypes.func.isRequired,
   completeLoginConsent: PropTypes.func.isRequired,
+  chainMetadata: PropTypes.object.isRequired,
 };
 
 const mapStateToProps = (state) => {
@@ -75,7 +75,9 @@ const mapStateToProps = (state) => {
     loginConsentRequest: state.rpc.loginConsentRequest,
     identities: state.identity.identities,
     activeIdentity: state.identity.activeIdentity,
-    originApp: state.origin.originApp
+    originApp: state.origin.originApp,
+    chainMetadata: state.chainMetadata.chainTicker,
+    signatureInfo: state.signatureInfo
   };
 };
 

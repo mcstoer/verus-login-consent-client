@@ -27,6 +27,7 @@ import { getAddresses } from '../../../../rpc/calls/getAddresses';
 const ProvisionIdentityForm = () => {
   const dispatch = useDispatch();
   const { request } = useSelector((state) => state.rpc.loginConsentRequest);
+  const chainMetadata = useSelector((state) => state.chainMetadata);
   const identityToProvisionField = useSelector((state) => state.provision.identityToProvisionField);
   const initialPrimaryAddress = useSelector((state) => state.provision.primaryAddress);
 
@@ -77,7 +78,7 @@ const ProvisionIdentityForm = () => {
       const {address, systemId, fqn, parent, webhook} = await updateProvisioningInfoProcessedData();
 
       // Get the addresses of the wallet so the identity can be provisioned to one of them.
-      const addresses = await getAddresses(request.chainTicker, true, false);
+      const addresses = await getAddresses(chainMetadata.chainTicker, true, false);
       const publicAddressObjects = addresses.public.filter((address) => address.tag === 'public');
       // Extract just the r-address from the address object.
       const publicAddresses = publicAddressObjects.map(addressObj => addressObj.address);
@@ -98,7 +99,7 @@ const ProvisionIdentityForm = () => {
         for (const idKey of identitykeys) {
           if (idKey != null) {
             try {
-              const identity = await getIdentity(request.chainTicker, idKey.data);
+              const identity = await getIdentity(chainMetadata.chainTicker, idKey.data);
   
               if (identity) {
                 // Get only the first part of the name to match the 'name' part of a getidentity call.
@@ -197,13 +198,13 @@ const ProvisionIdentityForm = () => {
       fromBase58Check(identity);
       formattedId = identity;
     } catch {
-      formattedId = parentName ? `${identity}${parentName}` : `${identity}.${request.chainName}@`;
+      formattedId = parentName ? `${identity}${parentName}` : `${identity}.${chainMetadata.chainName}@`;
     }
 
     let identityError = false;
 
     try {
-      await getIdentity(request.chainTicker, formattedId);
+      await getIdentity(chainMetadata.chainTicker, formattedId);
 
       // If we get a result back, that means the identity must already exist.
       // That is expected if the identity is already assigned by the provisioning service.

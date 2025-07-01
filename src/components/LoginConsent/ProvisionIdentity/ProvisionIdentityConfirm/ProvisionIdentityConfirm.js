@@ -37,6 +37,7 @@ import {
 const ProvisionIdentityConfirm = () => {
   const dispatch = useDispatch();
   const { request } = useSelector((state) => state.rpc.loginConsentRequest);
+  const chainMetadata = useSelector((state) => state.chainMetadata);
   const provisioningInfo = useSelector((state) => state.provision.provisioningInfo);
   const identityToProvisionField = useSelector((state) => state.provision.identityToProvisionField);
   const primaryAddress = useSelector((state) => state.provision.primaryAddress);
@@ -184,7 +185,7 @@ const ProvisionIdentityConfirm = () => {
       }
 
       if (isIAddress) {
-        const identityObj = await getIdentity(request.chainTicker, identity);
+        const identityObj = await getIdentity(chainMetadata.chainTicker, identity);
   
         identityName = identityObj.identity.name;
         parent = identityObj.identity.parent;
@@ -196,10 +197,10 @@ const ProvisionIdentityConfirm = () => {
         identityName = identity.split('@')[0];
         parent = provParent ? provParent.data : null;
         systemid = provSystemId ? provSystemId.data : null;
-        const parentObj = await getIdentity(request.chainTicker, parent ? parent : loginRequest.system_id);
+        const parentObj = await getIdentity(chainMetadata.chainTicker, parent ? parent : loginRequest.system_id);
 
         requestedFqn = `${identityName.split('.')[0]}.${parentObj.fullyqualifiedname}`;
-        nameId = (await getVdxfId(request.chainTicker, requestedFqn)).vdxfid;
+        nameId = (await getVdxfId(chainMetadata.chainTicker, requestedFqn)).vdxfid;
       }
 
       const provisionRequest = new LoginConsentProvisioningRequest({
@@ -214,7 +215,7 @@ const ProvisionIdentityConfirm = () => {
         }),
       });
       
-      const signedRequest = await signIdProvisioningRequest(request.chainTicker, provisionRequest, primaryAddress);
+      const signedRequest = await signIdProvisioningRequest(chainMetadata.chainTicker, provisionRequest, primaryAddress);
       
       // The responding server should include the error within the response instead of 
       // using an error code.
@@ -226,7 +227,7 @@ const ProvisionIdentityConfirm = () => {
       const provisionResponse = res.data;
       await handleProvisioningResponse(provisionResponse, nameId, requestedFqn);
 
-      const provisioningName = (await getIdentity(request.chainTicker, loginRequest.signing_id)).identity.name;
+      const provisioningName = (await getIdentity(chainMetadata.chainTicker, loginRequest.signing_id)).identity.name;
       
       submissionSuccess(res.data, requestedFqn, provisioningName, nameId);
     } catch (e) {
@@ -386,6 +387,6 @@ const ProvisionIdentityConfirm = () => {
       </div>
     </div>
   );
-}
+};
 
 export default ProvisionIdentityConfirm;
