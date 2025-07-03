@@ -26,7 +26,7 @@ import { getAddresses } from '../../../../rpc/calls/getAddresses';
 
 const ProvisionIdentityForm = () => {
   const dispatch = useDispatch();
-  const { request } = useSelector((state) => state.rpc.loginConsentRequest);
+  const request = useSelector((state) => state.rpc.request);
   const chainId = useSelector((state) => state.chainMetadata.chainId);
   const chainName = useSelector((state) => state.chainMetadata.chainName);
   const identityToProvisionField = useSelector((state) => state.provision.identityToProvisionField);

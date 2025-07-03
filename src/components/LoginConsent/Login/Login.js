@@ -31,7 +31,7 @@ const Login = (props) => {
   // eslint-disable-next-line react/prop-types
   const { canLoginOrGiveConsent, setRequestResult } = props;
   const dispatch = useDispatch();
-  const { request } = useSelector((state) => state.rpc.loginConsentRequest);
+  const request = useSelector((state) => state.rpc.request);
   const chainId = useSelector((state) => state.chainMetadata.chainId);
   const signatureInfo = useSelector((state) => state.signatureInfo);
   const [loading, setLoading] = useState(false);

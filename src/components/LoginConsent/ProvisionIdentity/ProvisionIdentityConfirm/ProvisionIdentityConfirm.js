@@ -36,7 +36,7 @@ import {
 
 const ProvisionIdentityConfirm = () => {
   const dispatch = useDispatch();
-  const { request } = useSelector((state) => state.rpc.loginConsentRequest);
+  const request = useSelector((state) => state.rpc.request);
   const chainId = useSelector((state) => state.chainMetadata.chainId);
   const provisioningInfo = useSelector((state) => state.provision.provisioningInfo);
   const identityToProvisionField = useSelector((state) => state.provision.identityToProvisionField);

@@ -97,7 +97,7 @@ export const checkForNewId = async (
 const ProvisionIdentityResult = () => {
   const dispatch = useDispatch();
 
-  const { request } = useSelector((state) => state.rpc.loginConsentRequest);
+  const request = useSelector((state) => state.rpc.request);
   const chainId = useSelector((state) => state.chainMetadata.chainId);
   const provisioningResponse = useSelector((state) => state.provision.provisioningResponse);
   const requestedFqn = useSelector((state) => state.provision.requestedFqn);

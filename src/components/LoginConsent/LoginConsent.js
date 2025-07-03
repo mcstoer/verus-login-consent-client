@@ -65,14 +65,14 @@ class LoginConsent extends React.Component {
 
     if (
       lastProps !== this.props &&
-      lastProps.loginConsentRequest.request !== this.props.loginConsentRequest.request
+      lastProps.request !== this.props.request
     ) {
       await this.handleRequest();
     }
   }
 
   async handleRequest() {
-    let { request } = this.props.loginConsentRequest;
+    const request = this.props.request;
 
     const mainChain = this.props.mainChain;
 
@@ -225,7 +225,7 @@ LoginConsent.propTypes = {
   error: PropTypes.object,
   rpcPassword: PropTypes.string,
   windowId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  loginConsentRequest: PropTypes.object,
+  request: PropTypes.object,
   chainInfo: PropTypes.object,
   apiErrors: PropTypes.object,
   chainId: PropTypes.string,
@@ -245,7 +245,7 @@ const mapStateToProps = (state) => {
     error: state.error.error,
     rpcPassword: state.rpc.password,
     windowId: state.rpc.windowId,
-    loginConsentRequest: state.rpc.loginConsentRequest,
+    request: state.rpc.request,
     chainInfo: state.identity.chainInfo,
     apiErrors: state.error.apiErrors,
     chainId: state.chainMetadata.chainId,

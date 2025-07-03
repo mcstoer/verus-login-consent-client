@@ -18,7 +18,7 @@ import AlertTitle from '@mui/material/AlertTitle';
 const CredentialsReview = (props) => {
   const { setRequestResult } = props;
   const dispatch = useDispatch();
-  const { request } = useSelector((state) => state.rpc.loginConsentRequest);
+  const request = useSelector((state) => state.rpc.request);
   const chainId = useSelector((state) => state.chainMetadata.chainId);
   const [loading, setLoading] = useState(false);
   const activeIdentity = useSelector((state) => state.identity.activeIdentity);

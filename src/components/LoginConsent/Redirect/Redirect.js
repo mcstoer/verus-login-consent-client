@@ -16,7 +16,7 @@ class Redirect extends React.Component {
     }
 
     this.redirect = this.redirect.bind(this);
-    this.redirects = props.loginConsentRequest.request.challenge.redirect_uris;
+    this.redirects = props.request.challenge.redirect_uris;
     this.redirectinfo = this.redirects ? this.redirects[0] : null;
     this.extraInfo = '';
 
@@ -46,7 +46,7 @@ class Redirect extends React.Component {
 
 const mapStateToProps = (state) => {
   return {
-    loginConsentRequest: state.rpc.loginConsentRequest,
+    request: state.rpc.request,
   };
 };
 

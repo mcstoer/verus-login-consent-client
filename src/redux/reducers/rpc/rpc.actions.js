@@ -1,7 +1,7 @@
 import {
   ADD_CALLED_TIME,
   SET_RPC_APP_ID,
-  SET_RPC_LOGIN_CONSENT_REQUEST,
+  SET_RPC_REQUEST,
   SET_RPC_EXPIRY_MARGIN,
   SET_RPC_PASSWORD,
   SET_RPC_PORT,
@@ -15,8 +15,8 @@ export const setRpcAppId = (appId) => {
     payload: {
       appId
     }
-  }
-}
+  };
+};
 
 export const setRpcPassword = (password) => {
   return {
@@ -24,8 +24,8 @@ export const setRpcPassword = (password) => {
     payload: {
       password
     }
-  }
-}
+  };
+};
 
 export const setRpcPort = (port) => {
   return {
@@ -33,8 +33,8 @@ export const setRpcPort = (port) => {
     payload: {
       port
     }
-  }
-}
+  };
+};
 
 export const setRpcExpiryMargin = (expiryMargin) => {
   return {
@@ -42,8 +42,8 @@ export const setRpcExpiryMargin = (expiryMargin) => {
     payload: {
       expiryMargin
     }
-  }
-}
+  };
+};
 
 export const addCalledTime = (time) => {
   return {
@@ -51,8 +51,8 @@ export const addCalledTime = (time) => {
     payload: {
       time
     }
-  }
-}
+  };
+};
 
 export const setRpcPostEncryption = (encryption) => {
   return {
@@ -60,8 +60,8 @@ export const setRpcPostEncryption = (encryption) => {
     payload: {
       encryption
     }
-  }
-}
+  };
+};
 
 export const setRpcWindowId = (windowId) => {
   return {
@@ -69,14 +69,14 @@ export const setRpcWindowId = (windowId) => {
     payload: {
       windowId
     }
-  }
-}
+  };
+};
 
-export const setRpcLoginConsentRequest = (loginConsentRequest) => {
+export const setRpcRequest = (request) => {
   return {
-    type: SET_RPC_LOGIN_CONSENT_REQUEST,
+    type: SET_RPC_REQUEST,
     payload: {
-      loginConsentRequest
+      request
     }
-  }
-}
+  };
+};

@@ -1,6 +1,6 @@
 import { DEVMODE, MOCK_IPC } from "../env";
 import { RPC_PASSWORD, RPC_PORT } from "../utils/mocks";
-import { setRpcLoginConsentRequest, setRpcExpiryMargin, setRpcPassword, setRpcPort, setRpcPostEncryption, setRpcWindowId } from "../redux/reducers/rpc/rpc.actions";
+import { setRpcRequest, setRpcExpiryMargin, setRpcPassword, setRpcPort, setRpcPostEncryption, setRpcWindowId } from "../redux/reducers/rpc/rpc.actions";
 import { setMainChain } from "../redux/reducers/chainMetadata/chainMetadata.actions";
 import store from "../redux/store";
 import { IPC_LOGIN_CONSENT_REQUEST_METHOD, IPC_INIT_MESSAGE, IPC_ORIGIN_DEV, IPC_ORIGIN_PRODUCTION, IPC_PUSH_MESSAGE, IPC_ORIGIN_DEV_LOCALHOST } from "../utils/constants";
@@ -58,9 +58,7 @@ export const handleIpc = async (event) => {
         );
 
         store.dispatch(
-          setRpcLoginConsentRequest({
-            request: data.data.request,
-          })
+          setRpcRequest(data.data.deeplink.data)
         );
         store.dispatch(setOriginAppBuiltin(data.data.origin_app_info.search_builtin));
         store.dispatch(setOriginAppId(data.data.origin_app_info.id));

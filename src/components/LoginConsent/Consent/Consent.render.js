@@ -6,8 +6,7 @@ import { convertFqnToDisplayFormat } from "../../../utils/fullyqualifiedname";
 
 export const ConsentRender = function () {
   const { loading } = this.state;
-  const { loginConsentRequest, chainName, signatureInfo } = this.props;
-  const { request } = loginConsentRequest;
+  const { request, chainName, signatureInfo } = this.props;
   const { sigBlockInfo, signedBy, signingRevocationIdentity, signingRecoveryIdentity } = signatureInfo;
   const { time } = sigBlockInfo;
   // Convert the fully qualified name into a nicer format for VRSC.
