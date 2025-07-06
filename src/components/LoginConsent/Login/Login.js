@@ -31,15 +31,15 @@ const Login = (props) => {
   // eslint-disable-next-line react/prop-types
   const { canLoginOrGiveConsent, setRequestResult } = props;
   const dispatch = useDispatch();
-  const request = useSelector((state) => state.rpc.request);
   const chainId = useSelector((state) => state.chainMetadata.chainId);
   const signatureInfo = useSelector((state) => state.signatureInfo);
   const [loading, setLoading] = useState(false);
   const identities = useSelector((state) => state.identity.identities);
   const activeIdentity = useSelector((state) => state.identity.activeIdentity);
+  const deeplinkData = useSelector((state) => state.deeplink.data);
   
   // Check if there are any credentials requested
-  const requestedCredentialKeys = request.challenge.requested_access
+  const requestedCredentialKeys = deeplinkData.challenge.requested_access
     .filter(item => SUPPORTED_CREDENTIALS.includes(item.vdxfkey))
     .map(item => item.vdxfkey);
   
@@ -49,7 +49,7 @@ const Login = (props) => {
   const [includeCredentials, setIncludeCredentials] = useState(hasRequestedCredentials);
 
   // The provisioning webhook needs to exist for provisioning.
-  let canProvision = request.challenge.provisioning_info && request.challenge.provisioning_info.some(x => {
+  let canProvision = deeplinkData.challenge.provisioning_info && deeplinkData.challenge.provisioning_info.some(x => {
     return (
       x.vdxfkey === LOGIN_CONSENT_ID_PROVISIONING_WEBHOOK_VDXF_KEY.vdxfid
     );
@@ -58,7 +58,7 @@ const Login = (props) => {
   // Provisioning is not an option if the subject is specified to be one of the identities that the user owns.
   if (identities.length > 0) {
     const identitySubjects =
-      request.challenge.subject.filter(item => item.vdxfkey === ID_ADDRESS_VDXF_KEY.vdxfid).map(id => id.data);
+      deeplinkData.challenge.subject.filter(item => item.vdxfkey === ID_ADDRESS_VDXF_KEY.vdxfid).map(id => id.data);
 
     const identitySubjectMatches = identities.filter(id => identitySubjects.includes(id.identity.identityaddress));
 
@@ -105,7 +105,7 @@ const Login = (props) => {
         } else {
           const signedResponse = await createAndSignLoginResponse(
             chainId,
-            request,
+            deeplinkData,
             loginIdentity,
             []
           );

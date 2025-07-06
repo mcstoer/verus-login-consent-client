@@ -97,7 +97,7 @@ export const checkForNewId = async (
 const ProvisionIdentityResult = () => {
   const dispatch = useDispatch();
 
-  const request = useSelector((state) => state.rpc.request);
+  const deeplinkData = useSelector((state) => state.deeplink.data);
   const chainId = useSelector((state) => state.chainMetadata.chainId);
   const provisioningResponse = useSelector((state) => state.provision.provisioningResponse);
   const requestedFqn = useSelector((state) => state.provision.requestedFqn);
@@ -122,7 +122,7 @@ const ProvisionIdentityResult = () => {
   useInterval(
     async () => await checkForProvisioningStatus(
       provisioningResponse.decision.result.info_uri,
-      request,
+      deeplinkData,
       setCheckForId,
       setProvisioningError,
       setCheckForProvisioningStatus,

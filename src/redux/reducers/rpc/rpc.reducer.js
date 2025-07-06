@@ -10,7 +10,6 @@ import {
   ADD_CALLED_TIME,
   SET_RPC_EXPIRY_MARGIN,
   SET_RPC_POST_ENCRYPTION,
-  SET_RPC_REQUEST,
   SET_RPC_WINDOW_ID
 } from "./rpc.types";
 
@@ -22,7 +21,6 @@ export const rpc = (state = {
   calledTimes: [],
   postEncryption: true,
   windowId: null,
-  request: {},
 }, action) => {
   switch (action.type) {
   case SET_RPC_APP_ID:
@@ -54,11 +52,6 @@ export const rpc = (state = {
     return {
       ...state,
       windowId: action.payload.windowId,
-    };
-  case SET_RPC_REQUEST:
-    return {
-      ...state,
-      request: action.payload.request
     };
   case ADD_CALLED_TIME: {
     let newCalledTimes = [...state.calledTimes, action.payload.time];

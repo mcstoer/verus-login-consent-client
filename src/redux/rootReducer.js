@@ -8,6 +8,7 @@ import { provision } from './reducers/provision/provision.reducer';
 import { credentials } from './reducers/credentials/credentials.reducer';
 import signatureInfo from './reducers/signatureInfo/signatureInfo.reducer';
 import chainMetadata from './reducers/chainMetadata/chainMetadata.reducer';
+import { deeplink } from './reducers/deeplink/deeplink.reducer';
 
 const rootReducer = combineReducers({
   navigation,
@@ -19,6 +20,7 @@ const rootReducer = combineReducers({
   credentials,
   signatureInfo,
   chainMetadata,
+  deeplink,
 });
 
 export default rootReducer;

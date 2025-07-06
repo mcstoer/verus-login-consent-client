@@ -1,9 +1,9 @@
 import { SET_CHAIN_METADATA, SET_MAIN_CHAIN } from './chainMetadata.types';
 
 const initialState = {
-  chainId: null,
-  chainName: null,
-  mainChain: null
+  chainId: '',
+  chainName: '',
+  mainChain: '',
 };
 
 const chainMetadata = (state = initialState, action) => {

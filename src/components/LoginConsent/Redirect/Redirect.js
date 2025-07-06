@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { 
   RedirectRender
@@ -13,16 +14,16 @@ class Redirect extends React.Component {
 
     this.state = {
       loading: false
-    }
+    };
 
     this.redirect = this.redirect.bind(this);
-    this.redirects = props.request.challenge.redirect_uris;
+    this.redirects = props.deeplinkData.challenge.redirect_uris;
     this.redirectinfo = this.redirects ? this.redirects[0] : null;
     this.extraInfo = '';
 
     if (this.redirectinfo.vdxfkey === LOGIN_CONSENT_REDIRECT_VDXF_KEY.vdxfid) {
       const url = new URL(this.redirectinfo.uri);
-      this.extraInfo = ` and return to ${url.protocol}//${url.host}`
+      this.extraInfo = ` and return to ${url.protocol}//${url.host}`;
     }
   }
 
@@ -44,9 +45,16 @@ class Redirect extends React.Component {
   }
 }
 
+Redirect.propTypes = {
+  deeplinkData: PropTypes.object.isRequired,
+  dispatch: PropTypes.func.isRequired,
+  completeLoginConsent: PropTypes.func.isRequired,
+  requestResult: PropTypes.object.isRequired,
+};
+
 const mapStateToProps = (state) => {
   return {
-    request: state.rpc.request,
+    deeplinkData: state.deeplink.data,
   };
 };
 

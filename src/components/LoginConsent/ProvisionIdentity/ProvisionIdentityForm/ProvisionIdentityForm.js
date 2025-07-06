@@ -26,13 +26,13 @@ import { getAddresses } from '../../../../rpc/calls/getAddresses';
 
 const ProvisionIdentityForm = () => {
   const dispatch = useDispatch();
-  const request = useSelector((state) => state.rpc.request);
+  const deeplinkData = useSelector((state) => state.deeplink.data);
   const chainId = useSelector((state) => state.chainMetadata.chainId);
   const chainName = useSelector((state) => state.chainMetadata.chainName);
   const identityToProvisionField = useSelector((state) => state.provision.identityToProvisionField);
   const initialPrimaryAddress = useSelector((state) => state.provision.primaryAddress);
 
-  const hasProvisioningInfo = request != null && request.challenge.provisioning_info != null;
+  const hasProvisioningInfo = deeplinkData != null && deeplinkData.challenge.provisioning_info != null;
 
   const [friendlyNameMap, setFriendlyNameMap] = useState({});
 
@@ -60,7 +60,7 @@ const ProvisionIdentityForm = () => {
       if (!hasProvisioningInfo) return;
   
       const findProvisioningInfo = (key) =>
-        request.challenge.provisioning_info.find(
+        deeplinkData.challenge.provisioning_info.find(
           (x) => x.vdxfkey === key.vdxfid
         );
   

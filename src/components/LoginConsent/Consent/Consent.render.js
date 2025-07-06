@@ -6,7 +6,7 @@ import { convertFqnToDisplayFormat } from "../../../utils/fullyqualifiedname";
 
 export const ConsentRender = function () {
   const { loading } = this.state;
-  const { request, chainName, signatureInfo } = this.props;
+  const { deeplinkData, chainName, signatureInfo } = this.props;
   const { sigBlockInfo, signedBy, signingRevocationIdentity, signingRecoveryIdentity } = signatureInfo;
   const { time } = sigBlockInfo;
   // Convert the fully qualified name into a nicer format for VRSC.
@@ -45,7 +45,7 @@ export const ConsentRender = function () {
 
         <RequestCard
           chainName={chainName}
-          systemId={request.system_id}
+          systemId={deeplinkData.system_id}
           signedBy={signedBy}
           signerFqn={signerFqn}
           revocationIdentity={signingRevocationIdentity}

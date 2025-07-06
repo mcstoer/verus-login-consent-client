@@ -1,11 +1,13 @@
 import { DEVMODE, MOCK_IPC } from "../env";
 import { RPC_PASSWORD, RPC_PORT } from "../utils/mocks";
-import { setRpcRequest, setRpcExpiryMargin, setRpcPassword, setRpcPort, setRpcPostEncryption, setRpcWindowId } from "../redux/reducers/rpc/rpc.actions";
+import { setRpcExpiryMargin, setRpcPassword, setRpcPort, setRpcPostEncryption, setRpcWindowId } from "../redux/reducers/rpc/rpc.actions";
 import { setMainChain } from "../redux/reducers/chainMetadata/chainMetadata.actions";
+import { setDeeplinkData } from "../redux/reducers/deeplink/deeplink.actions";
 import store from "../redux/store";
 import { IPC_LOGIN_CONSENT_REQUEST_METHOD, IPC_INIT_MESSAGE, IPC_ORIGIN_DEV, IPC_ORIGIN_PRODUCTION, IPC_PUSH_MESSAGE, IPC_ORIGIN_DEV_LOCALHOST } from "../utils/constants";
 import { setOriginAppId, setOriginAppBuiltin } from "../redux/reducers/origin/origin.actions";
 import { setError } from "../redux/reducers/error/error.actions";
+import { LoginConsentRequest } from "verus-typescript-primitives";
 
 export const handleIpc = async (event) => {
   try {
@@ -57,8 +59,13 @@ export const handleIpc = async (event) => {
           setMainChain(data.data.origin_app_info.main_chain_ticker)
         );
 
+        const loginConsentRequest = new LoginConsentRequest(data.data.deeplink.data);
+
         store.dispatch(
-          setRpcRequest(data.data.deeplink.data)
+          setDeeplinkData(
+            data.data.deeplink.id,
+            loginConsentRequest
+          )
         );
         store.dispatch(setOriginAppBuiltin(data.data.origin_app_info.search_builtin));
         store.dispatch(setOriginAppId(data.data.origin_app_info.id));

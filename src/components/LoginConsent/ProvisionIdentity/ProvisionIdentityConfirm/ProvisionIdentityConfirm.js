@@ -36,7 +36,7 @@ import {
 
 const ProvisionIdentityConfirm = () => {
   const dispatch = useDispatch();
-  const request = useSelector((state) => state.rpc.request);
+  const deeplinkData = useSelector((state) => state.deeplink.data);
   const chainId = useSelector((state) => state.chainMetadata.chainId);
   const provisioningInfo = useSelector((state) => state.provision.provisioningInfo);
   const identityToProvisionField = useSelector((state) => state.provision.identityToProvisionField);
@@ -155,7 +155,7 @@ const ProvisionIdentityConfirm = () => {
     };
 
     try {
-      const loginRequest = new LoginConsentRequest(request);
+      const loginRequest = new LoginConsentRequest(deeplinkData);
 
       const webhookSubject = loginRequest.challenge.provisioning_info ? loginRequest.challenge.provisioning_info.find(x => {
         return x.vdxfkey === LOGIN_CONSENT_ID_PROVISIONING_WEBHOOK_VDXF_KEY.vdxfid;

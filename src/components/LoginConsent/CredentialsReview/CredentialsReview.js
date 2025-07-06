@@ -18,7 +18,7 @@ import AlertTitle from '@mui/material/AlertTitle';
 const CredentialsReview = (props) => {
   const { setRequestResult } = props;
   const dispatch = useDispatch();
-  const request = useSelector((state) => state.rpc.request);
+  const deeplinkData = useSelector((state) => state.deeplink.data);
   const chainId = useSelector((state) => state.chainMetadata.chainId);
   const [loading, setLoading] = useState(false);
   const activeIdentity = useSelector((state) => state.identity.activeIdentity);
@@ -30,7 +30,7 @@ const CredentialsReview = (props) => {
   });
 
   // Calculate requested and missing credentials
-  const requestedCredentialKeys = request.challenge.requested_access
+  const requestedCredentialKeys = deeplinkData.challenge.requested_access
     .filter(item => SUPPORTED_CREDENTIALS.includes(item.vdxfkey))
     .map(item => item.vdxfkey);
 
@@ -49,7 +49,7 @@ const CredentialsReview = (props) => {
     const loginIdentity = activeIdentity.identity.identityaddress;
     const signedResponse = await createAndSignLoginResponse(
       chainId,
-      request,
+      deeplinkData,
       loginIdentity,
       credentials
     );

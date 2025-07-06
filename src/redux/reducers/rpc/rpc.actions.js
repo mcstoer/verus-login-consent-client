@@ -1,7 +1,6 @@
 import {
   ADD_CALLED_TIME,
   SET_RPC_APP_ID,
-  SET_RPC_REQUEST,
   SET_RPC_EXPIRY_MARGIN,
   SET_RPC_PASSWORD,
   SET_RPC_PORT,
@@ -68,15 +67,6 @@ export const setRpcWindowId = (windowId) => {
     type: SET_RPC_WINDOW_ID,
     payload: {
       windowId
-    }
-  };
-};
-
-export const setRpcRequest = (request) => {
-  return {
-    type: SET_RPC_REQUEST,
-    payload: {
-      request
     }
   };
 };

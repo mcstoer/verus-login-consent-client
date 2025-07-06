@@ -12,7 +12,7 @@ import PropTypes from 'prop-types';
 class Consent extends React.Component {
   constructor(props) {
     super(props);
-    const requestedPermissions = props.request.challenge.requested_access;
+    const requestedPermissions = props.deeplinkData.challenge.requested_access;
 
     let permissionsDescriptions = [];
 
@@ -62,7 +62,7 @@ class Consent extends React.Component {
 }
 
 Consent.propTypes = {
-  request: PropTypes.object.isRequired,
+  deeplinkData: PropTypes.object.isRequired,
   dispatch: PropTypes.func.isRequired,
   canLoginOrGiveConsent: PropTypes.func.isRequired,
   completeLoginConsent: PropTypes.func.isRequired,
@@ -73,7 +73,7 @@ Consent.propTypes = {
 const mapStateToProps = (state) => {
   return {
     path: state.navigation.path,
-    request: state.rpc.request,
+    deeplinkData: state.deeplink.data,
     identities: state.identity.identities,
     activeIdentity: state.identity.activeIdentity,
     originApp: state.origin.originApp,
