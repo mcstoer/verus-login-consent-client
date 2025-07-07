@@ -1,3 +1,6 @@
+/*
+  This reducer contains information about what chains are being used.
+*/
 import { SET_CHAIN_METADATA, SET_MAIN_CHAIN } from './chainMetadata.types';
 
 export const setChainMetadata = (chainMetadata) => ({

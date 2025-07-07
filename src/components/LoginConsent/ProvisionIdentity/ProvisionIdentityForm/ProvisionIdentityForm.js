@@ -29,6 +29,7 @@ const ProvisionIdentityForm = () => {
   const deeplinkData = useSelector((state) => state.deeplink.data);
   const chainId = useSelector((state) => state.chainMetadata.chainId);
   const chainName = useSelector((state) => state.chainMetadata.chainName);
+  const previousPath = useSelector((state) => state.navigation.previousPath);
   const identityToProvisionField = useSelector((state) => state.provision.identityToProvisionField);
   const initialPrimaryAddress = useSelector((state) => state.provision.primaryAddress);
 
@@ -245,7 +246,7 @@ const ProvisionIdentityForm = () => {
   };
 
   const cancel = () => {
-    dispatch(setNavigationPath(SELECT_LOGIN_ID));
+    dispatch(setNavigationPath(previousPath || SELECT_LOGIN_ID));
   };
 
   return (

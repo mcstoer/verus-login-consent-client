@@ -10,12 +10,14 @@ import { SET_EXTERNAL_ACTION, SET_NAVIGATION_PATH } from './navigation.types'
 export const navigation = (state = {
   path: LOADING_DISPLAY,
   pathArray: [LOADING_DISPLAY],
+  previousPath: undefined,
   externalAction: ""
 }, action) => {
   switch (action.type) {
     case SET_NAVIGATION_PATH:
       return {
         ...state,
+        previousPath: state.path,
         path: action.payload.navigationPath,
         pathArray: action.payload.navigationPathArray
       };

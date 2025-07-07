@@ -28,7 +28,9 @@ class Redirect extends React.Component {
   }
 
   cancel() {
-    this.props.dispatch(setNavigationPath(SELECT_LOGIN_ID));
+    this.props.dispatch(
+      setNavigationPath(this.props.previousPath || SELECT_LOGIN_ID)
+    );
   }
 
   redirect() {
@@ -50,11 +52,13 @@ Redirect.propTypes = {
   dispatch: PropTypes.func.isRequired,
   completeLoginConsent: PropTypes.func.isRequired,
   requestResult: PropTypes.object.isRequired,
+  previousPath: PropTypes.string,
 };
 
 const mapStateToProps = (state) => {
   return {
     deeplinkData: state.deeplink.data,
+    previousPath: state.navigation.previousPath,
   };
 };
 

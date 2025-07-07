@@ -1,3 +1,6 @@
+/*
+  This reducer contains the signature information of the deeplink data.
+*/
 import { SET_SIGNATURE_INFO } from './signatureInfo.types';
 
 const initialState = {
