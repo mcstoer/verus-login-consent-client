@@ -38,7 +38,6 @@ const ProvisionIdentityConfirm = () => {
   const dispatch = useDispatch();
   const deeplinkData = useSelector((state) => state.deeplink.data);
   const chainId = useSelector((state) => state.chainMetadata.chainId);
-  const previousPath = useSelector((state) => state.navigation.previousPath);
   const provisioningInfo = useSelector((state) => state.provision.provisioningInfo);
   const identityToProvisionField = useSelector((state) => state.provision.identityToProvisionField);
   const primaryAddress = useSelector((state) => state.provision.primaryAddress);
@@ -132,7 +131,7 @@ const ProvisionIdentityConfirm = () => {
   };
 
   const cancel = () => {
-    dispatch(setNavigationPath(previousPath || PROVISIONING_FORM));
+    dispatch(setNavigationPath(PROVISIONING_FORM));
   };
 
   const submitData = async () => {

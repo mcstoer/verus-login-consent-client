@@ -1,19 +1,31 @@
-import React from 'react';
-import { connect } from 'react-redux';
+import React, { useState, useMemo } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { setExternalAction, setNavigationPath } from '../../../redux/reducers/navigation/navigation.actions';
-import { 
-  ConsentRender
-} from './Consent.render';
 import { EXTERNAL_ACTION, EXTERNAL_CHAIN_START, SCOPES, SELECT_LOGIN_ID } from '../../../utils/constants';
 import { checkAndUpdateIdentities } from '../../../redux/reducers/identity/identity.actions';
 import { SUPPORTED_CREDENTIALS, CREDENTIALS } from '../../../utils/constants';
-import PropTypes from 'prop-types';
+import Button from '@mui/material/Button';
+import { RequestCard } from "../../../containers/RequestCard/RequestCard";
+import { VerusIdLogo } from "../../../images";
+import { convertFqnToDisplayFormat } from "../../../utils/fullyqualifiedname";
 
-class Consent extends React.Component {
-  constructor(props) {
-    super(props);
-    const requestedPermissions = props.deeplinkData.challenge.requested_access;
+const Consent = (props) => {
+  // eslint-disable-next-line react/prop-types
+  const { canLoginOrGiveConsent, completeLoginConsent } = props;
+  const dispatch = useDispatch();
+  const [loading, setLoading] = useState(false);
+  const deeplinkData = useSelector((state) => state.deeplink.data);
+  const chainId = useSelector((state) => state.chainMetadata.chainId);
+  const chainName = useSelector((state) => state.chainMetadata.chainName);
+  const signatureInfo = useSelector((state) => state.signatureInfo);
 
+  const { sigBlockInfo, signedBy, signingRevocationIdentity, signingRecoveryIdentity } = signatureInfo;
+  const { time } = sigBlockInfo;
+  // Convert the fully qualified name into a nicer format for VRSC.
+  const signerFqn = convertFqnToDisplayFormat(signedBy.fullyqualifiedname);
+
+  const permissionsText = useMemo(() => {
+    const requestedPermissions = deeplinkData.challenge.requested_access;
     let permissionsDescriptions = [];
 
     if (requestedPermissions != null) {
@@ -27,60 +39,119 @@ class Consent extends React.Component {
       }
     }
 
-    this.state = {
-      loading: false
-    };
+    return permissionsDescriptions.join(", ");
+  }, [deeplinkData.challenge.requested_access]);
 
-    this.tryLogin = this.tryLogin.bind(this);
-    this.cancel = this.cancel.bind(this);
-    this.permissionsText = permissionsDescriptions.join(", ");
-  }
+  const tryLogin = async () => {
+    setLoading(true);
+    
+    const userActions = await checkAndUpdateIdentities(chainId);
+    userActions.map(action => dispatch(action));
 
-  tryLogin() {
-    this.setState({ loading: true }, async () => {
-      const userActions = await checkAndUpdateIdentities(this.props.chainId);
-      userActions.map(action => this.props.dispatch(action));
-
-      if (this.props.canLoginOrGiveConsent()) {
-        this.props.dispatch(setNavigationPath(SELECT_LOGIN_ID));
-      } else {
-        this.props.dispatch(setExternalAction(EXTERNAL_CHAIN_START));
-        this.props.dispatch(setNavigationPath(EXTERNAL_ACTION));
-      }
-    });
-  }
-
-  cancel() {
-    this.setState({ loading: true }, async () => {
-      await this.props.completeLoginConsent();
-    });
-  }
-
-  render() {
-    return ConsentRender.call(this);
-  }
-}
-
-Consent.propTypes = {
-  deeplinkData: PropTypes.object.isRequired,
-  dispatch: PropTypes.func.isRequired,
-  canLoginOrGiveConsent: PropTypes.func.isRequired,
-  completeLoginConsent: PropTypes.func.isRequired,
-  chainId: PropTypes.string.isRequired,
-  chainName: PropTypes.string.isRequired,
-};
-
-const mapStateToProps = (state) => {
-  return {
-    path: state.navigation.path,
-    deeplinkData: state.deeplink.data,
-    identities: state.identity.identities,
-    activeIdentity: state.identity.activeIdentity,
-    originApp: state.origin.originApp,
-    chainId: state.chainMetadata.chainId,
-    chainName: state.chainMetadata.chainName,
-    signatureInfo: state.signatureInfo
+    if (canLoginOrGiveConsent()) {
+      dispatch(setNavigationPath(SELECT_LOGIN_ID));
+    } else {
+      dispatch(setExternalAction(EXTERNAL_CHAIN_START));
+      dispatch(setNavigationPath(EXTERNAL_ACTION));
+    }
   };
+
+  const cancel = async () => {
+    setLoading(true);
+    await completeLoginConsent();
+  };
+
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        flex: 1,
+        height: "100%",
+      }}
+    >
+      <div
+        style={{
+          height: "100%",
+          display: "flex",
+          padding: 32,
+          flexDirection: "column",
+          alignItems: "center",
+        }}
+      >
+        <img src={VerusIdLogo} width={'55%'} height={'10%'}/>
+        <div
+          style={{
+            width: "100%",
+            display: "flex",
+            alignItems: "center",
+            padding: 8,
+            justifyContent: "center",
+          }}
+        >
+          {signerFqn}{` is requesting login with VerusID`}
+        </div>
+
+        <RequestCard
+          chainName={chainName}
+          systemId={deeplinkData.system_id}
+          signedBy={signedBy}
+          signerFqn={signerFqn}
+          revocationIdentity={signingRevocationIdentity}
+          recoveryIdentity={signingRecoveryIdentity}
+          time={time}
+          permissions={permissionsText}
+          height={"54vh"}
+        >
+        </RequestCard>
+        <div
+          style={{
+            width: "100%",
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "flex-end",
+            justifyContent: "flex-end",
+            marginTop: "auto",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
+            <Button
+              variant="text"
+              disabled={loading}
+              color="secondary"
+              onClick={() => cancel()}
+              style={{
+                width: 120,
+                marginRight: 32,
+                padding: 8,
+              }}
+            >
+              {"Cancel"}
+            </Button>
+            <Button
+              variant="contained"
+              color="success"
+              disabled={loading}
+              onClick={() => tryLogin()}
+              style={{
+                width: 120,
+                padding: 8,
+              }}
+            >
+              {"Continue"}
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 };
 
-export default connect(mapStateToProps)(Consent);
+export default Consent;

@@ -20,7 +20,6 @@ const CredentialsReview = (props) => {
   const dispatch = useDispatch();
   const deeplinkData = useSelector((state) => state.deeplink.data);
   const chainId = useSelector((state) => state.chainMetadata.chainId);
-  const previousPath = useSelector((state) => state.navigation.previousPath);
   const [loading, setLoading] = useState(false);
   const activeIdentity = useSelector((state) => state.identity.activeIdentity);
   const credentials = useSelector((state) => {
@@ -42,7 +41,7 @@ const CredentialsReview = (props) => {
   );
 
   const cancel = () => {
-    dispatch(setNavigationPath(previousPath || SELECT_LOGIN_ID));
+    dispatch(setNavigationPath(SELECT_LOGIN_ID));
   };
 
   const continueLogin = async () => {

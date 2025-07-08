@@ -33,7 +33,6 @@ const Login = (props) => {
   const dispatch = useDispatch();
   const chainId = useSelector((state) => state.chainMetadata.chainId);
   const signatureInfo = useSelector((state) => state.signatureInfo);
-  const previousPath = useSelector((state) => state.navigation.previousPath);
   const [loading, setLoading] = useState(false);
   const identities = useSelector((state) => state.identity.identities);
   const activeIdentity = useSelector((state) => state.identity.activeIdentity);
@@ -69,7 +68,7 @@ const Login = (props) => {
   }
 
   const cancel = () => {
-    dispatch(setNavigationPath(previousPath || CONSENT_TO_SCOPE));
+    dispatch(setNavigationPath(CONSENT_TO_SCOPE));
   };
 
   const tryLogin = async() => {
