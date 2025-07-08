@@ -1,12 +1,20 @@
-import { SET_CHAIN_METADATA, SET_MAIN_CHAIN } from './chainMetadata.types';
+/*
+  This reducer contains information about what chains are being used.
+*/
+import { 
+  SET_CHAIN_METADATA, 
+  SET_MAIN_CHAIN,
+  ChainMetadataState,
+  ChainMetadataAction
+} from './chainMetadata.types';
 
-const initialState = {
+const initialState: ChainMetadataState = {
   chainId: '',
   chainName: '',
   mainChain: '',
 };
 
-const chainMetadata = (state = initialState, action) => {
+export const chainMetadata = (state = initialState, action: ChainMetadataAction): ChainMetadataState => {
   switch (action.type) {
   case SET_CHAIN_METADATA:
     return {

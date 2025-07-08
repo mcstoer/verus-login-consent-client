@@ -6,8 +6,8 @@ import { origin } from './reducers/origin/origin.reducer';
 import { error } from './reducers/error/error.reducer';
 import { provision } from './reducers/provision/provision.reducer';
 import { credentials } from './reducers/credentials/credentials.reducer';
-import signatureInfo from './reducers/signatureInfo/signatureInfo.reducer';
-import chainMetadata from './reducers/chainMetadata/chainMetadata.reducer';
+import { signatureInfo } from './reducers/signatureInfo/signatureInfo.reducer';
+import { chainMetadata } from './reducers/chainMetadata/chainMetadata.reducer';
 import { deeplink } from './reducers/deeplink/deeplink.reducer';
 
 const rootReducer = combineReducers({

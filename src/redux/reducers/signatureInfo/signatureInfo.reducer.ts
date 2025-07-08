@@ -1,16 +1,16 @@
 /*
   This reducer contains the signature information of the deeplink data.
 */
-import { SET_SIGNATURE_INFO } from './signatureInfo.types';
+import { SET_SIGNATURE_INFO, SignatureInfoState, SignatureInfoAction } from './signatureInfo.types';
 
-const initialState = {
-  signedBy: null,
-  sigBlockInfo: null,
-  signingRevocationIdentity: null,
-  signingRecoveryIdentity: null
+const initialState: SignatureInfoState = {
+  signedBy: undefined,
+  sigBlockInfo: undefined,
+  signingRevocationIdentity: undefined,
+  signingRecoveryIdentity: undefined
 };
 
-const signatureInfo = (state = initialState, action) => {
+export const signatureInfo = (state = initialState, action: SignatureInfoAction): SignatureInfoState => {
   switch (action.type) {
   case SET_SIGNATURE_INFO:
     return {
@@ -21,5 +21,3 @@ const signatureInfo = (state = initialState, action) => {
     return state;
   }
 };
-
-export default signatureInfo;

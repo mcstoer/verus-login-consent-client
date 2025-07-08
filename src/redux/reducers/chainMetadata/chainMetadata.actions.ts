@@ -1,14 +1,22 @@
 /*
   This reducer contains information about what chains are being used.
 */
-import { SET_CHAIN_METADATA, SET_MAIN_CHAIN } from './chainMetadata.types';
+import { 
+  SET_CHAIN_METADATA, 
+  SET_MAIN_CHAIN,
+  SetChainMetadataAction,
+  SetMainChainAction
+} from './chainMetadata.types';
 
-export const setChainMetadata = (chainMetadata) => ({
+export const setChainMetadata = (chainMetadata: {
+  chainId?: string;
+  chainName?: string;
+}): SetChainMetadataAction => ({
   type: SET_CHAIN_METADATA,
   payload: chainMetadata
 });
 
-export const setMainChain = (mainChain) => ({
+export const setMainChain = (mainChain: string): SetMainChainAction => ({
   type: SET_MAIN_CHAIN,
   payload: mainChain
 });
