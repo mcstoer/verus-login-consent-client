@@ -7,7 +7,78 @@ import store from "../redux/store";
 import { IPC_LOGIN_CONSENT_REQUEST_METHOD, IPC_INIT_MESSAGE, IPC_ORIGIN_DEV, IPC_ORIGIN_PRODUCTION, IPC_PUSH_MESSAGE, IPC_ORIGIN_DEV_LOCALHOST } from "../utils/constants";
 import { setOriginAppId, setOriginAppBuiltin } from "../redux/reducers/origin/origin.actions";
 import { setError } from "../redux/reducers/error/error.actions";
-import { LoginConsentRequest } from "verus-typescript-primitives";
+import { 
+  LoginConsentRequest,
+  LOGIN_CONSENT_REQUEST_VDXF_KEY,
+  VERUSPAY_INVOICE_VDXF_KEY,
+  IDENTITY_UPDATE_REQUEST_VDXF_KEY,
+  VerusPayInvoice,
+  IdentityUpdateRequest
+} from "verus-typescript-primitives";
+
+const parseDeeplinkByType = (deeplinkRawData, deeplinkId) => {
+  switch (deeplinkId) {
+  case LOGIN_CONSENT_REQUEST_VDXF_KEY.vdxfid:
+    return new LoginConsentRequest(deeplinkRawData);
+      
+  case VERUSPAY_INVOICE_VDXF_KEY.vdxfid:
+    return new VerusPayInvoice(deeplinkRawData);
+      
+  case IDENTITY_UPDATE_REQUEST_VDXF_KEY.vdxfid:
+    return new IdentityUpdateRequest(deeplinkRawData);
+      
+  default:
+    console.warn(`Unsupported deeplink ID: ${deeplinkId}`);
+    return new LoginConsentRequest(deeplinkRawData);
+  }
+};
+
+const updateReduxStore = (data) => {
+  // Add the name of daemon guaranteed to be running on desktop so 
+  // it can be used to look up other chains.
+  store.dispatch(
+    setMainChain(data.data.origin_app_info.main_chain_ticker)
+  );
+
+  const deeplinkData = parseDeeplinkByType(
+    data.data.deeplink.data, 
+    data.data.deeplink.id
+  );
+
+  store.dispatch(
+    setDeeplinkData(
+      data.data.deeplink.id,
+      deeplinkData
+    )
+  );
+  
+  store.dispatch(setOriginAppBuiltin(data.data.origin_app_info.search_builtin));
+  store.dispatch(setOriginAppId(data.data.origin_app_info.id));
+};
+
+const setupRpcConfig = (data = null) => {
+  try {
+    if (MOCK_IPC) {
+      store.dispatch(setRpcExpiryMargin(60000));
+      store.dispatch(setRpcPort(RPC_PORT));
+      store.dispatch(setRpcPostEncryption(true));
+      store.dispatch(setRpcWindowId(1));
+      store.dispatch(setRpcPassword(RPC_PASSWORD));
+    } else {
+      if (data) {
+        store.dispatch(setRpcExpiryMargin(data.data.expiry_margin));
+        store.dispatch(setRpcPort(data.data.rpc_port));
+        store.dispatch(setRpcPostEncryption(data.data.post_encryption));
+        store.dispatch(setRpcWindowId(data.data.window_id));
+      }
+      store.dispatch(setRpcPassword(window.bridge.getSecretSync().BuiltinSecret));
+    }
+  } catch (e) {
+    console.error("Error loading api secrets!");
+    console.error(e);
+    throw e;
+  }
+};
 
 export const handleIpc = async (event) => {
   try {
@@ -21,54 +92,13 @@ export const handleIpc = async (event) => {
       const data = JSON.parse(event.data);
 
       if (data.type === IPC_INIT_MESSAGE) {
-        store.dispatch(setRpcExpiryMargin(data.data.expiry_margin));
-        store.dispatch(setRpcPort(data.data.rpc_port));
-        store.dispatch(setRpcPostEncryption(data.data.post_encryption));
-        store.dispatch(setRpcWindowId(data.data.window_id));
-
-        try {
-          if (MOCK_IPC) store.dispatch(setRpcPassword(RPC_PASSWORD));
-          else store.dispatch(setRpcPassword(window.bridge.getSecretSync().BuiltinSecret));
-        } catch (e) {
-          console.error("Error loading api secrets!");
-          console.error(e);
-          throw e;
-        }
+        setupRpcConfig(data);
       } else if (
         data.type === IPC_PUSH_MESSAGE &&
         data.method === IPC_LOGIN_CONSENT_REQUEST_METHOD
       ) {
-        try {
-          if (MOCK_IPC) {
-            store.dispatch(setRpcExpiryMargin(60000));
-            store.dispatch(setRpcPort(RPC_PORT));
-            store.dispatch(setRpcPostEncryption(true));
-            store.dispatch(setRpcWindowId(1));
-            store.dispatch(setRpcPassword(RPC_PASSWORD));
-          }
-          else store.dispatch(setRpcPassword(window.bridge.getSecretSync().BuiltinSecret));
-        } catch (e) {
-          console.error("Error loading api secrets!");
-          console.error(e);
-          throw e;
-        }
-
-        // Add the name of daemon guaranteed to be is running on desktop so 
-        // it can be used to look up other chains.
-        store.dispatch(
-          setMainChain(data.data.origin_app_info.main_chain_ticker)
-        );
-
-        const loginConsentRequest = new LoginConsentRequest(data.data.deeplink.data);
-
-        store.dispatch(
-          setDeeplinkData(
-            data.data.deeplink.id,
-            loginConsentRequest
-          )
-        );
-        store.dispatch(setOriginAppBuiltin(data.data.origin_app_info.search_builtin));
-        store.dispatch(setOriginAppId(data.data.origin_app_info.id));
+        setupRpcConfig();
+        updateReduxStore(data);
       }
     } else if (typeof event.data === "string") {
       console.log(`[IPC] recieved event message from unapproved origin (${event.origin}), blocked`);
