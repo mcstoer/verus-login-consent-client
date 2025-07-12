@@ -3,32 +3,31 @@ import { useDispatch } from 'react-redux';
 import Button from '@mui/material/Button';
 import PageLayout from '../../common/PageLayout';
 import { setNavigationPath } from '../../../redux/reducers/navigation/navigation.actions';
-import { IDENTITY_UPDATE_CORE } from '../../../utils/constants';
+import { IDENTITY_UPDATE_CORE, IDENTITY_UPDATE_RESULT } from '../../../utils/constants';
 
-interface IdentityUpdateConfirmProps {
+interface IdentityUpdateContentMultiMapProps {
   completeLoginConsent: () => Promise<void>;
 }
 
-const IdentityUpdateConfirm: React.FC<IdentityUpdateConfirmProps> = (props) => {
-  const { completeLoginConsent } = props;
+const IdentityUpdateContentMultiMap: React.FC<IdentityUpdateContentMultiMapProps> = (props) => {
   const dispatch = useDispatch();
   const [loading, setLoading] = useState<boolean>(false);
 
-  const handleNext = async (): Promise<void> => {
+  const handleFinish = async (): Promise<void> => {
     setLoading(true);
-    dispatch(setNavigationPath(IDENTITY_UPDATE_CORE));
+    dispatch(setNavigationPath(IDENTITY_UPDATE_RESULT));
   };
 
   const cancel = async (): Promise<void> => {
     setLoading(true);
-    await completeLoginConsent();
+    dispatch(setNavigationPath(IDENTITY_UPDATE_CORE));
   };
 
   return (
     <PageLayout
-      title="Review the Identity Update Request"
+      title="Identity Update ContentMultiMap"
       footerContent={
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '16px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
           <Button
             variant="text"
             disabled={loading}
@@ -39,19 +38,19 @@ const IdentityUpdateConfirm: React.FC<IdentityUpdateConfirmProps> = (props) => {
               padding: 8,
             }}
           >
-            {"Cancel"}
+            {"Back"}
           </Button>
           <Button
             variant="contained"
             disabled={loading}
             color="primary"
-            onClick={() => handleNext()}
+            onClick={() => handleFinish()}
             style={{
               width: 120,
               padding: 8,
             }}
           >
-            {"Next"}
+            {"Finish"}
           </Button>
         </div>
       }
@@ -59,4 +58,4 @@ const IdentityUpdateConfirm: React.FC<IdentityUpdateConfirmProps> = (props) => {
   );
 };
 
-export default IdentityUpdateConfirm;
+export default IdentityUpdateContentMultiMap;

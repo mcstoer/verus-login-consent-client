@@ -3,32 +3,32 @@ import { useDispatch } from 'react-redux';
 import Button from '@mui/material/Button';
 import PageLayout from '../../common/PageLayout';
 import { setNavigationPath } from '../../../redux/reducers/navigation/navigation.actions';
-import { IDENTITY_UPDATE_CORE } from '../../../utils/constants';
+import { IDENTITY_UPDATE_CONFIRM, IDENTITY_UPDATE_CONTENTMULTIMAP } from '../../../utils/constants';
 
-interface IdentityUpdateConfirmProps {
+interface IdentityUpdateCoreProps {
   completeLoginConsent: () => Promise<void>;
 }
 
-const IdentityUpdateConfirm: React.FC<IdentityUpdateConfirmProps> = (props) => {
-  const { completeLoginConsent } = props;
+const IdentityUpdateCore: React.FC<IdentityUpdateCoreProps> = (props) => {
   const dispatch = useDispatch();
   const [loading, setLoading] = useState<boolean>(false);
 
+
   const handleNext = async (): Promise<void> => {
     setLoading(true);
-    dispatch(setNavigationPath(IDENTITY_UPDATE_CORE));
+    dispatch(setNavigationPath(IDENTITY_UPDATE_CONTENTMULTIMAP));
   };
 
   const cancel = async (): Promise<void> => {
     setLoading(true);
-    await completeLoginConsent();
+    dispatch(setNavigationPath(IDENTITY_UPDATE_CONFIRM));
   };
 
   return (
     <PageLayout
-      title="Review the Identity Update Request"
+      title="Identity Update Core"
       footerContent={
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '16px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
           <Button
             variant="text"
             disabled={loading}
@@ -39,7 +39,7 @@ const IdentityUpdateConfirm: React.FC<IdentityUpdateConfirmProps> = (props) => {
               padding: 8,
             }}
           >
-            {"Cancel"}
+            {"Back"}
           </Button>
           <Button
             variant="contained"
@@ -59,4 +59,4 @@ const IdentityUpdateConfirm: React.FC<IdentityUpdateConfirmProps> = (props) => {
   );
 };
 
-export default IdentityUpdateConfirm;
+export default IdentityUpdateCore;

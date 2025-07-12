@@ -10,6 +10,9 @@ import {
   PROVISIONING_RESULT,
   CREDENTIALS_REVIEW,
   IDENTITY_UPDATE_CONFIRM,
+  IDENTITY_UPDATE_CORE,
+  IDENTITY_UPDATE_CONTENTMULTIMAP,
+  IDENTITY_UPDATE_RESULT,
 } from '../../utils/constants';
 import ExternalAction from './ExternalAction/ExternalAction';
 import Loading from '../Loading';
@@ -23,6 +26,9 @@ import ProvisionIdentityConfirm from './ProvisionIdentity/ProvisionIdentityConfi
 import ProvisionIdentityResult from './ProvisionIdentity/ProvisionIdentityResult/ProvisionIdentityResult';
 import CredentialsReview from './CredentialsReview/CredentialsReview';
 import IdentityUpdateConfirm from './IdentityUpdate/Confirm';
+import IdentityUpdateCore from './IdentityUpdate/Core';
+import IdentityUpdateContentMultiMap from './IdentityUpdate/ContentMultiMap';
+import IdentityUpdateResult from './IdentityUpdate/Result';
 
 export const LoginConsentRender = function() {
   const COMPONENT_PROPS = {
@@ -58,6 +64,21 @@ export const LoginConsentRender = function() {
     ),
     [IDENTITY_UPDATE_CONFIRM]: (
       <IdentityUpdateConfirm
+        {...COMPONENT_PROPS}
+      />
+    ),
+    [IDENTITY_UPDATE_CORE]: (
+      <IdentityUpdateCore
+        {...COMPONENT_PROPS}
+      />
+    ),
+    [IDENTITY_UPDATE_CONTENTMULTIMAP]: (
+      <IdentityUpdateContentMultiMap
+        {...COMPONENT_PROPS}
+      />
+    ),
+    [IDENTITY_UPDATE_RESULT]: (
+      <IdentityUpdateResult
         {...COMPONENT_PROPS}
       />
     ),
