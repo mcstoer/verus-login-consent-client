@@ -2,19 +2,22 @@ import React, { useState } from 'react';
 import Button from '@mui/material/Button';
 import PageLayout from '../../common/PageLayout';
 
-const IdentityUpdateVerify = (props) => {
-  // eslint-disable-next-line react/prop-types
-  const { completeLoginConsent } = props;
-  const [loading, setLoading] = useState(false);
+interface IdentityUpdateConfirmProps {
+  completeLoginConsent: () => Promise<void>;
+}
 
-  const cancel = async () => {
+const IdentityUpdateConfirm: React.FC<IdentityUpdateConfirmProps> = (props) => {
+  const { completeLoginConsent } = props;
+  const [loading, setLoading] = useState<boolean>(false);
+
+  const cancel = async (): Promise<void> => {
     setLoading(true);
     await completeLoginConsent();
   };
 
   return (
     <PageLayout
-      title="Verify Identity Update Request"
+      title="Review the Identity Update Request"
       footerContent={
         <Button
           variant="text"
@@ -33,4 +36,4 @@ const IdentityUpdateVerify = (props) => {
   );
 };
 
-export default IdentityUpdateVerify;
+export default IdentityUpdateConfirm;

@@ -1,4 +1,5 @@
 import React from 'react';
+import { Box, Container, SxProps, Theme } from '@mui/material';
 import { VerusIdLogo } from "../../images";
 
 interface PageLayoutProps {
@@ -8,8 +9,8 @@ interface PageLayoutProps {
   logoWidth?: string;
   logoHeight?: string;
   footerContent?: React.ReactNode;
-  contentStyle?: React.CSSProperties;
-  containerStyle?: React.CSSProperties;
+  contentStyle?: SxProps<Theme>;
+  containerStyle?: SxProps<Theme>;
 }
 
 const PageLayout: React.FC<PageLayoutProps> = ({ 
@@ -23,8 +24,8 @@ const PageLayout: React.FC<PageLayoutProps> = ({
   containerStyle = {}
 }) => {
   return (
-    <div
-      style={{
+    <Box
+      sx={{
         display: "flex",
         flexDirection: "column",
         flex: 1,
@@ -32,50 +33,56 @@ const PageLayout: React.FC<PageLayoutProps> = ({
         ...containerStyle
       }}
     >
-      <div
-        style={{
+      <Container
+        maxWidth={false}
+        sx={{
           height: "100%",
           display: "flex",
-          padding: 32,
+          padding: 4,
           flexDirection: "column",
           alignItems: "center",
+          flex: 1
         }}
       >
         {showLogo && (
-          <img 
-            src={VerusIdLogo} 
-            width={logoWidth} 
-            height={logoHeight}
+          <Box
+            component="img"
+            src={VerusIdLogo}
             alt="Verus ID Logo"
+            sx={{
+              width: logoWidth,
+              height: logoHeight,
+              objectFit: 'contain'
+            }}
           />
         )}
         
         {title && (
-          <div
-            style={{
+          <Box
+            sx={{
               width: "100%",
               display: "flex",
               justifyContent: "flex-start",
             }}
           >
-            <div
-              style={{
+            <Box
+              sx={{
                 width: "100%",
                 display: "flex",
                 justifyContent: "center",
                 alignItems: "center",
                 flexDirection: "row",
-                padding: 8,
+                padding: 1,
               }}
             >
               {title}
-            </div>
-          </div>
+            </Box>
+          </Box>
         )}
 
         {/* Main content area */}
-        <div
-          style={{
+        <Box
+          sx={{
             width: "100%",
             display: "flex",
             flexDirection: "column",
@@ -84,12 +91,12 @@ const PageLayout: React.FC<PageLayoutProps> = ({
           }}
         >
           {children}
-        </div>
+        </Box>
 
         {/* Footer area */}
         {footerContent && (
-          <div
-            style={{
+          <Box
+            sx={{
               width: "100%",
               display: "flex",
               flexDirection: "row",
@@ -98,8 +105,8 @@ const PageLayout: React.FC<PageLayoutProps> = ({
               marginTop: "auto",
             }}
           >
-            <div
-              style={{
+            <Box
+              sx={{
                 display: "flex",
                 flexDirection: "row",
                 alignItems: "center",
@@ -107,11 +114,11 @@ const PageLayout: React.FC<PageLayoutProps> = ({
               }}
             >
               {footerContent}
-            </div>
-          </div>
+            </Box>
+          </Box>
         )}
-      </div>
-    </div>
+      </Container>
+    </Box>
   );
 };
 

@@ -17,7 +17,7 @@ import {
   EXTERNAL_CHAIN_START,
   CONSENT_TO_SCOPE,
   VERUS_LOGIN_CONSENT_UI,
-  IDENTITY_UPDATE_VERIFY,
+  IDENTITY_UPDATE_CONFIRM,
 } from "../../utils/constants";
 import { 
   LoginConsentRender
@@ -114,7 +114,7 @@ class LoginConsent extends React.Component {
         break;
         
       case IDENTITY_UPDATE_REQUEST_VDXF_KEY.vdxfid:
-        this.props.dispatch(setNavigationPath(IDENTITY_UPDATE_VERIFY));
+        this.props.dispatch(setNavigationPath(IDENTITY_UPDATE_CONFIRM));
         break;
         
       default:
