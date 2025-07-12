@@ -9,6 +9,7 @@ import {
   PROVISIONING_CONFIRM,
   PROVISIONING_RESULT,
   CREDENTIALS_REVIEW,
+  IDENTITY_UPDATE_VERIFY,
 } from '../../utils/constants';
 import ExternalAction from './ExternalAction/ExternalAction';
 import Loading from '../Loading';
@@ -21,6 +22,7 @@ import ProvisionIdentityForm from './ProvisionIdentity/ProvisionIdentityForm/Pro
 import ProvisionIdentityConfirm from './ProvisionIdentity/ProvisionIdentityConfirm/ProvisionIdentityConfirm';
 import ProvisionIdentityResult from './ProvisionIdentity/ProvisionIdentityResult/ProvisionIdentityResult';
 import CredentialsReview from './CredentialsReview/CredentialsReview';
+import IdentityUpdateVerify from './IdentityUpdateVerify/IdentityUpdateVerify';
 
 export const LoginConsentRender = function() {
   const COMPONENT_PROPS = {
@@ -51,6 +53,11 @@ export const LoginConsentRender = function() {
     ),
     [CONSENT_TO_SCOPE]: (
       <Consent 
+        {...COMPONENT_PROPS}
+      />
+    ),
+    [IDENTITY_UPDATE_VERIFY]: (
+      <IdentityUpdateVerify
         {...COMPONENT_PROPS}
       />
     ),

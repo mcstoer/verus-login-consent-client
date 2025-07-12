@@ -1,11 +1,15 @@
-import { API_VERIFY_LOGIN_REQUEST, NATIVE, POST } from "../../utils/constants";
+import { IdentityUpdateRequest } from "verus-typescript-primitives";
+import { API_VERIFY_IDENTITY_UPDATE_REQUEST, NATIVE, POST } from "../../utils/constants";
 import { getApiData } from "../callCreator";
 
-export const verifyLoginRequest = async (chainId, request) => {
+export const verifyIdentityUpdateRequest = async (
+  chainId: string,
+  request: IdentityUpdateRequest
+) => {
   try {
     const res = await getApiData(
       NATIVE,
-      API_VERIFY_LOGIN_REQUEST,
+      API_VERIFY_IDENTITY_UPDATE_REQUEST,
       {
         chainTicker: chainId,
         request: request,

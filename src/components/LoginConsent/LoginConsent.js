@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { LoginConsentRequest } from 'verus-typescript-primitives';
+import { LoginConsentRequest, IdentityUpdateRequest, LOGIN_CONSENT_REQUEST_VDXF_KEY, IDENTITY_UPDATE_REQUEST_VDXF_KEY } from 'verus-typescript-primitives';
 import { setError } from '../../redux/reducers/error/error.actions';
 import { checkAndUpdateAll, checkAndUpdateChainInfo } from '../../redux/reducers/identity/identity.actions';
 import { setExternalAction, setNavigationPath } from '../../redux/reducers/navigation/navigation.actions';
@@ -10,16 +10,14 @@ import { setChainMetadata } from '../../redux/reducers/chainMetadata/chainMetada
 import { setSignatureInfo } from '../../redux/reducers/signatureInfo/signatureInfo.actions';
 import { closePlugin } from '../../rpc/calls/closePlugin';
 import { getPlugin } from '../../rpc/calls/getPlugin';
-import { verifyRequest } from '../../rpc/calls/verifyRequest';
 import {
   API_GET_CHAIN_INFO,
   API_GET_IDENTITIES,
   EXTERNAL_ACTION,
   EXTERNAL_CHAIN_START,
   CONSENT_TO_SCOPE,
-  SUPPORTED_SCOPES,
   VERUS_LOGIN_CONSENT_UI,
-  SUPPORTED_CREDENTIALS,
+  IDENTITY_UPDATE_VERIFY,
 } from "../../utils/constants";
 import { 
   LoginConsentRender
@@ -28,6 +26,8 @@ import { getIdentity } from '../../rpc/calls/getIdentity';
 import { getSignatureInfo } from '../../rpc/calls/getSignatureInfo';
 import { getBlock } from '../../rpc/calls/getBlock';
 import { getCurrency } from '../../rpc/calls/getCurrency';
+import { checkLoginConsentRequest } from '../../utils/loginConsentRequest';
+import { checkIdentityUpdateRequest } from '../../utils/identityUpdateRequest';
 
 class LoginConsent extends React.Component {
   constructor(props) {
@@ -73,7 +73,6 @@ class LoginConsent extends React.Component {
 
   async handleRequest() {
     const request = this.props.deeplinkData;
-
     const mainChain = this.props.mainChain;
 
     // Check if the main daemon is running.
@@ -107,9 +106,20 @@ class LoginConsent extends React.Component {
     actions.map((action) => this.props.dispatch(action));
 
     if (this.canLoginOrGiveConsent()) {
-      await this.checkRequest(request);
-
-      this.props.dispatch(setNavigationPath(CONSENT_TO_SCOPE));
+      await this.checkRequest(this.props.deeplinkId, request);
+      
+      switch (this.props.deeplinkId) {
+      case LOGIN_CONSENT_REQUEST_VDXF_KEY.vdxfid:
+        this.props.dispatch(setNavigationPath(CONSENT_TO_SCOPE));
+        break;
+        
+      case IDENTITY_UPDATE_REQUEST_VDXF_KEY.vdxfid:
+        this.props.dispatch(setNavigationPath(IDENTITY_UPDATE_VERIFY));
+        break;
+        
+      default:
+        throw new Error(`Unsupported deeplink type for navigation: ${this.props.deeplinkId}`);
+      }
     } else {
       this.props.dispatch(setExternalAction(EXTERNAL_CHAIN_START));
       this.props.dispatch(setNavigationPath(EXTERNAL_ACTION));
@@ -118,47 +128,39 @@ class LoginConsent extends React.Component {
 
   // Checks request for signature authenticity, and other things that would immediately disqualify
   // it. If any problems are found, an error is thrown.
-  async checkRequest(req) {
+  async checkRequest(deeplinkId, req) {
     try {
-      // Typescript sanity check
-      const request = new LoginConsentRequest(req);
       const chainId = this.props.chainId;
+      let request;
+      let signingId;
+      let signatureString;
 
-      if (request.challenge.context != null) {
-        if (Object.keys(request.challenge.context.kv).length !== 0) {
-          throw new Error("Login requests with context are currently unsupported.");
-        }
-      }
-      
-      // Check request signature
-      const verificatonCheck = await verifyRequest(chainId, req);
-      if (!verificatonCheck.verified) {
-        throw new Error(verificatonCheck.message);
-      }
+      // Switch on the deeplink type to determine how to handle the request
+      switch (deeplinkId) {
+      case LOGIN_CONSENT_REQUEST_VDXF_KEY.vdxfid:
+        request = new LoginConsentRequest(req);
+        await checkLoginConsentRequest(chainId, request);
+        signingId = request.signing_id;
+        signatureString = request.signature.signature;
+        break;
 
-      for (const requestedPermission of request.challenge.requested_access) {
-        if (
-          !SUPPORTED_SCOPES.includes(requestedPermission.vdxfkey) && 
-          !SUPPORTED_CREDENTIALS.includes(requestedPermission.vdxfkey)
-        ) {
-          throw new Error(
-            'Unrecognized requested permission ' +
-              requestedPermission.vdxfkey,
-          );
-        }
-      }
+      case IDENTITY_UPDATE_REQUEST_VDXF_KEY.vdxfid:
+        request = new IdentityUpdateRequest(req);
+        await checkIdentityUpdateRequest(chainId, request);
+        signingId = request.signingid;
+        // The nesting of the signature does not match the expected structure
+        // for an unknown reason.
+        signatureString = request.signature.signature.signature;
+        break;
 
-      if (request.challenge.requested_access.length == 0) {
-        throw new Error(
-          'No permissions being requested in loginconsent request.',
-        );
+      default:
+        throw new Error(`Unsupported deeplink type: ${deeplinkId}`);
       }
 
-      // Get the signing identity for displaying later.
-      const signedBy = await getIdentity(chainId, request.signing_id);
+      const signedBy = await getIdentity(chainId, signingId);
 
       // Get information on the signature for displaying later.
-      const sigInfo = await getSignatureInfo(chainId, request.system_id, request.signature.signature, signedBy.identity.identityaddress);
+      const sigInfo = await getSignatureInfo(chainId, signingId, signatureString, signedBy.identity.identityaddress);
       const sigBlockInfo = await getBlock(chainId, sigInfo.height.toString());
 
       // Get the identities of the revocation and recovery i-addresses to display for anti-phishing.
@@ -226,6 +228,7 @@ LoginConsent.propTypes = {
   rpcPassword: PropTypes.string,
   windowId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   deeplinkData: PropTypes.object,
+  deeplinkId: PropTypes.string,
   chainInfo: PropTypes.object,
   apiErrors: PropTypes.object,
   chainId: PropTypes.string,
@@ -246,6 +249,7 @@ const mapStateToProps = (state) => {
     rpcPassword: state.rpc.password,
     windowId: state.rpc.windowId,
     deeplinkData: state.deeplink.data,
+    deeplinkId: state.deeplink.id,
     chainInfo: state.identity.chainInfo,
     apiErrors: state.error.apiErrors,
     chainId: state.chainMetadata.chainId,
