@@ -5,6 +5,10 @@ import Card from '@mui/material/Card';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
+import ListItemButton from '@mui/material/ListItemButton';
+import Collapse from '@mui/material/Collapse';
+import ExpandLess from '@mui/icons-material/ExpandLess';
+import ExpandMore from '@mui/icons-material/ExpandMore';
 import PageLayout from '../../common/PageLayout';
 import { setNavigationPath } from '../../../redux/reducers/navigation/navigation.actions';
 import { IDENTITY_UPDATE_CORE } from '../../../utils/constants';
@@ -21,6 +25,7 @@ const IdentityUpdateConfirm: React.FC<IdentityUpdateConfirmProps> = (props) => {
   const { completeLoginConsent } = props;
   const dispatch = useDispatch();
   const [loading, setLoading] = useState<boolean>(false);
+  const [openIdentity, setOpenIdentity] = useState<boolean>(false);
 
   // The root state is not implemented in TypeScript yet, so we need `any`.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -30,12 +35,37 @@ const IdentityUpdateConfirm: React.FC<IdentityUpdateConfirmProps> = (props) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const signatureInfo: SignatureInfoState = useSelector((state: any) => state.signatureInfo);
 
-  const { sigBlockInfo, signedBy } = signatureInfo || {};
+  const { sigBlockInfo, signedBy, signingRevocationIdentity, signingRecoveryIdentity } = signatureInfo || {};
   const { time } = sigBlockInfo || {};
   
   // Convert the fully qualified name into a nicer format for VRSC
   const signerFqn = signedBy?.fullyqualifiedname ? convertFqnToDisplayFormat(signedBy.fullyqualifiedname) : '';
   const systemDescriptor = `${chainName} (${deeplinkData.systemid})`;
+
+  // Helper function to create descriptors
+  const createIdentityDescriptor = (identity: { friendlyname?: string; identity?: { name?: string; identityaddress?: string }; identityaddress?: string } | null, fqn?: string) => {
+    if (!identity) return '-';
+    const name = fqn || identity.friendlyname || identity.identity?.name || 'Unknown';
+    return `${name} (${identity.identity?.identityaddress || identity.identityaddress || 'Unknown'})`;
+  };
+
+  const handleIdentityClick = () => {
+    setOpenIdentity(!openIdentity);
+  };
+
+  // Helper component for identity detail items
+  const IdentityDetailItem: React.FC<{ field: string; value: string }> = ({ field, value }) => (
+    <ListItem divider sx={{ pl: 6, pr: 2, py: 1 }}>
+      <ListItemText
+        primary={value}
+        secondary={field}
+        slotProps={{ 
+          primary: { variant: 'body2' },
+          secondary: { color: 'text.secondary', variant: 'caption' } 
+        }}
+      />
+    </ListItem>
+  );
 
   const handleNext = async (): Promise<void> => {
     setLoading(true);
@@ -96,30 +126,88 @@ const IdentityUpdateConfirm: React.FC<IdentityUpdateConfirmProps> = (props) => {
         }}
       >
         <List>
-          <ListItem divider>
+          <ListItemButton 
+            divider 
+            onClick={handleIdentityClick}
+            sx={{ 
+              py: 2,
+              '&:hover': {
+                backgroundColor: 'action.hover'
+              }
+            }}
+          >
             <ListItemText
               primary={signerFqn && signedBy?.identity?.identityaddress 
                 ? `${signerFqn} (${signedBy.identity.identityaddress})`
-                : 'Loading...'
+                : '-'
               }
               secondary="Requested by"
-              slotProps={{ secondary: { color: 'text.secondary' } }}
+              slotProps={{
+                primary: { variant: 'subtitle1' },
+                secondary: { color: 'text.secondary', variant: 'body2' } 
+              }}
             />
-          </ListItem>
+            {openIdentity ? <ExpandLess color="action" /> : <ExpandMore color="action" />}
+          </ListItemButton>
+          
+          <Collapse in={openIdentity} timeout="auto" unmountOnExit>
+            <List 
+              component="div"
+              dense
+              disablePadding
+            >
+              <IdentityDetailItem
+                field="Name"
+                value={(signedBy?.identity?.name as string) || '-'}
+              />
+              <IdentityDetailItem
+                field="Identity Address"
+                value={signedBy?.identity?.identityaddress || '-'}
+              />
+              <IdentityDetailItem
+                field="Status"
+                value={(signedBy?.status as string) || '-'}
+              />
+              <IdentityDetailItem
+                field="Revocation Authority"
+                value={createIdentityDescriptor(signingRevocationIdentity)}
+              />
+              <IdentityDetailItem
+                field="Recovery Authority"
+                value={createIdentityDescriptor(signingRecoveryIdentity)}
+              />
+              <IdentityDetailItem
+                field="System"
+                value={systemDescriptor}
+              />
+              {signedBy?.identity?.primaryaddresses?.[0] && (
+                <IdentityDetailItem
+                  field="Primary Address #1"
+                  value={signedBy.identity.primaryaddresses[0] as string}
+                />
+              )}
+            </List>
+          </Collapse>
 
           <ListItem divider>
             <ListItemText
-              primary={systemDescriptor || 'Loading...'}
+              primary={systemDescriptor || '-'}
               secondary="System name"
-              slotProps={{ secondary: { color: 'text.secondary' } }}
+              slotProps={{ 
+                primary: { variant: 'subtitle1' },
+                secondary: { color: 'text.secondary', variant: 'body2' } 
+              }}
             />
           </ListItem>
 
           <ListItem>
             <ListItemText
-              primary={time ? unixToDate(time) : 'Loading...'}
+              primary={time ? unixToDate(time) : '-'}
               secondary="Signed on"
-              slotProps={{ secondary: { color: 'text.secondary' } }}
+              slotProps={{ 
+                primary: { variant: 'subtitle1' },
+                secondary: { color: 'text.secondary', variant: 'body2' } 
+              }}
             />
           </ListItem>
         </List>
