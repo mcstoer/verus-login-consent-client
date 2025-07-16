@@ -55,13 +55,13 @@ const IdentityUpdateConfirm: React.FC<IdentityUpdateConfirmProps> = (props) => {
 
   // Helper component for identity detail items
   const IdentityDetailItem: React.FC<{ field: string; value: string }> = ({ field, value }) => (
-    <ListItem divider sx={{ pl: 6, pr: 2, py: 1 }}>
+    <ListItem divider sx={{ pl: 6, pr: 2, py: 0.5, minHeight: 48 }}>
       <ListItemText
         primary={value}
         secondary={field}
         slotProps={{ 
-          primary: { variant: 'body2' },
-          secondary: { color: 'text.secondary', variant: 'caption' } 
+          primary: { variant: 'body2', sx: { lineHeight: 1.3 } },
+          secondary: { color: 'text.secondary', variant: 'caption', sx: { lineHeight: 1.2 } } 
         }}
       />
     </ListItem>
