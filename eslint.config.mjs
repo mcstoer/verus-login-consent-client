@@ -14,6 +14,7 @@ export default [
     rules: {
       "indent": ["warn", 2],
       "semi": ["warn", "always"],
+      "@stylistic/js/no-trailing-spaces": "error",
     },
   },
   {

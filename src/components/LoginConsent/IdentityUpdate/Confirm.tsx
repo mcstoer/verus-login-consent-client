@@ -37,7 +37,7 @@ const IdentityUpdateConfirm: React.FC<IdentityUpdateConfirmProps> = (props) => {
 
   const { sigBlockInfo, signedBy, signingRevocationIdentity, signingRecoveryIdentity } = signatureInfo || {};
   const { time } = sigBlockInfo || {};
-  
+
   // Convert the fully qualified name into a nicer format for VRSC
   const signerFqn = signedBy?.fullyqualifiedname ? convertFqnToDisplayFormat(signedBy.fullyqualifiedname) : '';
   const systemDescriptor = `${chainName} (${deeplinkData.systemid})`;
@@ -59,9 +59,9 @@ const IdentityUpdateConfirm: React.FC<IdentityUpdateConfirmProps> = (props) => {
       <ListItemText
         primary={value}
         secondary={field}
-        slotProps={{ 
+        slotProps={{
           primary: { variant: 'body2', sx: { lineHeight: 1.3 } },
-          secondary: { color: 'text.secondary', variant: 'caption', sx: { lineHeight: 1.2 } } 
+          secondary: { color: 'text.secondary', variant: 'caption', sx: { lineHeight: 1.2 } }
         }}
       />
     </ListItem>
@@ -115,8 +115,8 @@ const IdentityUpdateConfirm: React.FC<IdentityUpdateConfirmProps> = (props) => {
         </div>
       }
     >
-      <Card 
-        square 
+      <Card
+        square
         sx={{
           marginTop: 1,
           marginBottom: 1,
@@ -126,10 +126,10 @@ const IdentityUpdateConfirm: React.FC<IdentityUpdateConfirmProps> = (props) => {
         }}
       >
         <List>
-          <ListItemButton 
-            divider 
+          <ListItemButton
+            divider
             onClick={handleIdentityClick}
-            sx={{ 
+            sx={{
               py: 2,
               '&:hover': {
                 backgroundColor: 'action.hover'
@@ -137,21 +137,21 @@ const IdentityUpdateConfirm: React.FC<IdentityUpdateConfirmProps> = (props) => {
             }}
           >
             <ListItemText
-              primary={signerFqn && signedBy?.identity?.identityaddress 
+              primary={signerFqn && signedBy?.identity?.identityaddress
                 ? `${signerFqn} (${signedBy.identity.identityaddress})`
                 : '-'
               }
               secondary="Requested by"
               slotProps={{
                 primary: { variant: 'subtitle1' },
-                secondary: { color: 'text.secondary', variant: 'body2' } 
+                secondary: { color: 'text.secondary', variant: 'body2' }
               }}
             />
             {openIdentity ? <ExpandLess color="action" /> : <ExpandMore color="action" />}
           </ListItemButton>
-          
+
           <Collapse in={openIdentity} timeout="auto" unmountOnExit>
-            <List 
+            <List
               component="div"
               dense
               disablePadding
@@ -193,9 +193,9 @@ const IdentityUpdateConfirm: React.FC<IdentityUpdateConfirmProps> = (props) => {
             <ListItemText
               primary={systemDescriptor || '-'}
               secondary="System name"
-              slotProps={{ 
+              slotProps={{
                 primary: { variant: 'subtitle1' },
-                secondary: { color: 'text.secondary', variant: 'body2' } 
+                secondary: { color: 'text.secondary', variant: 'body2' }
               }}
             />
           </ListItem>
@@ -204,9 +204,9 @@ const IdentityUpdateConfirm: React.FC<IdentityUpdateConfirmProps> = (props) => {
             <ListItemText
               primary={time ? unixToDate(time) : '-'}
               secondary="Signed on"
-              slotProps={{ 
+              slotProps={{
                 primary: { variant: 'subtitle1' },
-                secondary: { color: 'text.secondary', variant: 'body2' } 
+                secondary: { color: 'text.secondary', variant: 'body2' }
               }}
             />
           </ListItem>

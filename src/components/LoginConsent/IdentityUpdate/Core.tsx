@@ -2,6 +2,9 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import Typography from '@mui/material/Typography';
 import CircularProgress from '@mui/material/CircularProgress';
 import PageLayout from '../../common/PageLayout';
 import { setNavigationPath } from '../../../redux/reducers/navigation/navigation.actions';
@@ -44,7 +47,6 @@ const IdentityUpdateCore: React.FC<IdentityUpdateCoreProps> = () => {
 
   // Fetch identity when component loads
   useEffect(() => {
-    
     const loadIdentity = async () => {
       if (!chainId || !name) return;
       setLoading(true);
@@ -63,7 +65,6 @@ const IdentityUpdateCore: React.FC<IdentityUpdateCoreProps> = () => {
     };
 
     loadIdentity();
-    
   }, [fetchIdentity, chainId, name]);
 
   const handleNext = async (): Promise<void> => {
@@ -87,6 +88,12 @@ const IdentityUpdateCore: React.FC<IdentityUpdateCoreProps> = () => {
   return (
     <PageLayout
       title={`Review identity updates to ${name}`}
+      contentStyle={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: 2
+      }}
       footerContent={
         <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
           <Button
@@ -117,19 +124,26 @@ const IdentityUpdateCore: React.FC<IdentityUpdateCoreProps> = () => {
       }
     >
       {loading ? (
-        <Box sx={{ 
-          display: 'flex', 
-          flex: 1, 
-          alignItems: 'center', 
-          justifyContent: 'center' 
+        <Box sx={{
+          display: 'flex',
+          flex: 1,
+          alignItems: 'center',
+          justifyContent: 'center'
         }}>
           <CircularProgress />
         </Box>
       ) : (
-        // TODO
-        <Box sx={{ flex: 1 }}>
-          <p>TODO: Add content here.</p>
-        </Box>
+        <Card
+          square
+          sx={{
+            marginTop: 1,
+            marginBottom: 1,
+            width: '100%',
+            maxHeight: '60vh',
+            overflowY: 'auto',
+          }}
+        >
+        </Card>
       )}
       <SnackbarAlert
         open={fetchError.showError}
