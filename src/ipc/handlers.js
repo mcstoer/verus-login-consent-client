@@ -7,7 +7,7 @@ import store from "../redux/store";
 import { IPC_LOGIN_CONSENT_REQUEST_METHOD, IPC_INIT_MESSAGE, IPC_ORIGIN_DEV, IPC_ORIGIN_PRODUCTION, IPC_PUSH_MESSAGE, IPC_ORIGIN_DEV_LOCALHOST } from "../utils/constants";
 import { setOriginAppId, setOriginAppBuiltin } from "../redux/reducers/origin/origin.actions";
 import { setError } from "../redux/reducers/error/error.actions";
-import { 
+import {
   LoginConsentRequest,
   LOGIN_CONSENT_REQUEST_VDXF_KEY,
   VERUSPAY_INVOICE_VDXF_KEY,
@@ -17,16 +17,18 @@ import {
 } from "verus-typescript-primitives";
 
 const parseDeeplinkByType = (deeplinkRawData, deeplinkId) => {
+  // Always use fromJson when possible as some of the deeplink data has a
+  // different representation between JSON and the class definition.
   switch (deeplinkId) {
   case LOGIN_CONSENT_REQUEST_VDXF_KEY.vdxfid:
     return new LoginConsentRequest(deeplinkRawData);
-      
+
   case VERUSPAY_INVOICE_VDXF_KEY.vdxfid:
-    return new VerusPayInvoice(deeplinkRawData);
-      
+    return VerusPayInvoice.fromJson(deeplinkRawData);
+
   case IDENTITY_UPDATE_REQUEST_VDXF_KEY.vdxfid:
-    return new IdentityUpdateRequest(deeplinkRawData);
-      
+    return IdentityUpdateRequest.fromJson(deeplinkRawData);
+
   default:
     console.warn(`Unsupported deeplink ID: ${deeplinkId}`);
     return new LoginConsentRequest(deeplinkRawData);
@@ -34,14 +36,14 @@ const parseDeeplinkByType = (deeplinkRawData, deeplinkId) => {
 };
 
 const updateReduxStore = (data) => {
-  // Add the name of daemon guaranteed to be running on desktop so 
+  // Add the name of daemon guaranteed to be running on desktop so
   // it can be used to look up other chains.
   store.dispatch(
     setMainChain(data.data.origin_app_info.main_chain_ticker)
   );
 
   const deeplinkData = parseDeeplinkByType(
-    data.data.deeplink.data, 
+    data.data.deeplink.data,
     data.data.deeplink.id
   );
 
@@ -51,7 +53,7 @@ const updateReduxStore = (data) => {
       deeplinkData
     )
   );
-  
+
   store.dispatch(setOriginAppBuiltin(data.data.origin_app_info.search_builtin));
   store.dispatch(setOriginAppId(data.data.origin_app_info.id));
 };
@@ -85,7 +87,7 @@ export const handleIpc = async (event) => {
     if (
       typeof event.data === "string" &&
       ((!DEVMODE && event.origin === IPC_ORIGIN_PRODUCTION) ||
-        (DEVMODE && event.origin === IPC_ORIGIN_DEV || 
+        (DEVMODE && event.origin === IPC_ORIGIN_DEV ||
         (DEVMODE && event.origin === IPC_ORIGIN_DEV_LOCALHOST)
         ))
     ) {

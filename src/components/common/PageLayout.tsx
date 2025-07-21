@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Container, SxProps, Theme } from '@mui/material';
+import { Box, Container, SxProps, Theme, Typography } from '@mui/material';
 import { VerusIdLogo } from "../../images";
 
 interface PageLayoutProps {
@@ -13,11 +13,11 @@ interface PageLayoutProps {
   containerStyle?: SxProps<Theme>;
 }
 
-const PageLayout: React.FC<PageLayoutProps> = ({ 
-  children, 
-  title, 
-  showLogo = true, 
-  logoWidth = '55%', 
+const PageLayout: React.FC<PageLayoutProps> = ({
+  children,
+  title,
+  showLogo = true,
+  logoWidth = '55%',
   logoHeight = '10%',
   footerContent,
   contentStyle = {},
@@ -56,27 +56,19 @@ const PageLayout: React.FC<PageLayoutProps> = ({
             }}
           />
         )}
-        
+
         {title && (
           <Box
             sx={{
               width: "100%",
               display: "flex",
-              justifyContent: "flex-start",
+              justifyContent: "center",
+              padding: 1,
             }}
           >
-            <Box
-              sx={{
-                width: "100%",
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                flexDirection: "row",
-                padding: 1,
-              }}
-            >
+            <Typography color="text.secondary" gutterBottom>
               {title}
-            </Box>
+            </Typography>
           </Box>
         )}
 

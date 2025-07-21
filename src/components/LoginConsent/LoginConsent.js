@@ -147,7 +147,7 @@ class LoginConsent extends React.Component {
       case IDENTITY_UPDATE_REQUEST_VDXF_KEY.vdxfid:
         request = new IdentityUpdateRequest(req);
         await checkIdentityUpdateRequest(chainId, request);
-        signingId = request.signingid;
+        signingId = request.signingid.toAddress();
         // The nesting of the signature does not match the expected structure
         // for an unknown reason.
         signatureString = request.signature.signature.signature;

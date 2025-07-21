@@ -12,7 +12,7 @@ export const verifyIdentityUpdateRequest = async (
       API_VERIFY_IDENTITY_UPDATE_REQUEST,
       {
         chainTicker: chainId,
-        request: request,
+        request: request.toJson(),
       },
       POST,
       true
