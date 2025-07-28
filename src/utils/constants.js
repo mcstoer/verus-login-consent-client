@@ -1,4 +1,4 @@
-import { IDENTITY_CREDENTIAL_PLAINLOGIN, IDENTITY_VIEW } from "verus-typescript-primitives"
+import { IDENTITY_CREDENTIAL_PLAINLOGIN, IDENTITY_VIEW, IDENTITY_CREDENTIALS, DATA_TYPE_OBJECT_CREDENTIAL } from "verus-typescript-primitives";
 
 // App ID (fixed for reserve plugins)
 export const VERUS_LOGIN_CONSENT_UI = "VERUS_LOGIN_CONSENT_UI"
@@ -32,8 +32,9 @@ export const API_VERIFY_LOGIN_REQUEST = 'verusid/login/verify_request'
 export const API_SIGN_LOGIN_RESPONSE = 'verusid/login/sign_response'
 export const API_VERIFY_ID_PROVISIONING_RESPONSE = 'verusid/provision/verify_id_provisioning_response'
 export const API_SIGN_ID_PROVISIONING_REQUEST = 'verusid/provision/sign_id_provisioning_request'
-export const API_VERIFY_IDENTITY_UPDATE_REQUEST = 'verusid/identity/verify_identity_update_request'
-export const API_GET_CHAIN_INFO = 'get_info'
+export const API_VERIFY_IDENTITY_UPDATE_REQUEST = 'verusid/identity/verify_identity_update_request';
+export const API_EXECUTE_IDENTITY_UPDATE_REQUEST = 'verusid/identity/execute_identity_update_request';
+export const API_GET_CHAIN_INFO = 'get_info';
 export const API_SAVE_USERS = 'users/save'
 export const API_ENCRYPT_KEY = 'encryptkey'
 export const API_DECRYPT_KEY = 'decryptkey'
@@ -137,4 +138,9 @@ export const CREDENTIALS = {
   [IDENTITY_CREDENTIAL_PLAINLOGIN.vdxfid]: {
     description: "Plain Login",
   },
+};
+
+export const VDXF_ID_TO_READABLE = {
+  [IDENTITY_CREDENTIALS.vdxfid]: "Credentials",
+  [DATA_TYPE_OBJECT_CREDENTIAL.vdxfid]: "Credential",
 };

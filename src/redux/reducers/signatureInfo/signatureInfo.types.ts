@@ -2,8 +2,7 @@ export const SET_SIGNATURE_INFO = 'SET_SIGNATURE_INFO' as const;
 
 export type SignatureInfoActionTypes = typeof SET_SIGNATURE_INFO;
 
-// Temporary type definitions based on the what is needed for 
-// the signature information.
+// Temporary type definitions based on the what is needed for the signature information.
 export interface Identity {
   identity: {
     identityaddress: string;

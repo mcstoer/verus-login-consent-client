@@ -81,7 +81,7 @@ const IdentityUpdateConfirm: React.FC<IdentityUpdateConfirmProps> = (props) => {
         gap: 2
       }}
       footerContent={
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '16px' }}>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', width: '100%' }}>
           <Button
             variant="text"
             disabled={loading}
@@ -89,6 +89,7 @@ const IdentityUpdateConfirm: React.FC<IdentityUpdateConfirmProps> = (props) => {
             onClick={() => cancel()}
             style={{
               width: 120,
+              marginRight: 32,
               padding: 8,
             }}
           >

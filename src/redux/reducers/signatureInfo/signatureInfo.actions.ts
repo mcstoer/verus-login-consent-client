@@ -1,4 +1,4 @@
-import { 
+import {
   SET_SIGNATURE_INFO,
   SetSignatureInfoAction,
   Identity,

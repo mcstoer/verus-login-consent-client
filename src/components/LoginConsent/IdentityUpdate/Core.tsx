@@ -254,7 +254,7 @@ const IdentityUpdateCore: React.FC = () => {
         gap: 2
       }}
       footerContent={
-        <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', width: '100%' }}>
           <Button
             variant="text"
             disabled={loading}
@@ -262,6 +262,7 @@ const IdentityUpdateCore: React.FC = () => {
             onClick={() => cancel()}
             style={{
               width: 120,
+              marginRight: 32,
               padding: 8,
             }}
           >
