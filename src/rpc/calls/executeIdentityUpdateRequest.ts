@@ -20,7 +20,7 @@ export const executeIdentityUpdateRequest = async (
       true
     );
     if (res.msg !== "success") throw new Error(res.result);
-    else return res.result;
+    else return res.result.txid as string;
   } catch (e) {
     console.error(e.message);
     throw new Error(e.message);

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Container, SxProps, Theme, Typography } from '@mui/material';
+import { Box, Container, SxProps, Theme, Typography, CircularProgress } from '@mui/material';
 import { VerusIdLogo } from "../../images";
 
 interface PageLayoutProps {
@@ -11,6 +11,7 @@ interface PageLayoutProps {
   footerContent?: React.ReactNode;
   contentStyle?: SxProps<Theme>;
   containerStyle?: SxProps<Theme>;
+  loading?: boolean;
 }
 
 const PageLayout: React.FC<PageLayoutProps> = ({
@@ -21,7 +22,8 @@ const PageLayout: React.FC<PageLayoutProps> = ({
   logoHeight = '10%',
   footerContent,
   contentStyle = {},
-  containerStyle = {}
+  containerStyle = {},
+  loading = false
 }) => {
   return (
     <Box
@@ -78,11 +80,22 @@ const PageLayout: React.FC<PageLayoutProps> = ({
             width: "100%",
             display: "flex",
             flexDirection: "column",
-            flex: 1,
+            height: "56vh",
             ...contentStyle
           }}
         >
-          {children}
+          {loading ? (
+            <Box sx={{
+              display: 'flex',
+              flex: 1,
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <CircularProgress />
+            </Box>
+          ) : (
+            children
+          )}
         </Box>
 
         {/* Footer area */}
@@ -95,6 +108,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({
               alignItems: "flex-end",
               justifyContent: "flex-end",
               marginTop: "auto",
+              paddingTop: 2,
             }}
           >
             <Box

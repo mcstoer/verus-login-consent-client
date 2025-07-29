@@ -9,7 +9,8 @@ import { setNavigationPath } from '../../../redux/reducers/navigation/navigation
 import { IDENTITY_UPDATE_CORE, IDENTITY_UPDATE_RESULT } from '../../../utils/constants';
 import { IdentityUpdateRequest, IdentityUpdateRequestDetails } from 'verus-typescript-primitives';
 import { executeIdentityUpdateRequest } from '../../../rpc/calls/executeIdentityUpdateRequest';
-import { setIdentityUpdateTxid } from '../../../redux/reducers/identityUpdate/identityUpdate.actions';
+import { setIdentityUpdateTxid, setIdentityUpdateResponse } from '../../../redux/reducers/identityUpdate/identityUpdate.actions';
+import { createAndSignIdentityUpdateResponse } from '../../../utils/identityUpdateResponse';
 
 const IdentityUpdateContentMultiMap: React.FC = () => {
   const dispatch = useDispatch();
@@ -19,7 +20,10 @@ const IdentityUpdateContentMultiMap: React.FC = () => {
   const deeplinkData: IdentityUpdateRequest = useSelector((state: any) => state.deeplink.data);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const chainId: string = useSelector((state: any) => state.chainMetadata.chainId);
-  // Explicity set the type to IdentityUpdateRequestDetails since otherwise it is IdentityUpdateResponseDetails.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const activeIdentity: any = useSelector((state: any) => state.identity.activeIdentity);
+  // Explicity set the type to IdentityUpdateRequestDetails since
+  // otherwise it is IdentityUpdateResponseDetails.
   const deeplinkDetails = deeplinkData.details as IdentityUpdateRequestDetails;
   const name = deeplinkDetails.identity.name;
 
@@ -32,6 +36,16 @@ const IdentityUpdateContentMultiMap: React.FC = () => {
     try {
       const txid = await executeIdentityUpdateRequest(chainId, deeplinkData);
       dispatch(setIdentityUpdateTxid(txid));
+
+      const response = await createAndSignIdentityUpdateResponse(
+        chainId,
+        deeplinkData,
+        activeIdentity.identity.identityaddress,
+        txid,
+      );
+
+      dispatch(setIdentityUpdateResponse(response));
+
       dispatch(setNavigationPath(IDENTITY_UPDATE_RESULT));
     } catch (error) {
       setLoading(false);
@@ -47,6 +61,7 @@ const IdentityUpdateContentMultiMap: React.FC = () => {
   return (
     <PageLayout
       title={`The following data will be added to the contentmultimap of your identity ${name}`}
+      loading={loading}
       contentStyle={{
         display: 'flex',
         flexDirection: 'column',

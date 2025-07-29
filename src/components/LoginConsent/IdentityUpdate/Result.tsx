@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import Button from '@mui/material/Button';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import Box from '@mui/material/Box';
 import PageLayout from '../../common/PageLayout';
+import { useSelector } from 'react-redux';
 
 interface IdentityUpdateResultProps {
   completeLoginConsent: () => Promise<void>;
@@ -10,6 +12,10 @@ interface IdentityUpdateResultProps {
 const IdentityUpdateResult: React.FC<IdentityUpdateResultProps> = (props) => {
   const { completeLoginConsent } = props;
   const [loading, setLoading] = useState<boolean>(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const chainName: string = useSelector((state: any) => state.chainMetadata.chainName);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const txid: string = useSelector((state: any) => state.identityUpdate.txid);
 
   const handleDone = async (): Promise<void> => {
     setLoading(true);
@@ -18,7 +24,8 @@ const IdentityUpdateResult: React.FC<IdentityUpdateResultProps> = (props) => {
 
   return (
     <PageLayout
-      title="Identity Update Complete"
+      title="Identity updated!"
+      loading={loading}
       contentStyle={{
         alignItems: 'center',
         justifyContent: 'center',
@@ -41,13 +48,18 @@ const IdentityUpdateResult: React.FC<IdentityUpdateResultProps> = (props) => {
         </div>
       }
     >
-      <div style={{ fontWeight: "bold", marginBottom: 16 }}>{"Success!"}</div>
-      <div style={{ margin: 16 }}>
+      <Box style={{ margin: 32 }}>
         <CheckCircleIcon color="success" sx={{ fontSize: 72 }} />
-      </div>
-      <div style={{ marginTop: 16 }}>
-        {"Identity update has been completed successfully."}
-      </div>
+      </Box>
+      <Box style={{ margin: 4 }}>
+        {`Your VerusID has been updated on the ${chainName || '???'} blockchain.`}
+      </Box>
+      <Box style={{ margin: 4 }} color="text.secondary">
+        {'This action may take a few minutes to confirm on-chain.'}
+      </Box>
+      <Box style={{ margin: 8 }}>
+        {`Transaction ID: ${txid}`}
+      </Box>
     </PageLayout>
   );
 };

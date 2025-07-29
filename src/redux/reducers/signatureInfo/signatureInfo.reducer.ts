@@ -4,10 +4,10 @@
 import { SET_SIGNATURE_INFO, SignatureInfoState, SignatureInfoAction } from './signatureInfo.types';
 
 const initialState: SignatureInfoState = {
-  signedBy: undefined,
-  sigBlockInfo: undefined,
-  signingRevocationIdentity: undefined,
-  signingRecoveryIdentity: undefined
+  signedBy: null,
+  sigBlockInfo: null,
+  signingRevocationIdentity: null,
+  signingRecoveryIdentity: null
 };
 
 export const signatureInfo = (state = initialState, action: SignatureInfoAction): SignatureInfoState => {

@@ -118,7 +118,6 @@
     "socket.io-parser": "4.2.3",
     "fast-xml-parser": "4.1.2",
     "scss-tokenizer": "0.4.3",
-    "terser": "4.8.1",
     "follow-redirects": "1.15.6",
     "browserify-sign": "4.2.3",
     "json5": "2.2.3",

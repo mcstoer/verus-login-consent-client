@@ -1,6 +1,9 @@
-export const SET_TXID = 'SET_TXID' as const;
+import { IdentityUpdateResponse } from 'verus-typescript-primitives';
 
-export type TxidActionTypes = typeof SET_TXID;
+export const SET_TXID = 'SET_TXID' as const;
+export const SET_RESPONSE = 'SET_RESPONSE' as const;
+
+export type TxidActionTypes = typeof SET_TXID | typeof SET_RESPONSE;
 
 // Action interfaces
 export interface SetTxidAction {
@@ -8,9 +11,15 @@ export interface SetTxidAction {
   payload: string;
 }
 
-export type TxidAction = SetTxidAction;
+export interface SetResponseAction {
+  type: typeof SET_RESPONSE;
+  payload: IdentityUpdateResponse;
+}
+
+export type TxidAction = SetTxidAction | SetResponseAction;
 
 // State interface
 export interface TxidState {
   txid: string;
+  response: IdentityUpdateResponse | null;
 }
