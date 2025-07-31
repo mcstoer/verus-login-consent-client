@@ -4,22 +4,43 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import Box from '@mui/material/Box';
 import PageLayout from '../../common/PageLayout';
 import { useSelector } from 'react-redux';
+import { IDENTITY_UPDATE_RESPONSE_VDXF_KEY, IdentityUpdateEnvelopeJson, IdentityUpdateRequest, IdentityUpdateRequestDetails, IdentityUpdateResponse, ResponseUriJson } from 'verus-typescript-primitives';
+
+interface CompleteLoginConsentParams {
+  responseKey: string;
+  response: IdentityUpdateEnvelopeJson;
+  redirect: ResponseUriJson;
+}
 
 interface IdentityUpdateResultProps {
-  completeLoginConsent: () => Promise<void>;
+  completeLoginConsent: (params: CompleteLoginConsentParams) => Promise<void>;
 }
 
 const IdentityUpdateResult: React.FC<IdentityUpdateResultProps> = (props) => {
   const { completeLoginConsent } = props;
   const [loading, setLoading] = useState<boolean>(false);
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const chainName: string = useSelector((state: any) => state.chainMetadata.chainName);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const txid: string = useSelector((state: any) => state.identityUpdate.txid);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const deeplinkData: IdentityUpdateRequest = useSelector((state: any) => state.deeplink.data);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const response: IdentityUpdateResponse = useSelector((state: any) => state.identityUpdate.response);
+
+  // Explicity set the type to IdentityUpdateRequestDetails since
+  // otherwise it is IdentityUpdateResponseDetails.
+  const deeplinkDetails = deeplinkData.details as IdentityUpdateRequestDetails;
+  const responseURI = deeplinkDetails.responseuris?.[0];
 
   const handleDone = async (): Promise<void> => {
     setLoading(true);
-    await completeLoginConsent();
+    completeLoginConsent({
+      responseKey: IDENTITY_UPDATE_RESPONSE_VDXF_KEY.vdxfid,
+      response: response.toJson(),
+      redirect: responseURI?.toJson()
+    });
   };
 
   return (

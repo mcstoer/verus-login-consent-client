@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import { 
   RedirectRender
 } from './Redirect.render';
-import { LOGIN_CONSENT_REDIRECT_VDXF_KEY } from 'verus-typescript-primitives';
+import { LOGIN_CONSENT_REDIRECT_VDXF_KEY, LOGIN_CONSENT_RESPONSE_VDXF_KEY } from 'verus-typescript-primitives';
 import { SELECT_LOGIN_ID } from '../../../utils/constants';
 import { setNavigationPath } from '../../../redux/reducers/navigation/navigation.actions';
 
@@ -18,8 +18,16 @@ class Redirect extends React.Component {
 
     this.redirect = this.redirect.bind(this);
     this.redirects = props.deeplinkData.challenge.redirect_uris;
-    this.redirectinfo = this.redirects ? this.redirects[0] : null;
     this.extraInfo = '';
+
+    this.redirectinfo = null;
+    if (this.redirects && this.redirects.length > 0) {
+      const redirect = this.redirects[0];
+      this.redirectinfo = {
+        type: redirect.vdxfkey,
+        uri: redirect.uri,
+      };
+    }
 
     if (this.redirectinfo.vdxfkey === LOGIN_CONSENT_REDIRECT_VDXF_KEY.vdxfid) {
       const url = new URL(this.redirectinfo.uri);
@@ -36,6 +44,7 @@ class Redirect extends React.Component {
   redirect() {
     this.setState({ loading: true }, () => {
       this.props.completeLoginConsent({
+        responseKey: LOGIN_CONSENT_RESPONSE_VDXF_KEY.vdxfid,
         response: this.props.requestResult.response,
         redirect: this.redirectinfo,
       });
