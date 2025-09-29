@@ -14,6 +14,7 @@ import { PlainLoginCredential, UnknownCredential } from './Credential';
 import { createAndSignLoginResponse } from '../../../utils/loginResponse';
 import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
+import { convertFqnToDisplayFormat } from '../../../utils/fullyqualifiedname';
 
 const CredentialsReview = (props) => {
   const { setRequestResult } = props;
@@ -28,6 +29,11 @@ const CredentialsReview = (props) => {
     }
     return [];
   });
+
+  const signatureInfo = useSelector((state) => state.signatureInfo);
+  const { signedBy } = signatureInfo;
+  // Convert the fully qualified name into a nicer format for VRSC.
+  const signerFqn = convertFqnToDisplayFormat(signedBy.fullyqualifiedname);
 
   // Calculate requested and missing credentials
   const requestedCredentialKeys = deeplinkData.challenge.requested_access
@@ -53,7 +59,7 @@ const CredentialsReview = (props) => {
       loginIdentity,
       credentials
     );
-    
+
     setRequestResult(signedResponse, () => {
       dispatch(setNavigationPath(REDIRECT));
     });
@@ -63,13 +69,13 @@ const CredentialsReview = (props) => {
   const renderCredentialComponent = (credential, index) => {
     const credentialId = `credential-${index}`;
     const credentialKey = credential.credentialKey;
-    
+
     switch(credentialKey) {
     case IDENTITY_CREDENTIAL_PLAINLOGIN.vdxfid:
       return (
-        <PlainLoginCredential 
-          key={credentialId} 
-          credential={credential} 
+        <PlainLoginCredential
+          key={credentialId}
+          credential={credential}
         />
       );
     default:
@@ -110,7 +116,7 @@ const CredentialsReview = (props) => {
             padding: 16,
           }}
         >
-          Review included credentials
+          {"Review credentials to be sent to " + signerFqn}
         </div>
 
         <Card square sx={{
@@ -119,7 +125,7 @@ const CredentialsReview = (props) => {
           width: '100%',
           overflowY: 'scroll',
           maxHeight: '54vh',
-        }}> 
+        }}>
           <List>
             {/* Display fetched credentials */}
             {credentials.length > 0 && (
@@ -213,4 +219,4 @@ CredentialsReview.propTypes = {
   setRequestResult: PropTypes.func.isRequired
 };
 
-export default CredentialsReview; 
+export default CredentialsReview;

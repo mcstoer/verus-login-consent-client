@@ -247,7 +247,7 @@ const IdentityUpdateCore: React.FC = () => {
 
   return (
     <PageLayout
-      title={`The following fields will be updated in your identity ${name}`}
+      title={`The following fields other than the contentmultimap, will be updated in your identity ${name}`}
       loading={loading}
       contentStyle={{
         display: 'flex',

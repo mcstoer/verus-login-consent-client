@@ -4,6 +4,7 @@ export type SignatureInfoActionTypes = typeof SET_SIGNATURE_INFO;
 
 // Temporary type definitions based on the what is needed for the signature information.
 export interface Identity {
+  fullyqualifiedname: string;
   identity: {
     identityaddress: string;
     revocationauthority: string;
