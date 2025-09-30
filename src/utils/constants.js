@@ -1,4 +1,8 @@
-import { IDENTITY_CREDENTIAL_PLAINLOGIN, IDENTITY_VIEW, IDENTITY_CREDENTIALS, DATA_TYPE_OBJECT_CREDENTIAL } from "verus-typescript-primitives";
+import {
+  IDENTITY_CREDENTIAL_PLAINLOGIN,
+  IDENTITY_VIEW, IDENTITY_CREDENTIAL,
+  DATA_TYPE_OBJECT_CREDENTIAL
+} from "verus-typescript-primitives";
 
 // App ID (fixed for reserve plugins)
 export const VERUS_LOGIN_CONSENT_UI = "VERUS_LOGIN_CONSENT_UI"
@@ -142,6 +146,6 @@ export const CREDENTIALS = {
 };
 
 export const VDXF_ID_TO_READABLE = {
-  [IDENTITY_CREDENTIALS.vdxfid]: "Credentials",
+  [IDENTITY_CREDENTIAL.vdxfid]: "Credentials",
   [DATA_TYPE_OBJECT_CREDENTIAL.vdxfid]: "Credential",
 };
