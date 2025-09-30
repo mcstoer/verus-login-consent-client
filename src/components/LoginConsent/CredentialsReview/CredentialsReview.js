@@ -10,7 +10,7 @@ import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 import { VerusIdLogo } from "../../../images";
-import { PlainLoginCredential, UnknownCredential } from './Credential';
+import { PlainLoginCredential, UnknownCredential } from '../../common/Credential';
 import { createAndSignLoginResponse } from '../../../utils/loginResponse';
 import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';

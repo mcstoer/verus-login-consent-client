@@ -14,14 +14,14 @@ import VisibilityOff from '@mui/icons-material/VisibilityOff';
 // Displays the contents of an unknown credential key by showing the stringified JSON.
 const UnknownCredential = ({ credential }) => {
   const [open, setOpen] = useState(false);
-  
+
   const handleClick = () => {
     setOpen(!open);
   };
 
   const credentialKey = credential.credentialKey;
   const credentialContents = credential.credential;
-  
+
   // Pretty print the credential contents as JSON.
   const formattedCredential = JSON.stringify(credentialContents, null, 2);
 
@@ -34,10 +34,10 @@ const UnknownCredential = ({ credential }) => {
       <Collapse in={open} timeout="auto" unmountOnExit>
         <List component="div" dense disablePadding>
           <ListItem divider dense sx={{ pl: 4, pr: 4 }}>
-            <ListItemText 
+            <ListItemText
               primary={formattedCredential}
               disableTypography
-              sx={{ 
+              sx={{
                 whiteSpace: 'pre-wrap',
               }}
             />
@@ -57,7 +57,7 @@ UnknownCredential.propTypes = {
 const PlainLoginCredential = ({ credential }) => {
   const [open, setOpen] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  
+
   const handleClick = () => {
     setOpen(!open);
   };
@@ -75,9 +75,9 @@ const PlainLoginCredential = ({ credential }) => {
     <>
       <ListItemButton divider onClick={handleClick}>
         <ListItemText primary="Plain Login" disableTypography sx={{ pr: 4 }}/>
-        <ListItemText 
-          primary="Username and Password" 
-          disableTypography 
+        <ListItemText
+          primary="Username and Password"
+          disableTypography
           sx={{ textAlign: 'right' }}
         />
         {open ? <ExpandLess /> : <ExpandMore />}
@@ -89,8 +89,8 @@ const PlainLoginCredential = ({ credential }) => {
             <ListItemText
               primary={username}
               disableTypography
-              sx={{ 
-                textAlign: 'right', 
+              sx={{
+                textAlign: 'right',
                 color: "#878787"
               }}
             />
@@ -101,14 +101,14 @@ const PlainLoginCredential = ({ credential }) => {
               <ListItemText
                 primary={showPassword ? password : passwordMask}
                 disableTypography
-                sx={{ 
-                  textAlign: 'right', 
+                sx={{
+                  textAlign: 'right',
                   color: "#878787",
                   marginRight: '8px'
                 }}
               />
-              <IconButton 
-                edge="end" 
+              <IconButton
+                edge="end"
                 onClick={togglePasswordVisibility}
                 size="small"
               >

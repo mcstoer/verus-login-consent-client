@@ -4,7 +4,7 @@ import ListItemText from '@mui/material/ListItemText';
 import Box from '@mui/material/Box';
 import { Credential, DATA_TYPE_OBJECT_CREDENTIAL, IDENTITY_CREDENTIAL_PLAINLOGIN, VdxfUniType } from 'verus-typescript-primitives';
 import { VDXF_ID_TO_READABLE } from '../../../utils/constants';
-import { PlainLoginCredential, UnknownCredential } from '../CredentialsReview/Credential';
+import { PlainLoginCredential, UnknownCredential } from '../../common/Credential';
 
 interface VdxfKeyRendererProps {
   vdxfKey: string;
