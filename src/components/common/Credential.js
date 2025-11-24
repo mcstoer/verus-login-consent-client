@@ -55,7 +55,7 @@ UnknownCredential.propTypes = {
 // Displays the contents of the known PlainLogin credential,
 // which consists of a username and password.
 const PlainLoginCredential = ({ credential }) => {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
 
   const handleClick = () => {
