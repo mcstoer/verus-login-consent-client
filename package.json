@@ -27,7 +27,7 @@
     "redux": "3.6.0",
     "stream-browserify": "3.0.0",
     "util": "0.12.5",
-    "verus-typescript-primitives": "git+https://github.com/mcstoer/verus-typescript-primitives.git#credential-key-update"
+    "verus-typescript-primitives": "git+https://github.com/mcstoer/verus-typescript-primitives.git#generic-request-credential-keys"
   },
   "scripts": {
     "start": "npx webpack serve --mode development",
