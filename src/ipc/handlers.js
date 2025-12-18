@@ -1,20 +1,14 @@
-import { DEVMODE, MOCK_IPC } from "../env";
-import { RPC_PASSWORD, RPC_PORT } from "../utils/mocks";
-import { setRpcExpiryMargin, setRpcPassword, setRpcPort, setRpcPostEncryption, setRpcWindowId } from "../redux/reducers/rpc/rpc.actions";
-import { setMainChain } from "../redux/reducers/chainMetadata/chainMetadata.actions";
-import { setDeeplinkData } from "../redux/reducers/deeplink/deeplink.actions";
-import store from "../redux/store";
-import { IPC_LOGIN_CONSENT_REQUEST_METHOD, IPC_INIT_MESSAGE, IPC_ORIGIN_DEV, IPC_ORIGIN_PRODUCTION, IPC_PUSH_MESSAGE, IPC_ORIGIN_DEV_LOCALHOST } from "../utils/constants";
-import { setOriginAppId, setOriginAppBuiltin } from "../redux/reducers/origin/origin.actions";
-import { setError } from "../redux/reducers/error/error.actions";
-import {
-  LoginConsentRequest,
-  LOGIN_CONSENT_REQUEST_VDXF_KEY,
-  VERUSPAY_INVOICE_VDXF_KEY,
-  IDENTITY_UPDATE_REQUEST_VDXF_KEY,
-  VerusPayInvoice,
-  IdentityUpdateRequest
-} from "verus-typescript-primitives";
+import {GENERIC_ENVELOPE_DEEPLINK_VDXF_KEY, GenericRequest, LOGIN_CONSENT_REQUEST_VDXF_KEY, LoginConsentRequest, VERUSPAY_INVOICE_VDXF_KEY, VerusPayInvoice} from 'verus-typescript-primitives';
+
+import {DEVMODE, MOCK_IPC} from '../env';
+import {setMainChain} from '../redux/reducers/chainMetadata/chainMetadata.actions';
+import {setDeeplinkData} from '../redux/reducers/deeplink/deeplink.actions';
+import {setError} from '../redux/reducers/error/error.actions';
+import {setOriginAppBuiltin, setOriginAppId} from '../redux/reducers/origin/origin.actions';
+import {setRpcExpiryMargin, setRpcPassword, setRpcPort, setRpcPostEncryption, setRpcWindowId} from '../redux/reducers/rpc/rpc.actions';
+import store from '../redux/store';
+import {IPC_INIT_MESSAGE, IPC_LOGIN_CONSENT_REQUEST_METHOD, IPC_ORIGIN_DEV, IPC_ORIGIN_DEV_LOCALHOST, IPC_ORIGIN_PRODUCTION, IPC_PUSH_MESSAGE} from '../utils/constants';
+import {RPC_PASSWORD, RPC_PORT} from '../utils/mocks';
 
 const parseDeeplinkByType = (deeplinkRawData, deeplinkId) => {
   // Always use fromJson when possible as some of the deeplink data has a
@@ -26,12 +20,11 @@ const parseDeeplinkByType = (deeplinkRawData, deeplinkId) => {
   case VERUSPAY_INVOICE_VDXF_KEY.vdxfid:
     return VerusPayInvoice.fromJson(deeplinkRawData);
 
-  case IDENTITY_UPDATE_REQUEST_VDXF_KEY.vdxfid:
-    return IdentityUpdateRequest.fromJson(deeplinkRawData);
+  case GENERIC_ENVELOPE_DEEPLINK_VDXF_KEY.vdxfid:
+    return GenericRequest.fromJson(deeplinkRawData);
 
   default:
-    console.warn(`Unsupported deeplink ID: ${deeplinkId}`);
-    return new LoginConsentRequest(deeplinkRawData);
+    throw new Error(`Unsupported deeplink ID: ${deeplinkId}`);
   }
 };
 

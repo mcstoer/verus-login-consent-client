@@ -1,8 +1,8 @@
 /*
-  This reducer contains the deeplink information, including the 
+  This reducer contains the deeplink information, including the
   type of deeplink (id) and the data associated with it.
 */
-import { SET_DEEPLINK_DATA, DeeplinkState, DeeplinkAction, DeeplinkData } from "./deeplink.types";
+import {DeeplinkAction, DeeplinkData, DeeplinkState, SET_DEEPLINK_DATA} from './deeplink.types';
 
 const initialState: DeeplinkState = {
   id: '',

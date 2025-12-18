@@ -1,8 +1,4 @@
-import { 
-  LoginConsentRequest, 
-  IdentityUpdateRequest, 
-  VerusPayInvoice 
-} from "verus-typescript-primitives";
+import {GenericRequest, LoginConsentRequest, VerusPayInvoice} from 'verus-typescript-primitives';
 
 export const SET_DEEPLINK_DATA = 'SET_DEEPLINK_DATA' as const;
 
@@ -22,8 +18,8 @@ export type DeeplinkAction = SetDeeplinkDataAction;
 // State interface
 export type DeeplinkData =
   | LoginConsentRequest
-  | IdentityUpdateRequest
-  | VerusPayInvoice;
+  | VerusPayInvoice
+  | GenericRequest;
 
 export interface DeeplinkState {
   id: string;
