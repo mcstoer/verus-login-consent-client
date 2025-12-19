@@ -1,3 +1,4 @@
+// @ts-expect-error: the IdentityUpdateRequest was removed and needs to be re-added when the generic request is fully implemented.
 import { IdentityUpdateRequest, IdentityUpdateRequestDetails } from 'verus-typescript-primitives';
 import { verifyIdentityUpdateRequest } from '../rpc/calls/verifyIdentityUpdateRequest';
 import { loadIdentities } from '../rpc/calls/identities';

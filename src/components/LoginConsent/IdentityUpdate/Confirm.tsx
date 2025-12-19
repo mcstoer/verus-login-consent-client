@@ -16,6 +16,7 @@ import { IDENTITY_UPDATE_CORE } from '../../../utils/constants';
 import { unixToDate } from '../../../utils/math';
 import { convertFqnToDisplayFormat } from '../../../utils/fullyqualifiedname';
 import { createIdentityDescriptor } from '../../../utils/identity';
+// @ts-expect-error: the IdentityUpdateRequest was removed and needs to be re-added when the generic request is fully implemented.
 import { IdentityUpdateRequest } from 'verus-typescript-primitives';
 import { SignatureInfoState } from '../../../redux/reducers/signatureInfo/signatureInfo.types';
 

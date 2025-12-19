@@ -150,7 +150,8 @@ module.exports = (_, argv) => {
         stream: require.resolve('stream-browserify'),
         crypto: require.resolve('crypto-browserify'),
         util: require.resolve('util'),
-        assert: require.resolve('assert')
+        assert: require.resolve('assert'),
+        vm: require.resolve('vm-browserify')
       },
       extensions: ['.ts', '.tsx', '.js', '.jsx', '.webpack-loader.js', '.web-loader.js', '.loader.js'],
       modules: [

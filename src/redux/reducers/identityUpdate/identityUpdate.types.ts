@@ -1,3 +1,4 @@
+// @ts-expect-error: the IdentityUpdateRequest was removed and needs to be re-added when the generic request is fully implemented.
 import { IdentityUpdateResponse } from 'verus-typescript-primitives';
 
 export const SET_TXID = 'SET_TXID' as const;

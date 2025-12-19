@@ -7,6 +7,7 @@ import PageLayout from '../../common/PageLayout';
 import ContentMultiMapRenderer from './ContentMultiMapRenderer';
 import { setNavigationPath } from '../../../redux/reducers/navigation/navigation.actions';
 import { IDENTITY_UPDATE_CORE, IDENTITY_UPDATE_RESULT } from '../../../utils/constants';
+// @ts-expect-error: the IdentityUpdateRequest was removed and needs to be re-added when the generic request is fully implemented.
 import { IdentityUpdateRequest, IdentityUpdateRequestDetails } from 'verus-typescript-primitives';
 import { executeIdentityUpdateRequest } from '../../../rpc/calls/executeIdentityUpdateRequest';
 import { setIdentityUpdateTxid, setIdentityUpdateResponse } from '../../../redux/reducers/identityUpdate/identityUpdate.actions';

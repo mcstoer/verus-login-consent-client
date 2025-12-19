@@ -1,3 +1,4 @@
+// @ts-expect-error: the IdentityUpdateRequest was removed and needs to be re-added when the generic request is fully implemented.
 import { IdentityUpdateResponse } from "verus-typescript-primitives";
 import { API_SIGN_IDENTITY_UPDATE_RESPONSE, NATIVE, POST } from "../../utils/constants";
 import { getApiData } from "../callCreator";

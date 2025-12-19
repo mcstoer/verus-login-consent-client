@@ -1,5 +1,12 @@
-import {GENERIC_ENVELOPE_DEEPLINK_VDXF_KEY, GenericRequest, LOGIN_CONSENT_REQUEST_VDXF_KEY, LoginConsentRequest, VERUSPAY_INVOICE_VDXF_KEY, VerusPayInvoice} from 'verus-typescript-primitives';
-
+import {Buffer} from 'buffer';
+import {
+  GENERIC_REQUEST_DEEPLINK_VDXF_KEY,
+  GenericRequest,
+  LOGIN_CONSENT_REQUEST_VDXF_KEY,
+  LoginConsentRequest,
+  VERUSPAY_INVOICE_VDXF_KEY,
+  VerusPayInvoice
+} from 'verus-typescript-primitives';
 import {DEVMODE, MOCK_IPC} from '../env';
 import {setMainChain} from '../redux/reducers/chainMetadata/chainMetadata.actions';
 import {setDeeplinkData} from '../redux/reducers/deeplink/deeplink.actions';
@@ -20,9 +27,14 @@ const parseDeeplinkByType = (deeplinkRawData, deeplinkId) => {
   case VERUSPAY_INVOICE_VDXF_KEY.vdxfid:
     return VerusPayInvoice.fromJson(deeplinkRawData);
 
-  case GENERIC_ENVELOPE_DEEPLINK_VDXF_KEY.vdxfid:
-    return GenericRequest.fromJson(deeplinkRawData);
-
+  case GENERIC_REQUEST_DEEPLINK_VDXF_KEY.vdxfid: {
+    // The generic request must be created using fromBuffer, so we must take the Buffer object
+    // and convert it into an array.
+    const req = new GenericRequest();
+    const buffer = Buffer.from(Object.values(deeplinkRawData));
+    req.fromBuffer(buffer);
+    return req;
+  }
   default:
     throw new Error(`Unsupported deeplink ID: ${deeplinkId}`);
   }

@@ -4,6 +4,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import Box from '@mui/material/Box';
 import PageLayout from '../../common/PageLayout';
 import { useSelector } from 'react-redux';
+// @ts-expect-error: the IdentityUpdateRequest was removed and needs to be re-added when the generic request is fully implemented.
 import { IDENTITY_UPDATE_RESPONSE_VDXF_KEY, IdentityUpdateEnvelopeJson, IdentityUpdateRequest, IdentityUpdateRequestDetails, IdentityUpdateResponse, ResponseUriJson } from 'verus-typescript-primitives';
 
 interface CompleteLoginConsentParams {
@@ -32,6 +33,7 @@ const IdentityUpdateResult: React.FC<IdentityUpdateResultProps> = (props) => {
   // Explicity set the type to IdentityUpdateRequestDetails since
   // otherwise it is IdentityUpdateResponseDetails.
   const deeplinkDetails = deeplinkData.details as IdentityUpdateRequestDetails;
+  // @ts-expect-error: the IdentityUpdateRequest was removed and needs to be re-added when the generic request is fully implemented.
   const responseURI = deeplinkDetails.responseuris?.[0];
 
   const handleDone = async (): Promise<void> => {

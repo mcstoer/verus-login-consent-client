@@ -4,6 +4,7 @@ import {
   SetTxidAction,
   SetResponseAction
 } from './identityUpdate.types';
+// @ts-expect-error: the IdentityUpdateRequest was removed and needs to be re-added when the generic request is fully implemented.
 import { IdentityUpdateResponse } from 'verus-typescript-primitives';
 
 export const setIdentityUpdateTxid = (txid: string): SetTxidAction => ({
