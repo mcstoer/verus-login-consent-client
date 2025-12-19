@@ -17,21 +17,72 @@ import store from '../redux/store';
 import {IPC_INIT_MESSAGE, IPC_LOGIN_CONSENT_REQUEST_METHOD, IPC_ORIGIN_DEV, IPC_ORIGIN_DEV_LOCALHOST, IPC_ORIGIN_PRODUCTION, IPC_PUSH_MESSAGE} from '../utils/constants';
 import {RPC_PASSWORD, RPC_PORT} from '../utils/mocks';
 
-const parseDeeplinkByType = (deeplinkRawData, deeplinkId) => {
+// TODO: Move these types to a dedicated file
+// Create the type that desktop uses
+declare global {
+  interface Window {
+    bridge: {
+      getSecretSync: () => {
+        BuiltinSecret: string;
+      };
+    };
+  }
+}
+
+// Temporary IPC related types until a type file is created
+interface DeeplinkPayload {
+  id: string;
+  data: object;
+}
+
+interface OriginAppInfo {
+  main_chain_ticker: string;
+  search_builtin: boolean;
+  id: string;
+}
+
+interface IpcInitData {
+  expiry_margin: number;
+  rpc_port: number;
+  post_encryption: boolean;
+  window_id: number;
+}
+
+interface IpcPushData {
+  origin_app_info: OriginAppInfo;
+  deeplink: DeeplinkPayload;
+}
+
+interface IpcInitMessage {
+  type: typeof IPC_INIT_MESSAGE;
+  data: IpcInitData;
+}
+
+interface IpcPushMessage {
+  type: typeof IPC_PUSH_MESSAGE;
+  method: string;
+  data: IpcPushData;
+}
+
+type IpcMessage = IpcInitMessage | IpcPushMessage;
+
+const parseDeeplinkByType = (deeplinkRawData: object, deeplinkId: string): LoginConsentRequest | VerusPayInvoice | GenericRequest => {
   // Always use fromJson when possible as some of the deeplink data has a
   // different representation between JSON and the class definition.
   switch (deeplinkId) {
   case LOGIN_CONSENT_REQUEST_VDXF_KEY.vdxfid:
-    return new LoginConsentRequest(deeplinkRawData);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return new LoginConsentRequest(deeplinkRawData as any);
 
   case VERUSPAY_INVOICE_VDXF_KEY.vdxfid:
-    return VerusPayInvoice.fromJson(deeplinkRawData);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return VerusPayInvoice.fromJson(deeplinkRawData as any);
 
   case GENERIC_REQUEST_DEEPLINK_VDXF_KEY.vdxfid: {
     // The generic request must be created using fromBuffer, so we must take the Buffer object
     // and convert it into an array.
     const req = new GenericRequest();
-    const buffer = Buffer.from(Object.values(deeplinkRawData));
+    const buffer = Buffer.from(Object.values(deeplinkRawData as Record<string, number>));
     req.fromBuffer(buffer);
     return req;
   }
@@ -40,7 +91,7 @@ const parseDeeplinkByType = (deeplinkRawData, deeplinkId) => {
   }
 };
 
-const updateReduxStore = (data) => {
+const updateReduxStore = (data: IpcPushMessage): void => {
   // Add the name of daemon guaranteed to be running on desktop so
   // it can be used to look up other chains.
   store.dispatch(
@@ -63,7 +114,7 @@ const updateReduxStore = (data) => {
   store.dispatch(setOriginAppId(data.data.origin_app_info.id));
 };
 
-const setupRpcConfig = (data = null) => {
+const setupRpcConfig = (data: IpcInitMessage | null = null): void => {
   try {
     if (MOCK_IPC) {
       store.dispatch(setRpcExpiryMargin(60000));
@@ -87,7 +138,7 @@ const setupRpcConfig = (data = null) => {
   }
 };
 
-export const handleIpc = async (event) => {
+export const handleIpc = async (event: MessageEvent): Promise<void> => {
   try {
     if (
       typeof event.data === "string" &&
@@ -96,22 +147,22 @@ export const handleIpc = async (event) => {
         (DEVMODE && event.origin === IPC_ORIGIN_DEV_LOCALHOST)
         ))
     ) {
-      const data = JSON.parse(event.data);
+      const data = JSON.parse(event.data) as IpcMessage;
 
       if (data.type === IPC_INIT_MESSAGE) {
-        setupRpcConfig(data);
+        setupRpcConfig(data as IpcInitMessage);
       } else if (
         data.type === IPC_PUSH_MESSAGE &&
         data.method === IPC_LOGIN_CONSENT_REQUEST_METHOD
       ) {
         setupRpcConfig();
-        updateReduxStore(data);
+        updateReduxStore(data as IpcPushMessage);
       }
     } else if (typeof event.data === "string") {
       console.log(`[IPC] recieved event message from unapproved origin (${event.origin}), blocked`);
     }
   } catch(e) {
     console.error(e);
-    store.dispatch(setError(new Error(e.message)));
+    store.dispatch(setError(new Error((e as Error).message)));
   }
 };
