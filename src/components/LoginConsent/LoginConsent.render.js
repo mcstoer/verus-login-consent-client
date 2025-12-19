@@ -36,7 +36,7 @@ export const LoginConsentRender = function() {
     completeLoginConsent: this.completeLoginConsent,
     requestResult: this.state.requestResult,
     setRequestResult: this.getRequestResult,
-    canLoginOrGiveConsent: this.canLoginOrGiveConsent,
+    canProcessRequest: this.canProcessRequest,
     handleRequest: this.handleRequest,
     checkRequest: this.checkRequest
   };

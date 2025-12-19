@@ -29,7 +29,7 @@ import { createAndSignLoginResponse } from '../../../utils/loginResponse';
 
 const Login = (props) => {
   // eslint-disable-next-line react/prop-types
-  const { canLoginOrGiveConsent, setRequestResult } = props;
+  const { canProcessRequest, setRequestResult } = props;
   const dispatch = useDispatch();
   const chainId = useSelector((state) => state.chainMetadata.chainId);
   const signatureInfo = useSelector((state) => state.signatureInfo);
@@ -77,7 +77,7 @@ const Login = (props) => {
     const userActions = await checkAndUpdateIdentities(chainId);
     userActions.map(action => dispatch(action));
 
-    if (canLoginOrGiveConsent()) {
+    if (canProcessRequest()) {
       const loginIdentity = activeIdentity.identity.identityaddress;
 
       try {

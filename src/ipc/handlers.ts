@@ -1,4 +1,3 @@
-import {Buffer} from 'buffer';
 import {
   GENERIC_REQUEST_DEEPLINK_VDXF_KEY,
   GenericRequest,
@@ -66,8 +65,9 @@ interface IpcPushMessage {
 
 type IpcMessage = IpcInitMessage | IpcPushMessage;
 
-const parseDeeplinkByType = (deeplinkRawData: object, deeplinkId: string): LoginConsentRequest | VerusPayInvoice | GenericRequest => {
-  // Always use fromJson when possible as some of the deeplink data has a
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const parseDeeplinkByType = (deeplinkRawData: any, deeplinkId: string): LoginConsentRequest | VerusPayInvoice | GenericRequest => {
+  // Always use fromJson or other similar methods when possible as some of the deeplink data has a
   // different representation between JSON and the class definition.
   switch (deeplinkId) {
   case LOGIN_CONSENT_REQUEST_VDXF_KEY.vdxfid:
@@ -79,11 +79,8 @@ const parseDeeplinkByType = (deeplinkRawData: object, deeplinkId: string): Login
     return VerusPayInvoice.fromJson(deeplinkRawData as any);
 
   case GENERIC_REQUEST_DEEPLINK_VDXF_KEY.vdxfid: {
-    // The generic request must be created using fromBuffer, so we must take the Buffer object
-    // and convert it into an array.
-    const req = new GenericRequest();
-    const buffer = Buffer.from(Object.values(deeplinkRawData as Record<string, number>));
-    req.fromBuffer(buffer);
+    // The generic request is sent as the QR string to be base64 encoded.
+    const req = GenericRequest.fromQrString(deeplinkRawData);
     return req;
   }
   default:

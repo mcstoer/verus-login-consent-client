@@ -1,15 +1,19 @@
-import React from 'react';
 import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
-import { LoginConsentRequest, IdentityUpdateRequest, LOGIN_CONSENT_REQUEST_VDXF_KEY, IDENTITY_UPDATE_REQUEST_VDXF_KEY } from 'verus-typescript-primitives';
-import { setError } from '../../redux/reducers/error/error.actions';
-import { checkAndUpdateAll, checkAndUpdateChainInfo } from '../../redux/reducers/identity/identity.actions';
-import { setExternalAction, setNavigationPath } from '../../redux/reducers/navigation/navigation.actions';
-import { setOriginApp } from '../../redux/reducers/origin/origin.actions';
-import { setChainMetadata } from '../../redux/reducers/chainMetadata/chainMetadata.actions';
-import { setSignatureInfo } from '../../redux/reducers/signatureInfo/signatureInfo.actions';
-import { closePlugin } from '../../rpc/calls/closePlugin';
-import { getPlugin } from '../../rpc/calls/getPlugin';
+import React from 'react';
+import {connect} from 'react-redux';
+import {LoginConsentRequest, IdentityUpdateRequest, LOGIN_CONSENT_REQUEST_VDXF_KEY, IDENTITY_UPDATE_REQUEST_VDXF_KEY, GENERIC_REQUEST_DEEPLINK_VDXF_KEY, GenericRequest} from 'verus-typescript-primitives';
+import {setChainMetadata} from '../../redux/reducers/chainMetadata/chainMetadata.actions';
+import {setError} from '../../redux/reducers/error/error.actions';
+import {checkAndUpdateAll, checkAndUpdateChainInfo} from '../../redux/reducers/identity/identity.actions';
+import {setExternalAction, setNavigationPath} from '../../redux/reducers/navigation/navigation.actions';
+import {setOriginApp} from '../../redux/reducers/origin/origin.actions';
+import {setSignatureInfo} from '../../redux/reducers/signatureInfo/signatureInfo.actions';
+import {closePlugin} from '../../rpc/calls/closePlugin';
+import {getBlock} from '../../rpc/calls/getBlock';
+import {getCurrency} from '../../rpc/calls/getCurrency';
+import {getIdentity} from '../../rpc/calls/getIdentity';
+import {getPlugin} from '../../rpc/calls/getPlugin';
+import {getSignatureInfo} from '../../rpc/calls/getSignatureInfo';
 import {
   API_GET_CHAIN_INFO,
   API_GET_IDENTITIES,
@@ -17,17 +21,10 @@ import {
   EXTERNAL_CHAIN_START,
   CONSENT_TO_SCOPE,
   VERUS_LOGIN_CONSENT_UI,
-  IDENTITY_UPDATE_CONFIRM,
 } from "../../utils/constants";
-import { 
-  LoginConsentRender
-} from './LoginConsent.render';
-import { getIdentity } from '../../rpc/calls/getIdentity';
-import { getSignatureInfo } from '../../rpc/calls/getSignatureInfo';
-import { getBlock } from '../../rpc/calls/getBlock';
-import { getCurrency } from '../../rpc/calls/getCurrency';
-import { checkLoginConsentRequest } from '../../utils/loginConsentRequest';
-import { checkIdentityUpdateRequest } from '../../utils/identityUpdateRequest';
+import {checkIdentityUpdateRequest} from '../../utils/identityUpdateRequest';
+import {checkLoginConsentRequest} from '../../utils/loginConsentRequest';
+import {LoginConsentRender} from './LoginConsent.render';
 
 class LoginConsent extends React.Component {
   constructor(props) {
@@ -39,7 +36,7 @@ class LoginConsent extends React.Component {
 
     this.completeLoginConsent = this.completeLoginConsent.bind(this);
     this.getRequestResult = this.getRequestResult.bind(this);
-    this.canLoginOrGiveConsent = this.canLoginOrGiveConsent.bind(this);
+    this.canProcessRequest = this.canProcessRequest.bind(this);
     this.handleRequest = this.handleRequest.bind(this);
     this.checkRequest = this.checkRequest.bind(this);
   }
@@ -79,11 +76,11 @@ class LoginConsent extends React.Component {
     const chainActions = await checkAndUpdateChainInfo(mainChain);
     chainActions.map((action) => this.props.dispatch(action));
 
-    // Add a small delay so that the Redux store is updated since 
+    // Add a small delay so that the Redux store is updated since
     // React 18 has concurrent rendering.
     await new Promise(resolve => setTimeout(resolve, 0));
 
-    if (!this.canLoginOrGiveConsent()) {
+    if (!this.canProcessRequest()) {
       this.props.dispatch(setChainMetadata({
         chainId: mainChain
       }));
@@ -105,18 +102,18 @@ class LoginConsent extends React.Component {
     const actions = await checkAndUpdateAll(chainId);
     actions.map((action) => this.props.dispatch(action));
 
-    if (this.canLoginOrGiveConsent()) {
+    if (this.canProcessRequest()) {
       await this.checkRequest(this.props.deeplinkId, request);
-      
+
       switch (this.props.deeplinkId) {
       case LOGIN_CONSENT_REQUEST_VDXF_KEY.vdxfid:
         this.props.dispatch(setNavigationPath(CONSENT_TO_SCOPE));
         break;
-        
-      case IDENTITY_UPDATE_REQUEST_VDXF_KEY.vdxfid:
-        this.props.dispatch(setNavigationPath(IDENTITY_UPDATE_CONFIRM));
+
+      case GENERIC_REQUEST_DEEPLINK_VDXF_KEY.vdxfid:
+        console.log("processing generic request");
         break;
-        
+
       default:
         throw new Error(`Unsupported deeplink type for navigation: ${this.props.deeplinkId}`);
       }
@@ -144,8 +141,8 @@ class LoginConsent extends React.Component {
         signatureString = request.signature.signature;
         break;
 
-      case IDENTITY_UPDATE_REQUEST_VDXF_KEY.vdxfid:
-        request = new IdentityUpdateRequest(req);
+      case GENERIC_REQUEST_DEEPLINK_VDXF_KEY.vdxfid:
+        request = new GenericRequest(req);
         await checkIdentityUpdateRequest(chainId, request);
         signingId = request.signingid.toAddress();
         // The nesting of the signature does not match the expected structure
@@ -186,7 +183,7 @@ class LoginConsent extends React.Component {
     }, () => cb());
   }
 
-  canLoginOrGiveConsent() {
+  canProcessRequest() {
     return (
       this.props.apiErrors[API_GET_CHAIN_INFO] === null &&
       this.props.apiErrors[API_GET_IDENTITIES] === null &&
@@ -209,7 +206,7 @@ class LoginConsent extends React.Component {
     } catch(e) {
       this.props.dispatch(setError(e));
     }
-  } 
+  }
 
   render() {
     return LoginConsentRender.call(this);

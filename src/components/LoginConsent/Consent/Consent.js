@@ -11,7 +11,7 @@ import { convertFqnToDisplayFormat } from "../../../utils/fullyqualifiedname";
 
 const Consent = (props) => {
   // eslint-disable-next-line react/prop-types
-  const { canLoginOrGiveConsent, completeLoginConsent } = props;
+  const { canProcessRequest, completeLoginConsent } = props;
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
   const deeplinkData = useSelector((state) => state.deeplink.data);
@@ -48,7 +48,7 @@ const Consent = (props) => {
     const userActions = await checkAndUpdateIdentities(chainId);
     userActions.map(action => dispatch(action));
 
-    if (canLoginOrGiveConsent()) {
+    if (canProcessRequest()) {
       dispatch(setNavigationPath(SELECT_LOGIN_ID));
     } else {
       dispatch(setExternalAction(EXTERNAL_CHAIN_START));
