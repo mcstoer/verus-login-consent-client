@@ -22,7 +22,7 @@ import {
   CONSENT_TO_SCOPE,
   VERUS_LOGIN_CONSENT_UI,
 } from "../../utils/constants";
-import {checkIdentityUpdateRequest} from '../../utils/identityUpdateRequest';
+import {checkGenericRequest} from '../../utils/genericRequest';
 import {checkLoginConsentRequest} from '../../utils/loginConsentRequest';
 import {LoginConsentRender} from './LoginConsent.render';
 
@@ -134,43 +134,50 @@ class LoginConsent extends React.Component {
 
       // Switch on the deeplink type to determine how to handle the request
       switch (deeplinkId) {
-      case LOGIN_CONSENT_REQUEST_VDXF_KEY.vdxfid:
+      case LOGIN_CONSENT_REQUEST_VDXF_KEY.vdxfid: {
         request = new LoginConsentRequest(req);
         await checkLoginConsentRequest(chainId, request);
         signingId = request.signing_id;
         signatureString = request.signature.signature;
+
+        const signedBy = await getIdentity(chainId, signingId);
+
+        // Get information on the signature for displaying later.
+        const sigInfo = await getSignatureInfo(chainId, signingId, signatureString, signedBy.identity.identityaddress);
+        const sigBlockInfo = await getBlock(chainId, sigInfo.height.toString());
+
+        // Get the identities of the revocation and recovery i-addresses to display for anti-phishing.
+        const signingRevocationIdentity  = await getIdentity(chainId, signedBy.identity.revocationauthority);
+        const signingRecoveryIdentity = await getIdentity(chainId, signedBy.identity.recoveryauthority);
+
+        // Store signature information in dedicated reducer
+        this.props.dispatch(setSignatureInfo({
+          signedBy: signedBy,
+          sigBlockInfo: sigBlockInfo,
+          signingRevocationIdentity: signingRevocationIdentity,
+          signingRecoveryIdentity: signingRecoveryIdentity
+        }));
         break;
+      }
 
       case GENERIC_REQUEST_DEEPLINK_VDXF_KEY.vdxfid:
         request = new GenericRequest(req);
-        await checkIdentityUpdateRequest(chainId, request);
+        await checkGenericRequest(chainId, request);
         signingId = request.signingid.toAddress();
-        // The nesting of the signature does not match the expected structure
-        // for an unknown reason.
-        signatureString = request.signature.signature.signature;
+        signatureString = request.signature.signatureAsVch.toString('hex');
+        // TODO: Remove the placeholders when the signature verification works.
+        // Store signature information in dedicated reducer
+        this.props.dispatch(setSignatureInfo({
+          signedBy: 'PLACEHOLDER_SIGNED_BY',
+          sigBlockInfo: 'PLACEHOLDER_SIG_BLOCK_INFO',
+          signingRevocationIdentity: 'PLACEHOLDER_SIGNING_REVOCATION_IDENTITY',
+          signingRecoveryIdentity: 'PLACEHOLDER_SIGNING_RECOVERY_IDENTITY'
+        }));
         break;
 
       default:
         throw new Error(`Unsupported deeplink type: ${deeplinkId}`);
       }
-
-      const signedBy = await getIdentity(chainId, signingId);
-
-      // Get information on the signature for displaying later.
-      const sigInfo = await getSignatureInfo(chainId, signingId, signatureString, signedBy.identity.identityaddress);
-      const sigBlockInfo = await getBlock(chainId, sigInfo.height.toString());
-
-      // Get the identities of the revocation and recovery i-addresses to display for anti-phishing.
-      const signingRevocationIdentity  = await getIdentity(chainId, signedBy.identity.revocationauthority);
-      const signingRecoveryIdentity = await getIdentity(chainId, signedBy.identity.recoveryauthority);
-
-      // Store signature information in dedicated reducer
-      this.props.dispatch(setSignatureInfo({
-        signedBy: signedBy,
-        sigBlockInfo: sigBlockInfo,
-        signingRevocationIdentity: signingRevocationIdentity,
-        signingRecoveryIdentity: signingRecoveryIdentity
-      }));
     } catch(e) {
       console.error(e);
       this.props.dispatch(setError(new Error(e.message)));
