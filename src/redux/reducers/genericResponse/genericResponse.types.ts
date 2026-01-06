@@ -11,7 +11,6 @@ export type GenericResponseActionTypes =
   | typeof UPDATE_CURRENT_DETAIL
   | typeof COMPLETE_CURRENT_DETAIL;
 
-// Action interfaces
 export interface SetGenericResponseAction {
   type: typeof SET_GENERIC_RESPONSE;
   payload: {
@@ -46,7 +45,8 @@ export type GenericResponseAction =
   | UpdateCurrentDetailAction
   | CompleteCurrentDetailAction;
 
-// State interface
+// Ideally the GenericResponse would be serializable, but the initialization with empty details results
+// a serialization error.
 export interface GenericResponseState {
   response: GenericResponse | null;
   currentDetailIndex: number;

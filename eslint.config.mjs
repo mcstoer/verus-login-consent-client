@@ -15,6 +15,7 @@ export default [
       "indent": ["warn", 2],
       "semi": ["warn", "always"],
       "@stylistic/js/no-trailing-spaces": "error",
+      "@stylistic/js/object-curly-spacing": ["warn", "never"],
     },
   },
   {

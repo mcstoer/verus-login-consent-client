@@ -1,13 +1,14 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import {connect} from 'react-redux';
-import {LoginConsentRequest, IdentityUpdateRequest, LOGIN_CONSENT_REQUEST_VDXF_KEY, IDENTITY_UPDATE_REQUEST_VDXF_KEY, GENERIC_REQUEST_DEEPLINK_VDXF_KEY, GenericRequest} from 'verus-typescript-primitives';
+import {LoginConsentRequest, LOGIN_CONSENT_REQUEST_VDXF_KEY, GENERIC_REQUEST_DEEPLINK_VDXF_KEY, GenericRequest, GenericResponse} from 'verus-typescript-primitives';
 import {setChainMetadata} from '../../redux/reducers/chainMetadata/chainMetadata.actions';
 import {setError} from '../../redux/reducers/error/error.actions';
 import {checkAndUpdateAll, checkAndUpdateChainInfo} from '../../redux/reducers/identity/identity.actions';
 import {setExternalAction, setNavigationPath} from '../../redux/reducers/navigation/navigation.actions';
 import {setOriginApp} from '../../redux/reducers/origin/origin.actions';
 import {setSignatureInfo} from '../../redux/reducers/signatureInfo/signatureInfo.actions';
+import {setGenericResponse} from '../../redux/reducers/genericResponse/genericResponse.actions';
 import {closePlugin} from '../../rpc/calls/closePlugin';
 import {getBlock} from '../../rpc/calls/getBlock';
 import {getCurrency} from '../../rpc/calls/getCurrency';
@@ -110,9 +111,20 @@ class LoginConsent extends React.Component {
         this.props.dispatch(setNavigationPath(CONSENT_TO_SCOPE));
         break;
 
-      case GENERIC_REQUEST_DEEPLINK_VDXF_KEY.vdxfid:
-        console.log("processing generic request");
+      case GENERIC_REQUEST_DEEPLINK_VDXF_KEY.vdxfid: {
+        const genericRequest = new GenericRequest(request);
+        const response = new GenericResponse({
+          requestID: genericRequest.requestID,
+          requestHash: genericRequest.getRawDataSha256(),
+          details: [],
+        });
+
+        this.props.dispatch(setGenericResponse(response));
+
+        console.log("Created the generic reponse");
+        // TODO: Navigate to appropriate view for generic requests
         break;
+      }
 
       default:
         throw new Error(`Unsupported deeplink type for navigation: ${this.props.deeplinkId}`);
@@ -163,16 +175,18 @@ class LoginConsent extends React.Component {
       case GENERIC_REQUEST_DEEPLINK_VDXF_KEY.vdxfid:
         request = new GenericRequest(req);
         await checkGenericRequest(chainId, request);
-        signingId = request.signingid.toAddress();
-        signatureString = request.signature.signatureAsVch.toString('hex');
-        // TODO: Remove the placeholders when the signature verification works.
-        // Store signature information in dedicated reducer
-        this.props.dispatch(setSignatureInfo({
-          signedBy: 'PLACEHOLDER_SIGNED_BY',
-          sigBlockInfo: 'PLACEHOLDER_SIG_BLOCK_INFO',
-          signingRevocationIdentity: 'PLACEHOLDER_SIGNING_REVOCATION_IDENTITY',
-          signingRecoveryIdentity: 'PLACEHOLDER_SIGNING_RECOVERY_IDENTITY'
-        }));
+        if (request.isSigned) {
+          signingId = request.signature.identityID.toIAddress();
+          signatureString = request.signature.signatureAsVch.toString('hex');
+          // TODO: Remove the placeholders when the signature verification works.
+          // Store signature information in dedicated reducer
+          this.props.dispatch(setSignatureInfo({
+            signedBy: 'PLACEHOLDER_SIGNED_BY',
+            sigBlockInfo: 'PLACEHOLDER_SIG_BLOCK_INFO',
+            signingRevocationIdentity: 'PLACEHOLDER_SIGNING_REVOCATION_IDENTITY',
+            signingRecoveryIdentity: 'PLACEHOLDER_SIGNING_RECOVERY_IDENTITY'
+          }));
+        }
         break;
 
       default:
@@ -208,7 +222,7 @@ class LoginConsent extends React.Component {
         true,
         result != null
           ? result
-          : { error: error != null ? error.message : error }
+          : {error: error != null ? error.message : error}
       );
     } catch(e) {
       this.props.dispatch(setError(e));

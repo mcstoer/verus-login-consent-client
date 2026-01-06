@@ -10,6 +10,7 @@ import {
   SET_GENERIC_RESPONSE,
   UPDATE_CURRENT_DETAIL
 } from './genericResponse.types';
+import {GenericResponse} from 'verus-typescript-primitives';
 
 const initialState: GenericResponseState = {
   response: null,
@@ -35,21 +36,31 @@ export const genericResponse = (
     if (!state.response) {
       return state;
     }
-    state.response.details[state.currentDetailIndex] = action.payload.detail;
-    return {
-      ...state,
-      response: state.response,
-    };
+    {
+      // Create a clone to avoid mutating state directly
+      const responseClone = new GenericResponse();
+      responseClone.fromBuffer(state.response.toBuffer());
+      responseClone.details[state.currentDetailIndex] = action.payload.detail;
+      return {
+        ...state,
+        response: responseClone,
+      };
+    }
   case COMPLETE_CURRENT_DETAIL:
     if (!state.response) {
       return state;
     }
-    state.response.details[state.currentDetailIndex] = action.payload.detail;
-    return {
-      ...state,
-      response: state.response,
-      currentDetailIndex: state.currentDetailIndex + 1,
-    };
+    {
+      // Create a clone to avoid mutating state directly
+      const responseClone = new GenericResponse();
+      responseClone.fromBuffer(state.response.toBuffer());
+      responseClone.details[state.currentDetailIndex] = action.payload.detail;
+      return {
+        ...state,
+        response: responseClone,
+        currentDetailIndex: state.currentDetailIndex + 1,
+      };
+    }
   default:
     return state;
   }
