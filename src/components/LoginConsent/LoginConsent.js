@@ -15,6 +15,7 @@ import {getCurrency} from '../../rpc/calls/getCurrency';
 import {getIdentity} from '../../rpc/calls/getIdentity';
 import {getPlugin} from '../../rpc/calls/getPlugin';
 import {getSignatureInfo} from '../../rpc/calls/getSignatureInfo';
+import {getStartPathForDetail, runDetailPrepFunction} from '../../utils/detailNavigation';
 import {
   API_GET_CHAIN_INFO,
   API_GET_IDENTITIES,
@@ -121,8 +122,22 @@ class LoginConsent extends React.Component {
 
         this.props.dispatch(setGenericResponse(response));
 
-        console.log("Created the generic reponse");
-        // TODO: Navigate to appropriate view for generic requests
+        console.log("Created the generic response");
+
+        // Initialize detail processing - navigate to first detail
+        if (genericRequest.details.length > 0) {
+          const firstDetail = genericRequest.details[0];
+
+          // Run prep function for the first detail (if any)
+          await runDetailPrepFunction(firstDetail, this.props.dispatch);
+
+          // Navigate to the first screen of the first detail
+          const startPath = getStartPathForDetail(firstDetail);
+          this.props.dispatch(setNavigationPath(startPath));
+        } else {
+          throw new Error('GenericRequest contains no details to process');
+        }
+
         break;
       }
 

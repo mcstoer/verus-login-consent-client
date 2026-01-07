@@ -13,6 +13,7 @@ import {
   IDENTITY_UPDATE_CORE,
   IDENTITY_UPDATE_CONTENTMULTIMAP,
   IDENTITY_UPDATE_RESULT,
+  GENERIC_FINALIZATION,
 } from '../../utils/constants';
 import ExternalAction from './ExternalAction/ExternalAction';
 import Loading from '../Loading';
@@ -29,6 +30,7 @@ import IdentityUpdateConfirm from './IdentityUpdate/Confirm';
 import IdentityUpdateCore from './IdentityUpdate/Core';
 import IdentityUpdateContentMultiMap from './IdentityUpdate/ContentMultiMap';
 import IdentityUpdateResult from './IdentityUpdate/Result';
+import GenericFinalization from './GenericFinalization/GenericFinalization';
 
 export const LoginConsentRender = function() {
   const COMPONENT_PROPS = {
@@ -99,6 +101,11 @@ export const LoginConsentRender = function() {
     ),
     [PROVISIONING_RESULT]: (
       <ProvisionIdentityResult
+        {...COMPONENT_PROPS}
+      />
+    ),
+    [GENERIC_FINALIZATION]: (
+      <GenericFinalization
         {...COMPONENT_PROPS}
       />
     ),
