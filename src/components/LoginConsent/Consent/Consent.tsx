@@ -1,62 +1,88 @@
-import React, { useState, useMemo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { setExternalAction, setNavigationPath } from '../../../redux/reducers/navigation/navigation.actions';
-import { EXTERNAL_ACTION, EXTERNAL_CHAIN_START, SCOPES, SELECT_LOGIN_ID } from '../../../utils/constants';
-import { checkAndUpdateIdentities } from '../../../redux/reducers/identity/identity.actions';
-import { SUPPORTED_CREDENTIALS, CREDENTIALS } from '../../../utils/constants';
+import React, {useState, useMemo} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
+import {navigateGenericRequest, setExternalAction, setNavigationPath} from '../../../redux/reducers/navigation/navigation.actions';
+import {EXTERNAL_ACTION, EXTERNAL_CHAIN_START, SCOPES, SELECT_LOGIN_ID} from '../../../utils/constants';
+import {checkAndUpdateIdentities} from '../../../redux/reducers/identity/identity.actions';
+import {SUPPORTED_CREDENTIALS, CREDENTIALS} from '../../../utils/constants';
 import Button from '@mui/material/Button';
-import { RequestCard } from "../../../containers/RequestCard/RequestCard";
-import { VerusIdLogo } from "../../../images";
-import { convertFqnToDisplayFormat } from "../../../utils/fullyqualifiedname";
+import {RequestCard} from "../../../containers/RequestCard/RequestCard";
+import {VerusIdLogo} from "../../../images";
+import {convertFqnToDisplayFormat} from "../../../utils/fullyqualifiedname";
+import {isGenericRequest} from '../../../utils/genericRequest';
+import store from '../../../redux/store';
 
-const Consent = (props) => {
-  // eslint-disable-next-line react/prop-types
-  const { canProcessRequest, completeLoginConsent } = props;
+interface ConsentProps {
+  canProcessRequest: () => boolean;
+  completeLoginConsent: () => Promise<void>;
+}
+
+const Consent: React.FC<ConsentProps> = (props) => {
+  const {canProcessRequest, completeLoginConsent} = props;
   const dispatch = useDispatch();
-  const [loading, setLoading] = useState(false);
-  const deeplinkData = useSelector((state) => state.deeplink.data);
-  const chainId = useSelector((state) => state.chainMetadata.chainId);
-  const chainName = useSelector((state) => state.chainMetadata.chainName);
-  const signatureInfo = useSelector((state) => state.signatureInfo);
+  const [loading, setLoading] = useState<boolean>(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const deeplinkData = useSelector((state: any) => state.deeplink.data);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const deeplinkId = useSelector((state: any) => state.deeplink.id);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const chainId = useSelector((state: any) => state.chainMetadata.chainId);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const chainName = useSelector((state: any) => state.chainMetadata.chainName);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const signatureInfo = useSelector((state: any) => state.signatureInfo);
 
-  const { sigBlockInfo, signedBy, signingRevocationIdentity, signingRecoveryIdentity } = signatureInfo;
-  const { time } = sigBlockInfo;
-  // Convert the fully qualified name into a nicer format for VRSC.
-  const signerFqn = convertFqnToDisplayFormat(signedBy.fullyqualifiedname);
+  const {sigBlockInfo, signedBy, signingRevocationIdentity, signingRecoveryIdentity} = signatureInfo;
+  const {time} = sigBlockInfo;
 
-  const permissionsText = useMemo(() => {
-    const requestedPermissions = deeplinkData.challenge.requested_access;
-    let permissionsDescriptions = [];
+  let signerFqn = "";
+  let permissionsText = "";
 
-    if (requestedPermissions != null) {
-      // Match permissions to the possible ids in the scopes.
-      for (const permission of requestedPermissions) {
-        if (SCOPES[permission.vdxfkey]) {
-          permissionsDescriptions.push(SCOPES[permission.vdxfkey].description);
-        } else if (SUPPORTED_CREDENTIALS.includes(permission.vdxfkey) && CREDENTIALS[permission.vdxfkey]) {
-          permissionsDescriptions.push("Get " + CREDENTIALS[permission.vdxfkey].description + " credential");
+  if (isGenericRequest(deeplinkId)) {
+    signerFqn = signedBy;
+    permissionsText = "Authenticate with VerusID";
+  } else {
+    // Convert the fully qualified name into a nicer format for VRSC.
+    signerFqn = convertFqnToDisplayFormat(signedBy.fullyqualifiedname);
+
+    permissionsText = useMemo(() => {
+      const requestedPermissions = deeplinkData.challenge.requested_access;
+      const permissionsDescriptions: string[] = [];
+
+      if (requestedPermissions != null) {
+        // Match permissions to the possible ids in the scopes.
+        for (const permission of requestedPermissions) {
+          if (SCOPES[permission.vdxfkey]) {
+            permissionsDescriptions.push(SCOPES[permission.vdxfkey].description);
+          } else if (SUPPORTED_CREDENTIALS.includes(permission.vdxfkey) && CREDENTIALS[permission.vdxfkey]) {
+            permissionsDescriptions.push("Get " + CREDENTIALS[permission.vdxfkey].description + " credential");
+          }
         }
       }
-    }
 
-    return permissionsDescriptions.join(", ");
-  }, [deeplinkData.challenge.requested_access]);
+      return permissionsDescriptions.join(", ");
+    }, [deeplinkData.challenge.requested_access]);
+  }
 
-  const tryLogin = async () => {
+  const tryLogin = async (): Promise<void> => {
     setLoading(true);
-    
+
     const userActions = await checkAndUpdateIdentities(chainId);
     userActions.map(action => dispatch(action));
 
     if (canProcessRequest()) {
-      dispatch(setNavigationPath(SELECT_LOGIN_ID));
+      if (isGenericRequest(deeplinkId)) {
+        // Manually add the dispatch and state since the Redux version is old.
+        navigateGenericRequest()(dispatch, store.getState);
+      } else {
+        dispatch(setNavigationPath(SELECT_LOGIN_ID));
+      }
     } else {
       dispatch(setExternalAction(EXTERNAL_CHAIN_START));
       dispatch(setNavigationPath(EXTERNAL_ACTION));
     }
   };
 
-  const cancel = async () => {
+  const cancel = async (): Promise<void> => {
     setLoading(true);
     await completeLoginConsent();
   };
