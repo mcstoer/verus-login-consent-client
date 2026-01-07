@@ -1,4 +1,4 @@
-import {GenericRequest, VDXF_ORDINAL_VERUSPAY_INVOICE} from 'verus-typescript-primitives';
+import {GENERIC_REQUEST_DEEPLINK_VDXF_KEY, GenericRequest, VDXF_ORDINAL_VERUSPAY_INVOICE} from 'verus-typescript-primitives';
 import {loadIdentities} from '../rpc/calls/identities';
 import {verifyGenericRequest} from '../rpc/calls/verifyGenericRequest';
 
@@ -47,4 +47,8 @@ export const checkGenericRequest = async (
     }
   }
 
+};
+
+export const isGenericRequest = (id: string): boolean => {
+  return id === GENERIC_REQUEST_DEEPLINK_VDXF_KEY.vdxfid;
 };

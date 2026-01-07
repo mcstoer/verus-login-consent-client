@@ -23,6 +23,7 @@ const DETAIL_TYPE_PREP_FUNCTIONS: Record<string, DetailPrepFunction> = {
   // Example:
   [VDXF_ORDINAL_AUTHENTICATION_REQUEST.vdxfid]: async () => {
     // No prep needed for authentication request at this time
+    // Possibly handle the recipientConstraints here in the future
     return;
   }
 };

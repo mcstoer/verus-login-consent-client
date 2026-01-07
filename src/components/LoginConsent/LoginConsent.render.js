@@ -19,7 +19,7 @@ import ExternalAction from './ExternalAction/ExternalAction';
 import Loading from '../Loading';
 import Error from './Error/Error';
 import Login from './Login/Login';
-import { setError } from '../../redux/reducers/error/error.actions';
+import {setError} from '../../redux/reducers/error/error.actions';
 import Redirect from './Redirect/Redirect';
 import Consent from './Consent/Consent';
 import ProvisionIdentityForm from './ProvisionIdentity/ProvisionIdentityForm/ProvisionIdentityForm';
@@ -60,7 +60,7 @@ export const LoginConsentRender = function() {
       />
     ),
     [CONSENT_TO_SCOPE]: (
-      <Consent 
+      <Consent
         {...COMPONENT_PROPS}
       />
     ),
