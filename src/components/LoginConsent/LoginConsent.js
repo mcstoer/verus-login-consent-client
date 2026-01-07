@@ -195,11 +195,18 @@ class LoginConsent extends React.Component {
           signatureString = request.signature.signatureAsVch.toString('hex');
           // TODO: Remove the placeholders when the signature verification works.
           // Store signature information in dedicated reducer
+          const signedBy = await getIdentity(chainId, signingId);
+          const sigBlockInfo = await getBlock(chainId, '884624');
+          const signingRevocationIdentity  = await getIdentity(chainId, signingId);
+          const signingRecoveryIdentity = await getIdentity(chainId, signingId);
+
+          console.log(signedBy, sigBlockInfo, signingRevocationIdentity, signingRecoveryIdentity);
+
           this.props.dispatch(setSignatureInfo({
-            signedBy: 'PLACEHOLDER_SIGNED_BY',
-            sigBlockInfo: 'PLACEHOLDER_SIG_BLOCK_INFO',
-            signingRevocationIdentity: 'PLACEHOLDER_SIGNING_REVOCATION_IDENTITY',
-            signingRecoveryIdentity: 'PLACEHOLDER_SIGNING_RECOVERY_IDENTITY'
+            signedBy: signedBy,
+            sigBlockInfo: sigBlockInfo,
+            signingRevocationIdentity: signingRevocationIdentity,
+            signingRecoveryIdentity: signingRecoveryIdentity
           }));
         }
         break;

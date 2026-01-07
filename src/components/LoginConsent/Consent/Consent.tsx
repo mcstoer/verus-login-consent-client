@@ -1,5 +1,6 @@
 import React, {useState, useMemo} from 'react';
-import {useDispatch, useSelector} from 'react-redux';
+import {useSelector} from 'react-redux';
+import {useAppDispatch} from '../../../redux/hooks';
 import {navigateGenericRequest, setExternalAction, setNavigationPath} from '../../../redux/reducers/navigation/navigation.actions';
 import {EXTERNAL_ACTION, EXTERNAL_CHAIN_START, SCOPES, SELECT_LOGIN_ID} from '../../../utils/constants';
 import {checkAndUpdateIdentities} from '../../../redux/reducers/identity/identity.actions';
@@ -9,7 +10,7 @@ import {RequestCard} from "../../../containers/RequestCard/RequestCard";
 import {VerusIdLogo} from "../../../images";
 import {convertFqnToDisplayFormat} from "../../../utils/fullyqualifiedname";
 import {isGenericRequest} from '../../../utils/genericRequest';
-import store from '../../../redux/store';
+import {GenericRequest} from 'verus-typescript-primitives';
 
 interface ConsentProps {
   canProcessRequest: () => boolean;
@@ -18,7 +19,7 @@ interface ConsentProps {
 
 const Consent: React.FC<ConsentProps> = (props) => {
   const {canProcessRequest, completeLoginConsent} = props;
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const [loading, setLoading] = useState<boolean>(false);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const deeplinkData = useSelector((state: any) => state.deeplink.data);
@@ -36,11 +37,14 @@ const Consent: React.FC<ConsentProps> = (props) => {
 
   let signerFqn = "";
   let permissionsText = "";
+  let systemId = "";
 
   if (isGenericRequest(deeplinkId)) {
-    signerFqn = signedBy;
+    signerFqn = signedBy.fullyqualifiedname;
     permissionsText = "Authenticate with VerusID";
+    systemId = (deeplinkData as GenericRequest).signature?.systemID.toIAddress();
   } else {
+    systemId = deeplinkData.system_id;
     // Convert the fully qualified name into a nicer format for VRSC.
     signerFqn = convertFqnToDisplayFormat(signedBy.fullyqualifiedname);
 
@@ -71,8 +75,7 @@ const Consent: React.FC<ConsentProps> = (props) => {
 
     if (canProcessRequest()) {
       if (isGenericRequest(deeplinkId)) {
-        // Manually add the dispatch and state since the Redux version is old.
-        navigateGenericRequest()(dispatch, store.getState);
+        dispatch(navigateGenericRequest());
       } else {
         dispatch(setNavigationPath(SELECT_LOGIN_ID));
       }
@@ -120,7 +123,7 @@ const Consent: React.FC<ConsentProps> = (props) => {
 
         <RequestCard
           chainName={chainName}
-          systemId={deeplinkData.system_id}
+          systemId={systemId}
           signedBy={signedBy}
           signerFqn={signerFqn}
           revocationIdentity={signingRevocationIdentity}

@@ -1,7 +1,9 @@
+import {ThunkAction} from 'redux-thunk';
+import {AnyAction} from 'redux';
 import {SET_EXTERNAL_ACTION, SET_NAVIGATION_PATH, SET_CURRENT_DETAIL_INDEX} from './navigation.types';
 import {readNavigationPath} from './navigation.util';
 import {getNextDetail, getStartPathForDetail} from '../../../utils/detailNavigation';
-import {GENERIC_REQUEST_DEEPLINK_VDXF_KEY} from 'verus-typescript-primitives';
+import {GENERIC_REQUEST_DEEPLINK_VDXF_KEY, GenericRequest} from 'verus-typescript-primitives';
 import {
   IDENTITY_UPDATE_RESULT,
   PROVISIONING_RESULT,
@@ -14,11 +16,12 @@ import {
   CONSENT_TO_SCOPE,
   SELECT_LOGIN_ID
 } from '../../../utils/constants';
+import {RootState} from '../../store';
 
 /**
  * Sets the navigation path in the redux store.
  */
-export const setNavigationPath = (path) => {
+export const setNavigationPath = (path: string) => {
   const navigationArray = readNavigationPath(path);
 
   return {
@@ -33,7 +36,7 @@ export const setNavigationPath = (path) => {
 /**
  * Sets the navigation path in the redux store
  */
-export const setExternalAction = (externalAction) => {
+export const setExternalAction = (externalAction: string) => {
   return {
     type: SET_EXTERNAL_ACTION,
     payload: {
@@ -45,7 +48,7 @@ export const setExternalAction = (externalAction) => {
 /**
  * Sets the current detail index for multi-detail generic requests
  */
-export const setCurrentDetailIndex = (index) => {
+export const setCurrentDetailIndex = (index: number) => {
   return {
     type: SET_CURRENT_DETAIL_INDEX,
     payload: {
@@ -59,7 +62,7 @@ export const setCurrentDetailIndex = (index) => {
  * When navigation reaches one of these paths, the detail is considered complete
  * and the system should transition to the next detail or finalization.
  */
-const DETAIL_COMPLETION_PATHS = {
+const DETAIL_COMPLETION_PATHS: Record<string, boolean> = {
   [IDENTITY_UPDATE_RESULT]: true,
   [PROVISIONING_RESULT]: true,
   // Add other detail type completion paths as they are implemented
@@ -69,7 +72,7 @@ const DETAIL_COMPLETION_PATHS = {
  * Maps paths to their next paths within the same detail flow.
  * This handles navigation within a detail, not between details.
  */
-const WITHIN_DETAIL_NEXT_PATHS = {
+const WITHIN_DETAIL_NEXT_PATHS: Record<string, string> = {
   // Identity Update flow
   [IDENTITY_UPDATE_CONFIRM]: IDENTITY_UPDATE_CORE,
   [IDENTITY_UPDATE_CORE]: IDENTITY_UPDATE_CONTENTMULTIMAP,
@@ -86,10 +89,10 @@ const WITHIN_DETAIL_NEXT_PATHS = {
 
 /**
  * Determines the next path within the current detail flow.
- * @param {string} currentPath - The current navigation path
- * @returns {string|null} The next path within the detail, or null if at end of detail
+ * @param currentPath - The current navigation path
+ * @returns The next path within the detail, or null if at end of detail
  */
-const getNextPathInDetail = (currentPath) => {
+const getNextPathInDetail = (currentPath: string): string | null => {
   return WITHIN_DETAIL_NEXT_PATHS[currentPath] || null;
 };
 
@@ -97,13 +100,13 @@ const getNextPathInDetail = (currentPath) => {
  * Thunk that determines the next navigation path within the generic request handling flow
  * based on the current state. This handles navigation both between details and within a detail itself.
  * Reads currentPath, deeplinkId, deeplinkData, and currentDetailIndex from the Redux store.
- * @returns {Function} Thunk function that dispatches navigation action
+ * @returns Thunk function that dispatches navigation action
  */
-export const navigateGenericRequest = () => (dispatch, getState) => {
+export const navigateGenericRequest = (): ThunkAction<void, RootState, unknown, AnyAction> => (dispatch, getState) => {
   const state = getState();
   const currentPath = state.navigation.path;
   const deeplinkId = state.deeplink.id;
-  const deeplinkData = state.deeplink.data;
+  const deeplinkData = state.deeplink.data as GenericRequest;
   const currentDetailIndex = state.navigation.currentDetailIndex || 0;
 
   // Validate that the deeplink is a generic request
@@ -115,7 +118,9 @@ export const navigateGenericRequest = () => (dispatch, getState) => {
     );
   }
 
-  let nextPath;
+  console.log("dispatching navigateGenericRequest from path:", currentPath);
+
+  let nextPath: string;
   let newDetailIndex = currentDetailIndex;
 
   // Check if current path marks detail completion
@@ -133,12 +138,14 @@ export const navigateGenericRequest = () => (dispatch, getState) => {
     }
   } else {
     // Navigate within current detail
-    nextPath = getNextPathInDetail(currentPath);
+    const nextPathInDetail = getNextPathInDetail(currentPath);
 
-    if (!nextPath) {
+    if (!nextPathInDetail) {
       // No next path defined for current path - this might be an error
       console.warn(`No next path defined for: ${currentPath}`);
       nextPath = GENERIC_FINALIZATION; // Fallback to finalization
+    } else {
+      nextPath = nextPathInDetail;
     }
   }
 
@@ -148,4 +155,5 @@ export const navigateGenericRequest = () => (dispatch, getState) => {
   if (newDetailIndex !== currentDetailIndex) {
     dispatch(setCurrentDetailIndex(newDetailIndex));
   }
+  console.log("navigated to path:", nextPath);
 };
