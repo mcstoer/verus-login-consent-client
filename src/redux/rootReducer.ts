@@ -1,4 +1,4 @@
-import {combineReducers} from 'redux';
+import {combineReducers} from '@reduxjs/toolkit';
 import {navigation} from './reducers/navigation/navigation.reducer';
 import {rpc} from './reducers/rpc/rpc.reducer';
 import {identity} from './reducers/identity/identity.reducer';

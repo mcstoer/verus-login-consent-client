@@ -1,11 +1,11 @@
-import {createStore, applyMiddleware} from 'redux';
-import thunk, {ThunkDispatch} from 'redux-thunk';
 import rootReducer from './rootReducer';
-import {AnyAction} from 'redux';
+import {configureStore} from '@reduxjs/toolkit';
 
-const store = createStore(rootReducer, applyMiddleware(thunk));
+const store = configureStore({
+  reducer: rootReducer,
+});
 
 export default store;
 
-export type RootState = ReturnType<typeof rootReducer>;
-export type AppDispatch = ThunkDispatch<RootState, unknown, AnyAction>;
+export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;

@@ -1,5 +1,5 @@
 import {GenericRequest, OrdinalVDXFObject, VDXF_ORDINAL_AUTHENTICATION_REQUEST} from 'verus-typescript-primitives';
-import {Dispatch} from 'redux';
+import {Dispatch} from '@reduxjs/toolkit';
 import {CONSENT_TO_SCOPE, GENERIC_FINALIZATION} from './constants';
 
 /**

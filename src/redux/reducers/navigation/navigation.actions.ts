@@ -1,5 +1,4 @@
-import {ThunkAction} from 'redux-thunk';
-import {AnyAction} from 'redux';
+import {AnyAction, ThunkAction} from '@reduxjs/toolkit';
 import {SET_EXTERNAL_ACTION, SET_NAVIGATION_PATH, SET_CURRENT_DETAIL_INDEX} from './navigation.types';
 import {readNavigationPath} from './navigation.util';
 import {getNextDetail, getStartPathForDetail} from '../../../utils/detailNavigation';
@@ -87,21 +86,11 @@ const WITHIN_DETAIL_NEXT_PATHS: Record<string, string> = {
   // Add more within-detail path mappings as needed
 };
 
-/**
- * Determines the next path within the current detail flow.
- * @param currentPath - The current navigation path
- * @returns The next path within the detail, or null if at end of detail
- */
+// Determines the next path within the current detail flow.
 const getNextPathInDetail = (currentPath: string): string | null => {
   return WITHIN_DETAIL_NEXT_PATHS[currentPath] || null;
 };
 
-/**
- * Thunk that determines the next navigation path within the generic request handling flow
- * based on the current state. This handles navigation both between details and within a detail itself.
- * Reads currentPath, deeplinkId, deeplinkData, and currentDetailIndex from the Redux store.
- * @returns Thunk function that dispatches navigation action
- */
 export const navigateGenericRequest = (): ThunkAction<void, RootState, unknown, AnyAction> => (dispatch, getState) => {
   const state = getState();
   const currentPath = state.navigation.path;
