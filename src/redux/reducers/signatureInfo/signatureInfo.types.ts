@@ -1,3 +1,5 @@
+import {IdentityDefinition} from "verus-typescript-primitives";
+
 export const SET_SIGNATURE_INFO = 'SET_SIGNATURE_INFO' as const;
 
 export type SignatureInfoActionTypes = typeof SET_SIGNATURE_INFO;
@@ -5,12 +7,7 @@ export type SignatureInfoActionTypes = typeof SET_SIGNATURE_INFO;
 // Temporary type definitions based on the what is needed for the signature information.
 export interface Identity {
   fullyqualifiedname: string;
-  identity: {
-    identityaddress: string;
-    revocationauthority: string;
-    recoveryauthority: string;
-    [key: string]: unknown;
-  };
+  identity: IdentityDefinition;
   [key: string]: unknown;
 }
 

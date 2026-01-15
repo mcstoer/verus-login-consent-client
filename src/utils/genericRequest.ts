@@ -1,6 +1,7 @@
 import {GENERIC_REQUEST_DEEPLINK_VDXF_KEY, GenericRequest, VDXF_ORDINAL_VERUSPAY_INVOICE} from 'verus-typescript-primitives';
 import {loadIdentities} from '../rpc/calls/identities';
 import {verifyGenericRequest} from '../rpc/calls/verifyGenericRequest';
+import {Identity} from '../redux/reducers/signatureInfo/signatureInfo.types';
 
 // Checks the validity of a generic request and throws errors for any issues found
 export const checkGenericRequest = async (
@@ -23,30 +24,24 @@ export const checkGenericRequest = async (
     // Possibly throw error for appOrDelegatedId
   } else {
     // Verify the signature of the generic request.
-    // Skip this until the problem is found.
-    /*
-    console.log("Verifying generic request signature...");
     const verificationResult = await verifyGenericRequest(chainId, request);
-    console.log("Generic request verification result:", verificationResult);
     if (!verificationResult.verified) {
       throw new Error(verificationResult.message);
     }
-      */
 
     if (request.hasAppOrDelegatedID()) {
       // Check the signing identity is in the wallet, so that the appOrDelegatedId is allowed
-      const signingId = "placeholder_for_signing_identity";
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const identities = await loadIdentities(chainId) as Array<any>;
+      const signingId = request.signature.identityID.toIAddress();
+      const identities = await loadIdentities(chainId) as Array<Identity>;
       const found = identities.find(id => {
-        return id.identity.name === signingId;
+        return id.identity.identityaddress === signingId;
       });
-      console.log("Found identity in wallet:", found);
 
-      // Throw error if not found
+      if (!found) {
+        throw new Error(`The signing identity is not in the wallet, so having an app or delegated ID is not allowed.`);
+      }
     }
   }
-
 };
 
 export const isGenericRequest = (id: string): boolean => {
