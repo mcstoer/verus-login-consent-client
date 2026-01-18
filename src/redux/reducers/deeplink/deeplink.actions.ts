@@ -1,4 +1,4 @@
-import { DeeplinkData } from "./deeplink.types";
+import {DeeplinkData} from "./deeplink.types";
 import {
   SET_DEEPLINK_DATA,
   SetDeeplinkDataAction

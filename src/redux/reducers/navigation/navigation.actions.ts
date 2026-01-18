@@ -1,5 +1,5 @@
 import {AnyAction, ThunkAction} from '@reduxjs/toolkit';
-import {SET_EXTERNAL_ACTION, SET_NAVIGATION_PATH, SET_CURRENT_DETAIL_INDEX} from './navigation.types';
+import {SET_EXTERNAL_ACTION, SET_NAVIGATION_PATH, SET_CURRENT_DETAIL_INDEX, PUSH_TO_NAVIGATION_STACK, POP_FROM_NAVIGATION_STACK, CLEAR_NAVIGATION_STACK} from './navigation.types';
 import {readNavigationPath} from './navigation.util';
 import {getNextDetail, getStartPathForDetail} from '../../../utils/detailNavigation';
 import {GENERIC_REQUEST_DEEPLINK_VDXF_KEY, GenericRequest} from 'verus-typescript-primitives';
@@ -50,9 +50,37 @@ export const setExternalAction = (externalAction: string) => {
 export const setCurrentDetailIndex = (index: number) => {
   return {
     type: SET_CURRENT_DETAIL_INDEX,
+    payload: index
+  };
+};
+
+/**
+ * Pushes a path onto the navigation stack for backward navigation support
+ */
+export const pushToNavigationStack = (path: string) => {
+  return {
+    type: PUSH_TO_NAVIGATION_STACK,
     payload: {
-      currentDetailIndex: index
+      path
     }
+  };
+};
+
+/**
+ * Pops the most recent path from the navigation stack
+ */
+export const popFromNavigationStack = () => {
+  return {
+    type: POP_FROM_NAVIGATION_STACK
+  };
+};
+
+/**
+ * Clears the entire navigation stack
+ */
+export const clearNavigationStack = () => {
+  return {
+    type: CLEAR_NAVIGATION_STACK
   };
 };
 
@@ -138,6 +166,8 @@ export const navigateGenericRequest = (): ThunkAction<void, RootState, unknown, 
     }
   }
 
+  // Push current path to stack before navigating forward
+  dispatch(pushToNavigationStack(currentPath));
   dispatch(setNavigationPath(nextPath));
 
   // If detail index changed, dispatch action to update it
@@ -145,4 +175,49 @@ export const navigateGenericRequest = (): ThunkAction<void, RootState, unknown, 
     dispatch(setCurrentDetailIndex(newDetailIndex));
   }
   console.log("navigated to path:", nextPath);
+};
+
+/**
+ * Navigates backward in the generic request flow.
+ * Returns to the previous path in the navigation stack.
+ */
+export const navigateBackGenericRequest = (): ThunkAction<void, RootState, unknown, AnyAction> => (dispatch, getState) => {
+  const state = getState();
+  const navigationStack = state.navigation.navigationStack || [];
+  const currentDetailIndex = state.navigation.currentDetailIndex || 0;
+  const deeplinkId = state.deeplink.id;
+
+  // Validate that the deeplink is a generic request
+  if (deeplinkId !== GENERIC_REQUEST_DEEPLINK_VDXF_KEY.vdxfid) {
+    throw new Error(
+      `navigateBackGenericRequest can only be used with generic requests. ` +
+      `Expected deeplink ID: ${GENERIC_REQUEST_DEEPLINK_VDXF_KEY.vdxfid}, ` +
+      `but got: ${deeplinkId}`
+    );
+  }
+
+  if (navigationStack.length === 0) {
+    console.warn('Cannot navigate back: navigation stack is empty');
+    return;
+  }
+
+  const previousPath = navigationStack[navigationStack.length - 1];
+  console.log('navigating back from', state.navigation.path, 'to', previousPath);
+
+  // Check if we are returning to a previous detail
+  const previousPathInCompletionPaths = DETAIL_COMPLETION_PATHS[previousPath];
+  let newDetailIndex = currentDetailIndex;
+
+  if (previousPathInCompletionPaths && currentDetailIndex > 0) {
+    newDetailIndex = currentDetailIndex - 1;
+  }
+
+  dispatch(popFromNavigationStack());
+  dispatch(setNavigationPath(previousPath));
+
+  if (newDetailIndex !== currentDetailIndex) {
+    dispatch(setCurrentDetailIndex(newDetailIndex));
+  }
+
+  console.log('navigated back to path:', previousPath);
 };

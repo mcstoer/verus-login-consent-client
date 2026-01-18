@@ -5,14 +5,15 @@
 */
 
 import {LOADING_DISPLAY} from '../../../utils/constants';
-import {SET_EXTERNAL_ACTION, SET_NAVIGATION_PATH, SET_CURRENT_DETAIL_INDEX} from './navigation.types';
+import {SET_EXTERNAL_ACTION, SET_NAVIGATION_PATH, SET_CURRENT_DETAIL_INDEX, PUSH_TO_NAVIGATION_STACK, POP_FROM_NAVIGATION_STACK, CLEAR_NAVIGATION_STACK} from './navigation.types';
 
 export const navigation = (state = {
   path: LOADING_DISPLAY,
   pathArray: [LOADING_DISPLAY],
   previousPath: undefined,
   externalAction: "",
-  currentDetailIndex: 0
+  currentDetailIndex: 0,
+  navigationStack: []
 }, action) => {
   switch (action.type) {
   case SET_NAVIGATION_PATH:
@@ -30,7 +31,22 @@ export const navigation = (state = {
   case SET_CURRENT_DETAIL_INDEX:
     return {
       ...state,
-      currentDetailIndex: action.payload.currentDetailIndex
+      currentDetailIndex: action.payload
+    };
+  case PUSH_TO_NAVIGATION_STACK:
+    return {
+      ...state,
+      navigationStack: [...state.navigationStack, action.payload.path]
+    };
+  case POP_FROM_NAVIGATION_STACK:
+    return {
+      ...state,
+      navigationStack: state.navigationStack.slice(0, -1)
+    };
+  case CLEAR_NAVIGATION_STACK:
+    return {
+      ...state,
+      navigationStack: []
     };
   default:
     return state;
