@@ -1,6 +1,9 @@
 {
   "name": "verus-login-consent-client",
   "version": "0.1.0",
+  "imports": {
+    "#/*": "./src/*"
+  },
   "dependencies": {
     "@emotion/react": "11.14.0",
     "@emotion/styled": "11.14.0",

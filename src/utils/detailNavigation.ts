@@ -7,7 +7,7 @@ import {CONSENT_TO_SCOPE, GENERIC_FINALIZATION} from './constants';
  * Each detail type should have an entry that specifies where to start the detail flow.
  */
 const DETAIL_TYPE_TO_START_PATH: Record<string, string> = {
-  [VDXF_ORDINAL_AUTHENTICATION_REQUEST]: CONSENT_TO_SCOPE
+  [VDXF_ORDINAL_AUTHENTICATION_REQUEST.toNumber()]: CONSENT_TO_SCOPE
 };
 
 /**
@@ -21,7 +21,7 @@ type DetailPrepFunction = (detail: OrdinalVDXFObject, dispatch: Dispatch<any>) =
 const DETAIL_TYPE_PREP_FUNCTIONS: Record<string, DetailPrepFunction> = {
   // Add prep functions as detail types are implemented
   // Example:
-  [VDXF_ORDINAL_AUTHENTICATION_REQUEST.vdxfid]: async () => {
+  [VDXF_ORDINAL_AUTHENTICATION_REQUEST.toNumber()]: async () => {
     // No prep needed for authentication request at this time
     // Possibly handle the recipientConstraints here in the future
     return;
@@ -34,7 +34,7 @@ const DETAIL_TYPE_PREP_FUNCTIONS: Record<string, DetailPrepFunction> = {
  */
 export const getStartPathForDetail = (detail: OrdinalVDXFObject): string => {
   const detailType = detail.type;
-  const startPath = DETAIL_TYPE_TO_START_PATH[detailType];
+  const startPath = DETAIL_TYPE_TO_START_PATH[detailType.toNumber()];
 
   if (!startPath) {
     throw new Error(
@@ -56,7 +56,7 @@ export const runDetailPrepFunction = async (
   dispatch: Dispatch<any>
 ): Promise<void> => {
   const detailType = detail.type;
-  const prepFunction = DETAIL_TYPE_PREP_FUNCTIONS[detailType];
+  const prepFunction = DETAIL_TYPE_PREP_FUNCTIONS[detailType.toNumber()];
 
   if (prepFunction) {
     await prepFunction(detail, dispatch);

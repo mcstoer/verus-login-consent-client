@@ -8,7 +8,7 @@ import {provision} from './reducers/provision/provision.reducer';
 import {credentials} from './reducers/credentials/credentials.reducer';
 import {signatureInfo} from './reducers/signatureInfo/signatureInfo.reducer';
 import {chainMetadata} from './reducers/chainMetadata/chainMetadata.reducer';
-import {deeplink} from './reducers/deeplink/deeplink.reducer';
+import {deeplink} from './reducers/deeplink/deeplinkSlice';
 import {genericResponse} from './reducers/genericResponse/genericResponse.reducer';
 import {identityUpdate} from './reducers/identityUpdate/identityUpdate.reducer';
 

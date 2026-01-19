@@ -159,6 +159,9 @@ module.exports = (_, argv) => {
         'node_modules',
         jsSourcePath,
       ],
+      alias: {
+        '#': path.resolve(__dirname, 'src')
+      }
     },
     plugins,
     devServer: {

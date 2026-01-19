@@ -6,15 +6,15 @@ import {
   VERUSPAY_INVOICE_VDXF_KEY,
   VerusPayInvoice
 } from 'verus-typescript-primitives';
-import {DEVMODE, MOCK_IPC} from '../env';
-import {setMainChain} from '../redux/reducers/chainMetadata/chainMetadata.actions';
-import {setDeeplinkData} from '../redux/reducers/deeplink/deeplink.actions';
-import {setError} from '../redux/reducers/error/error.actions';
-import {setOriginAppBuiltin, setOriginAppId} from '../redux/reducers/origin/origin.actions';
-import {setRpcExpiryMargin, setRpcPassword, setRpcPort, setRpcPostEncryption, setRpcWindowId} from '../redux/reducers/rpc/rpc.actions';
-import store from '../redux/store';
+import {DEVMODE, MOCK_IPC} from '#/env';
+import {setMainChain} from '#/redux/reducers/chainMetadata/chainMetadata.actions';
+import {setDeeplinkData} from '#/redux/reducers/deeplink/deeplinkSlice';
+import {setError} from '#/redux/reducers/error/error.actions';
+import {setOriginAppBuiltin, setOriginAppId} from '#/redux/reducers/origin/origin.actions';
+import {setRpcExpiryMargin, setRpcPassword, setRpcPort, setRpcPostEncryption, setRpcWindowId} from '#/redux/reducers/rpc/rpc.actions';
+import store from '#/redux/store';
 import {IPC_INIT_MESSAGE, IPC_LOGIN_CONSENT_REQUEST_METHOD, IPC_ORIGIN_DEV, IPC_ORIGIN_DEV_LOCALHOST, IPC_ORIGIN_PRODUCTION, IPC_PUSH_MESSAGE} from '../utils/constants';
-import {RPC_PASSWORD, RPC_PORT} from '../utils/mocks';
+import {RPC_PASSWORD, RPC_PORT} from '#/utils/mocks';
 
 // TODO: Move these types to a dedicated file
 // Create the type that desktop uses
@@ -101,10 +101,10 @@ const updateReduxStore = (data: IpcPushMessage): void => {
   );
 
   store.dispatch(
-    setDeeplinkData(
-      data.data.deeplink.id,
-      deeplinkData
-    )
+    setDeeplinkData({
+      id: data.data.deeplink.id,
+      data: deeplinkData
+    })
   );
 
   store.dispatch(setOriginAppBuiltin(data.data.origin_app_info.search_builtin));
