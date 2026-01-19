@@ -46,8 +46,8 @@ const Login = (props: LoginProps) => {
   const deeplinkId = useSelector((state: RootState) => state.deeplink.id);
   const currentDetailIndex = useSelector((state: RootState) => state.navigation.currentDetailIndex) || 0;
 
-  const loginData: LoginData = isGenericRequest(deeplinkId)
-    ? extractLoginDataV2(deeplinkData as GenericRequest, identities, currentDetailIndex)
+  const loginData: LoginData = deeplinkData instanceof GenericRequest
+    ? extractLoginDataV2(deeplinkData, identities, currentDetailIndex)
     : extractLoginDataV1(deeplinkData as LoginConsentRequest, identities);
 
   const {

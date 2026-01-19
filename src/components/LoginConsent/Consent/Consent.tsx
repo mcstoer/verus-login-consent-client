@@ -1,16 +1,17 @@
 import React, {useState, useMemo} from 'react';
 import {useSelector} from 'react-redux';
-import {useAppDispatch} from '../../../redux/hooks';
-import {navigateGenericRequest, setExternalAction, setNavigationPath} from '../../../redux/reducers/navigation/navigation.actions';
-import {EXTERNAL_ACTION, EXTERNAL_CHAIN_START, SCOPES, SELECT_LOGIN_ID} from '../../../utils/constants';
-import {checkAndUpdateIdentities} from '../../../redux/reducers/identity/identity.actions';
-import {SUPPORTED_CREDENTIALS, CREDENTIALS} from '../../../utils/constants';
 import Button from '@mui/material/Button';
-import {RequestCard} from "../../../containers/RequestCard/RequestCard";
-import {VerusIdLogo} from "../../../images";
-import {convertFqnToDisplayFormat} from "../../../utils/fullyqualifiedname";
-import {isGenericRequest} from '../../../utils/genericRequest';
-import {GenericRequest} from 'verus-typescript-primitives';
+import {GenericRequest, LoginConsentRequest} from 'verus-typescript-primitives';
+
+import {useAppDispatch} from '#/redux/hooks';
+import {checkAndUpdateIdentities} from '#/redux/reducers/identity/identity.actions';
+import {navigateGenericRequest, setExternalAction, setNavigationPath} from '#/redux/reducers/navigation/navigation.actions';
+import {RootState} from '#/redux/store';
+import {RequestCard} from '#/containers/RequestCard/RequestCard';
+import {VerusIdLogo} from '#/images';
+import {CREDENTIALS, EXTERNAL_ACTION, EXTERNAL_CHAIN_START, SCOPES, SELECT_LOGIN_ID, SUPPORTED_CREDENTIALS} from '#/utils/constants';
+import {convertFqnToDisplayFormat} from '#/utils/fullyqualifiedname';
+import {isGenericRequest} from '#/utils/genericRequest';
 
 interface ConsentProps {
   canProcessRequest: () => boolean;
@@ -21,16 +22,11 @@ const Consent: React.FC<ConsentProps> = (props) => {
   const {canProcessRequest, completeLoginConsent} = props;
   const dispatch = useAppDispatch();
   const [loading, setLoading] = useState<boolean>(false);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const deeplinkData = useSelector((state: any) => state.deeplink.data);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const deeplinkId = useSelector((state: any) => state.deeplink.id);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const chainId = useSelector((state: any) => state.chainMetadata.chainId);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const chainName = useSelector((state: any) => state.chainMetadata.chainName);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const signatureInfo = useSelector((state: any) => state.signatureInfo);
+  const deeplinkData = useSelector((state: RootState) => state.deeplink.data);
+  const deeplinkId = useSelector((state: RootState) => state.deeplink.id);
+  const chainId = useSelector((state: RootState) => state.chainMetadata.chainId);
+  const chainName = useSelector((state: RootState) => state.chainMetadata.chainName);
+  const signatureInfo = useSelector((state: RootState) => state.signatureInfo);
 
   const {sigBlockInfo, signedBy, signingRevocationIdentity, signingRecoveryIdentity} = signatureInfo;
   const {time} = sigBlockInfo;
@@ -39,11 +35,11 @@ const Consent: React.FC<ConsentProps> = (props) => {
   let permissionsText = "";
   let systemId = "";
 
-  if (isGenericRequest(deeplinkId)) {
+  if (deeplinkData instanceof GenericRequest) {
     signerFqn = signedBy.fullyqualifiedname;
     permissionsText = "Authenticate with VerusID";
     systemId = (deeplinkData as GenericRequest).signature?.systemID.toIAddress();
-  } else {
+  } else if (deeplinkData instanceof LoginConsentRequest) {
     systemId = deeplinkData.system_id;
     // Convert the fully qualified name into a nicer format for VRSC.
     signerFqn = convertFqnToDisplayFormat(signedBy.fullyqualifiedname);

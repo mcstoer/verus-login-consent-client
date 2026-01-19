@@ -122,8 +122,6 @@ class LoginConsent extends React.Component {
 
         this.props.dispatch(setGenericResponse(response));
 
-        console.log("Created the generic response");
-
         // Initialize detail processing - navigate to first detail
         if (genericRequest.details.length > 0) {
           const firstDetail = genericRequest.details[0];
@@ -174,7 +172,7 @@ class LoginConsent extends React.Component {
         const sigBlockInfo = await getBlock(chainId, sigInfo.height.toString());
 
         // Get the identities of the revocation and recovery i-addresses to display for anti-phishing.
-        const signingRevocationIdentity  = await getIdentity(chainId, signedBy.identity.revocationauthority);
+        const signingRevocationIdentity = await getIdentity(chainId, signedBy.identity.revocationauthority);
         const signingRecoveryIdentity = await getIdentity(chainId, signedBy.identity.recoveryauthority);
 
         // Store signature information in dedicated reducer
@@ -192,15 +190,16 @@ class LoginConsent extends React.Component {
         await checkGenericRequest(chainId, request);
         if (request.isSigned) {
           signingId = request.signature.identityID.toIAddress();
-          signatureString = request.signature.signatureAsVch.toString('hex');
-          // TODO: Remove the placeholders when the signature verification works.
-          // Store signature information in dedicated reducer
+          signatureString = request.signature.signatureAsVch.toString('base64');
+          // TODO: Reduce duplication with the other requests
           const signedBy = await getIdentity(chainId, signingId);
-          const sigBlockInfo = await getBlock(chainId, '884624');
-          const signingRevocationIdentity  = await getIdentity(chainId, signingId);
-          const signingRecoveryIdentity = await getIdentity(chainId, signingId);
 
-          console.log(signedBy, sigBlockInfo, signingRevocationIdentity, signingRecoveryIdentity);
+          // Get information on the signature for displaying later.
+          const sigInfo = await getSignatureInfo(chainId, signingId, signatureString, signedBy.identity.identityaddress);
+          const sigBlockInfo = await getBlock(chainId, sigInfo.height.toString());
+
+          const signingRevocationIdentity = await getIdentity(chainId, signingId);
+          const signingRecoveryIdentity = await getIdentity(chainId, signingId);
 
           this.props.dispatch(setSignatureInfo({
             signedBy: signedBy,

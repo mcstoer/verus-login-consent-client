@@ -6,8 +6,8 @@ const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
-        ignoredActions: ['deeplink/setDeeplinkData'],
-        ignoredPaths: ['deeplink.data'],
+        ignoredActions: ['deeplink/setDeeplinkData', 'genericResponse/SET_GENERIC_RESPONSE'],
+        ignoredPaths: ['deeplink.data', 'genericResponse.response', 'error.error'],
       },
     }),
 });
