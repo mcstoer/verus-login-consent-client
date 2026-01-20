@@ -1,17 +1,27 @@
 import React, {useState} from 'react';
 import {useSelector} from 'react-redux';
 import Button from '@mui/material/Button';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemText from '@mui/material/ListItemText';
+import ListItemButton from '@mui/material/ListItemButton';
+import Collapse from '@mui/material/Collapse';
+import ExpandLess from '@mui/icons-material/ExpandLess';
+import ExpandMore from '@mui/icons-material/ExpandMore';
 import {GenericRequest, LoginConsentRequest} from 'verus-typescript-primitives';
 
 import {useAppDispatch} from '#/redux/hooks';
 import {checkAndUpdateIdentities} from '#/redux/reducers/identity/identity.actions';
 import {navigateGenericRequest, setExternalAction, setNavigationPath} from '#/redux/reducers/navigation/navigation.actions';
 import {RootState} from '#/redux/store';
-import {RequestCard} from '#/containers/RequestCard/RequestCard';
-import {VerusIdLogo} from '#/images';
+import PageLayout from '#/components/common/PageLayout';
+import IdentityDetails from '#/components/common/Identity';
 import {EXTERNAL_ACTION, EXTERNAL_CHAIN_START, SELECT_LOGIN_ID} from '#/utils/constants';
 import {extractConsentDataV1, extractConsentDataV2} from '#/utils/login/consentDataExtractors';
 import {Identity} from '#/redux/reducers/signatureInfo/signatureInfo.types';
+import {unixToDate} from '#/utils/math';
 
 interface ConsentProps {
   canProcessRequest: () => boolean;
@@ -22,6 +32,9 @@ const Consent: React.FC<ConsentProps> = (props) => {
   const {canProcessRequest, completeLoginConsent} = props;
   const dispatch = useAppDispatch();
   const [loading, setLoading] = useState<boolean>(false);
+  const [openPermissions, setOpenPermissions] = useState<boolean>(false);
+  const [openConstraints, setOpenConstraints] = useState<boolean>(false);
+  const [openResponseURIs, setOpenResponseURIs] = useState<boolean>(false);
   const deeplinkData = useSelector((state: RootState) => state.deeplink.data);
   const currentDetailIndex = useSelector((state: RootState) => state.navigation.currentDetailIndex);
   const chainId = useSelector((state: RootState) => state.chainMetadata.chainId);
@@ -37,7 +50,27 @@ const Consent: React.FC<ConsentProps> = (props) => {
     ? extractConsentDataV2(deeplinkData, signedBy as Identity, currentDetailIndex)
     : extractConsentDataV1(deeplinkData as LoginConsentRequest, signedBy as Identity);
 
-  const {signerFqn, permissionsText, systemId} = consentData;
+  const {
+    signerFqn,
+    permissionsLabels,
+    systemId,
+    constraintsLabels,
+    expiryLabel,
+    responseURIsLabels,
+  } = consentData;
+  const systemDescriptor = `${chainName} (${systemId})`;
+
+  const handlePermissionsClick = () => {
+    setOpenPermissions(!openPermissions);
+  };
+
+  const handleConstraintsClick = () => {
+    setOpenConstraints(!openConstraints);
+  };
+
+  const handleResponseURIsClick = () => {
+    setOpenResponseURIs(!openResponseURIs);
+  };
 
   const tryLogin = async (): Promise<void> => {
     setLoading(true);
@@ -63,95 +96,208 @@ const Consent: React.FC<ConsentProps> = (props) => {
   };
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        flex: 1,
-        height: "100%",
+    <PageLayout
+      title={`${signerFqn} is requesting login with VerusID`}
+      contentStyle={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: 2
       }}
-    >
-      <div
-        style={{
-          height: "100%",
-          display: "flex",
-          padding: 32,
-          flexDirection: "column",
-          alignItems: "center",
-        }}
-      >
-        <img src={VerusIdLogo} width={'55%'} height={'10%'}/>
-        <div
-          style={{
-            width: "100%",
-            display: "flex",
-            alignItems: "center",
-            padding: 8,
-            justifyContent: "center",
-          }}
-        >
-          {signerFqn}{` is requesting login with VerusID`}
-        </div>
-
-        <RequestCard
-          chainName={chainName}
-          systemId={systemId}
-          signedBy={signedBy}
-          signerFqn={signerFqn}
-          revocationIdentity={signingRevocationIdentity}
-          recoveryIdentity={signingRecoveryIdentity}
-          time={time}
-          permissions={permissionsText}
-          height={"54vh"}
-        >
-        </RequestCard>
-        <div
-          style={{
-            width: "100%",
-            display: "flex",
-            flexDirection: "row",
-            alignItems: "flex-end",
-            justifyContent: "flex-end",
-            marginTop: "auto",
-          }}
-        >
-          <div
+      footerContent={
+        <div style={{display: 'flex', justifyContent: 'flex-end', width: '100%'}}>
+          <Button
+            variant="text"
+            disabled={loading}
+            color="secondary"
+            onClick={() => cancel()}
             style={{
-              display: "flex",
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "space-between",
+              width: 120,
+              marginRight: 32,
+              padding: 8,
             }}
           >
-            <Button
-              variant="text"
-              disabled={loading}
-              color="secondary"
-              onClick={() => cancel()}
-              style={{
-                width: 120,
-                marginRight: 32,
-                padding: 8,
-              }}
-            >
-              {"Cancel"}
-            </Button>
-            <Button
-              variant="contained"
-              color="success"
-              disabled={loading}
-              onClick={() => tryLogin()}
-              style={{
-                width: 120,
-                padding: 8,
-              }}
-            >
-              {"Continue"}
-            </Button>
-          </div>
+            {"Cancel"}
+          </Button>
+          <Button
+            variant="contained"
+            color="success"
+            disabled={loading}
+            onClick={() => tryLogin()}
+            style={{
+              width: 120,
+              padding: 8,
+            }}
+          >
+            {"Continue"}
+          </Button>
         </div>
-      </div>
-    </div>
+      }
+    >
+      <Card
+        square
+        sx={{
+          width: '100%',
+          maxHeight: '60vh',
+          overflowY: 'auto',
+        }}
+      >
+        <CardContent>
+          <List>
+            <IdentityDetails
+              identity={signedBy}
+              revocationAuthority={signingRevocationIdentity}
+              recoveryAuthority={signingRecoveryIdentity}
+              systemDescriptor={systemDescriptor}
+              headerLabel="Requested by"
+            />
+
+            <ListItem divider>
+              <ListItemText
+                primary={systemDescriptor || '-'}
+                secondary="System name"
+                slotProps={{
+                  primary: {variant: 'subtitle1'},
+                  secondary: {color: 'text.secondary', variant: 'body2'}
+                }}
+              />
+            </ListItem>
+
+            <ListItem divider>
+              <ListItemText
+                primary={time ? unixToDate(time) : '-'}
+                secondary="Signed on"
+                slotProps={{
+                  primary: {variant: 'subtitle1'},
+                  secondary: {color: 'text.secondary', variant: 'body2'}
+                }}
+              />
+            </ListItem>
+
+            {permissionsLabels && permissionsLabels.length > 0 && (
+              <>
+                <ListItemButton
+                  onClick={handlePermissionsClick}
+                >
+                  <ListItemText
+                    primary="Permissions Requested"
+                    secondary={openPermissions ? 'Click to collapse' : 'Click to expand'}
+                    slotProps={{
+                      primary: {variant: 'subtitle1'},
+                      secondary: {color: 'text.secondary', variant: 'body2'}
+                    }}
+                  />
+                  {openPermissions ? <ExpandLess color="action" /> : <ExpandMore color="action" />}
+                </ListItemButton>
+
+                <Collapse in={openPermissions} timeout="auto" unmountOnExit>
+                  <List
+                    component="div"
+                    dense
+                    disablePadding
+                  >
+                    {permissionsLabels.map((permission, index) => (
+                      <ListItem key={index} divider sx={{pl: 6, pr: 2, py: 0.5, minHeight: 48}}>
+                        <ListItemText
+                          primary={`${permission}`}
+                          slotProps={{
+                            primary: {variant: 'body2', sx: {lineHeight: 1.3}}
+                          }}
+                        />
+                      </ListItem>
+                    ))}
+                  </List>
+                </Collapse>
+              </>
+            )}
+
+            {constraintsLabels && constraintsLabels.length > 0 && (
+              <>
+                <ListItemButton
+                  onClick={handleConstraintsClick}
+                >
+                  <ListItemText
+                    primary="Constraints"
+                    secondary={openConstraints ? 'Click to collapse' : 'Click to expand'}
+                    slotProps={{
+                      primary: {variant: 'subtitle1'},
+                      secondary: {color: 'text.secondary', variant: 'body2'}
+                    }}
+                  />
+                  {openConstraints ? <ExpandLess color="action" /> : <ExpandMore color="action" />}
+                </ListItemButton>
+
+                <Collapse in={openConstraints} timeout="auto" unmountOnExit>
+                  <List
+                    component="div"
+                    dense
+                    disablePadding
+                  >
+                    {constraintsLabels.map((constraint, index) => (
+                      <ListItem key={index} divider sx={{pl: 6, pr: 2, py: 0.5, minHeight: 48}}>
+                        <ListItemText
+                          primary={`${constraint}`}
+                          slotProps={{
+                            primary: {variant: 'body2', sx: {lineHeight: 1.3}}
+                          }}
+                        />
+                      </ListItem>
+                    ))}
+                  </List>
+                </Collapse>
+              </>
+            )}
+
+            {responseURIsLabels.length > 0 && (
+              <>
+                <ListItemButton
+                  onClick={handleResponseURIsClick}
+                >
+                  <ListItemText
+                    primary="Response URIs"
+                    secondary={openResponseURIs ? 'Click to collapse' : 'Click to expand'}
+                    slotProps={{
+                      primary: {variant: 'subtitle1'},
+                      secondary: {color: 'text.secondary', variant: 'body2'}
+                    }}
+                  />
+                  {openResponseURIs ? <ExpandLess color="action" /> : <ExpandMore color="action" />}
+                </ListItemButton>
+
+                <Collapse in={openResponseURIs} timeout="auto" unmountOnExit>
+                  <List
+                    component="div"
+                    dense
+                    disablePadding
+                  >
+                    {responseURIsLabels.map((uri, index) => (
+                      <ListItem key={index} divider sx={{pl: 6, pr: 2, py: 0.5, minHeight: 48}}>
+                        <ListItemText
+                          primary={`${uri}`}
+                          slotProps={{
+                            primary: {variant: 'body2', sx: {lineHeight: 1.3}}
+                          }}
+                        />
+                      </ListItem>
+                    ))}
+                  </List>
+                </Collapse>
+              </>
+            )}
+            <ListItem divider>
+              <ListItemText
+                primary={expiryLabel || '-'}
+                secondary="Expires at"
+                slotProps={{
+                  primary: {variant: 'subtitle1'},
+                  secondary: {color: 'text.secondary', variant: 'body2'}
+                }}
+              />
+            </ListItem>
+          </List>
+        </CardContent>
+      </Card>
+    </PageLayout>
   );
 };
 

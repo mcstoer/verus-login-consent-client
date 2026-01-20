@@ -3,17 +3,21 @@ import {
   LoginConsentRequest,
   ID_ADDRESS_VDXF_KEY,
   LOGIN_CONSENT_ID_PROVISIONING_WEBHOOK_VDXF_KEY,
-  VDXF_ORDINAL_AUTHENTICATION_REQUEST,
+  AuthenticationRequestOrdinalVDXFObject,
+  RecipientConstraint,
+  AuthenticationRequestDetails,
 } from 'verus-typescript-primitives';
-import {SUPPORTED_CREDENTIALS} from '../constants';
-import {Identity} from '../../redux/reducers/signatureInfo/signatureInfo.types';
+import {SUPPORTED_CREDENTIALS} from '#/utils/constants';
+import {Identity} from '#/redux/reducers/signatureInfo/signatureInfo.types';
+import {getSystemNameFromSystemId} from '#/utils/systems';
 
 // The data for displaying the identity selection UI for login.
 export interface LoginData {
-  requestedDataKeys: string[];
-  hasRequestedCredentials: boolean;
+  requestedDataKeys?: string[];
+  hasRequestedCredentials?: boolean;
   canProvision: boolean;
-  identitySubjects: string[];
+  identitySubjects?: string[];
+  filterIdentities: (identities: Identity[]) => Identity[];
 }
 
 // extractLoginDataV1 gets the data from the LoginConsentRequest.
@@ -38,22 +42,54 @@ export const extractLoginDataV1 = (
       .filter((item: {vdxfkey: string}) => item.vdxfkey === ID_ADDRESS_VDXF_KEY.vdxfid)
       .map((id: {data: string}) => id.data);
 
-  if (identities.length > 0 && identitySubjects.length > 0) {
-    const identitySubjectMatches = identities.filter((id: Identity) =>
-      identitySubjects.includes(id.identity.identityaddress)
-    );
+  const identitySubjectMatches = identities.filter((id: Identity) =>
+    identitySubjects.includes(id.identity.identityaddress)
+  );
 
-    if (identitySubjectMatches.length > 0) {
-      canProvision = false;
-    }
+  if (identitySubjectMatches.length > 0) {
+    canProvision = false;
   }
+
+  const filterIdentities = (identitiesToFilter: Identity[]): Identity[] => {
+    if (identitySubjectMatches.length > 0) {
+      return identitySubjectMatches;
+    }
+    return identitiesToFilter;
+  };
 
   return {
     requestedDataKeys,
     hasRequestedCredentials,
     canProvision,
     identitySubjects,
+    filterIdentities,
   };
+};
+
+const getAllowedSystems = (recipientConstraints: RecipientConstraint[]) => {
+  return recipientConstraints.reduce((acc, constraint) => {
+    if (constraint.type === AuthenticationRequestDetails.REQUIRED_SYSTEM) {
+      try {
+        acc.add(getSystemNameFromSystemId(constraint.identity.toIAddress()));
+      } catch {
+        // Skip invalid systems
+      }
+    }
+    return acc;
+  }, new Set<string>());
+};
+
+const getRequiredIDs = (recipientConstraints: RecipientConstraint[]) => {
+  return recipientConstraints.reduce((acc, constraint) => {
+    if (constraint.type === AuthenticationRequestDetails.REQUIRED_ID) {
+      try {
+        acc.add(constraint.identity.toIAddress());
+      } catch {
+        // Skip invalid IDs
+      }
+    }
+    return acc;
+  }, new Set<string>());
 };
 
 // extractLoginDataV2 gets the data from the authentication request detail in a generic request.
@@ -62,25 +98,44 @@ export const extractLoginDataV2 = (
   identities: Identity[],
   currentDetailIndex: number,
 ): LoginData => {
-  const authDetail = request.details[currentDetailIndex];
+  const ordinalWrapper = request.details[currentDetailIndex];
 
-  if (!authDetail.type.eq(VDXF_ORDINAL_AUTHENTICATION_REQUEST)) {
-    throw new Error('Current detail in the request is not an authentication request detail');
+  if (!(ordinalWrapper instanceof AuthenticationRequestOrdinalVDXFObject)) {
+    throw new Error('Detail is not an AuthenticationRequestOrdinalVDXFObject');
   }
-
-  const requestedDataKeys: string[] = [];
-  const hasRequestedCredentials: boolean = false;
 
   // TODO: Implement provisioning detection for v2 when provisioning detail type is defined
   const canProvision = false;
 
-  // TODO: Extract identity subjects from auth detail when structure is defined
-  const identitySubjects: string[] = [];
+  const authRequestDetail = ordinalWrapper.data;
+
+  const recipientConstraints = authRequestDetail?.recipientConstraints ?? [];
+  const allowedSystems = getAllowedSystems(recipientConstraints);
+  const requiredIDs = getRequiredIDs(recipientConstraints);
+
+  const filterIdentities = (identitiesToFilter: Identity[]): Identity[] => {
+    if (requiredIDs.size === 0 && allowedSystems.size === 0) {
+      return identitiesToFilter;
+    }
+
+    return identitiesToFilter.filter(identity => {
+      const iAddr = identity.identity.identityaddress;
+      const chainId = identity.identity.systemid;
+
+      if (requiredIDs.size > 0 && !requiredIDs.has(iAddr)) {
+        return false;
+      }
+
+      if (allowedSystems.size > 0 && !allowedSystems.has(chainId)) {
+        return false;
+      }
+
+      return true;
+    });
+  };
 
   return {
-    requestedDataKeys,
-    hasRequestedCredentials,
     canProvision,
-    identitySubjects,
+    filterIdentities,
   };
 };

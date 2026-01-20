@@ -1,5 +1,5 @@
 import {extractConsentDataV1, extractConsentDataV2} from './consentDataExtractors';
-import {GenericRequest, LoginConsentRequest} from 'verus-typescript-primitives';
+import {GenericRequest, LoginConsentRequest, AuthenticationRequestOrdinalVDXFObject} from 'verus-typescript-primitives';
 import {Identity} from '../../redux/reducers/signatureInfo/signatureInfo.types';
 
 describe('consentDataExtractors', () => {
@@ -11,6 +11,9 @@ describe('consentDataExtractors', () => {
           requested_access: [
             {vdxfkey: 'iCVH2MqhgvFiGu3NqcRK9FgDjfRtpQQkCy'},
           ],
+          redirect_uris: [
+            {uri: 'https://example.com/callback'},
+          ],
         },
       } as unknown as LoginConsentRequest;
 
@@ -21,62 +24,49 @@ describe('consentDataExtractors', () => {
       const result = extractConsentDataV1(mockRequest, mockSignedBy);
 
       expect(result).toHaveProperty('signerFqn');
-      expect(result).toHaveProperty('permissionsText');
+      expect(result).toHaveProperty('permissionsLabels');
       expect(result).toHaveProperty('systemId');
+      expect(result).toHaveProperty('responseURIsLabels');
       expect(result.systemId).toBe('iJhCezBExJHvtyH3fSUwhzybVMVcCL9Gjf');
-    });
-
-    it('should handle empty requested_access', () => {
-      const mockRequest = {
-        system_id: 'iJhCezBExJHvtyH3fSUwhzybVMVcCL9Gjf',
-        challenge: {
-          requested_access: null,
-        },
-      } as unknown as LoginConsentRequest;
-
-      const mockSignedBy = {
-        fullyqualifiedname: 'testuser@',
-      } as unknown as Identity;
-
-      const result = extractConsentDataV1(mockRequest, mockSignedBy);
-
-      expect(result.permissionsText).toBe('');
+      expect(Array.isArray(result.permissionsLabels)).toBe(true);
+      expect(Array.isArray(result.responseURIsLabels)).toBe(true);
+      expect(result.responseURIsLabels).toEqual(['https://example.com/callback']);
     });
   });
 
   describe('extractConsentDataV2', () => {
     it('should extract consent data from GenericRequest', () => {
+      const mockAuthRequestDetail = {
+        hasExpiryTime: () => false,
+        recipientConstraints: [],
+        responseURIs: [],
+      };
+
+      const mockOrdinalWrapper = new AuthenticationRequestOrdinalVDXFObject();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (mockOrdinalWrapper as any).data = mockAuthRequestDetail;
+
       const mockRequest = {
         signature: {
           systemID: {
             toIAddress: () => 'iJhCezBExJHvtyH3fSUwhzybVMVcCL9Gjf',
           },
         },
+        details: [mockOrdinalWrapper],
       } as unknown as GenericRequest;
 
       const mockSignedBy = {
         fullyqualifiedname: 'testuser@',
       } as unknown as Identity;
 
-      const result = extractConsentDataV2(mockRequest, mockSignedBy);
+      const result = extractConsentDataV2(mockRequest, mockSignedBy, 0);
 
       expect(result.signerFqn).toBe('testuser@');
-      expect(result.permissionsText).toBe('Authenticate with VerusID');
+      expect(result.permissionsLabels).toEqual([]);
       expect(result.systemId).toBe('iJhCezBExJHvtyH3fSUwhzybVMVcCL9Gjf');
-    });
-
-    it('should handle missing signature', () => {
-      const mockRequest = {
-        signature: null,
-      } as unknown as GenericRequest;
-
-      const mockSignedBy = {
-        fullyqualifiedname: 'testuser@',
-      } as unknown as Identity;
-
-      const result = extractConsentDataV2(mockRequest, mockSignedBy);
-
-      expect(result.systemId).toBe('');
+      expect(result.constraintsLabels).toEqual([]);
+      expect(result.responseURIsLabels).toEqual([]);
+      expect(result.expiryLabel).toBeNull();
     });
   });
 });

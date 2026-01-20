@@ -4,6 +4,7 @@ import {
   GenericRequest,
   LoginConsentRequest,
   RecipientConstraint,
+  RedirectUri,
   ResponseURI,
 } from 'verus-typescript-primitives';
 import {CREDENTIALS, SCOPES, SUPPORTED_CREDENTIALS} from '#/utils/constants';
@@ -14,7 +15,7 @@ import {getSystemNameFromSystemId} from '#/utils/systems';
 
 export interface ConsentData {
   signerFqn: string;
-  permissionsText: string;
+  permissionsLabels: string[];
   systemId: string;
   expiryLabel?: string;
   constraintsLabels?: string[];
@@ -42,13 +43,11 @@ export const extractConsentDataV1 = (
     }
   }
 
-  const permissionsText = permissionsDescriptions.join(", ");
-
-  const responseURIsLabels = request.challenge.redirect_uris.map((uri) => uri.toString());
+  const responseURIsLabels = request.challenge.redirect_uris.map((uri: RedirectUri) => uri.uri);
 
   return {
     signerFqn,
-    permissionsText,
+    permissionsLabels: permissionsDescriptions,
     systemId,
     responseURIsLabels,
   };
@@ -95,7 +94,8 @@ export const extractConsentDataV2 = (
   const signerFqn = convertFqnToDisplayFormat(signedBy.fullyqualifiedname);
   const systemId = request.signature?.systemID.toIAddress() || "";
 
-  const permissionsText = "Authenticate with VerusID";
+  // The generic request doesn't use permission labels since each detail displays their own info.
+  const permissionsLabels = [];
 
   const ordinalWrapper = request.details[currentDetailIndex];
 
@@ -105,15 +105,15 @@ export const extractConsentDataV2 = (
 
   const authRequestDetail = ordinalWrapper.data;
   const expiryLabel = getExpiryLabel(authRequestDetail);
-  const constraints = authRequestDetail && authRequestDetail.recipientConstraints ? authRequestDetail.recipientConstraints : [];
-  const responseURIs = authRequestDetail && authRequestDetail.responseURIs ? authRequestDetail.responseURIs : [];
+  const constraints = authRequestDetail?.recipientConstraints ?? [];
+  const responseURIs = authRequestDetail?.responseURIs ?? [];
 
   const constraintsLabels = constraints.map(getConstraintLabel);
-  const responseURIsLabels = responseURIs.map((uri: ResponseURI) => uri.toString());
+  const responseURIsLabels = responseURIs.map((uri: ResponseURI) => uri.getUriString());
 
   return {
     signerFqn,
-    permissionsText,
+    permissionsLabels,
     systemId,
     expiryLabel,
     constraintsLabels,

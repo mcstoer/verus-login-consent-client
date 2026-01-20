@@ -51,10 +51,13 @@ const Login = (props: LoginProps) => {
     : extractLoginDataV1(deeplinkData as LoginConsentRequest, identities);
 
   const {
-    requestedDataKeys,
-    hasRequestedCredentials,
-    canProvision
+    requestedDataKeys = [],
+    hasRequestedCredentials = false,
+    canProvision,
+    filterIdentities
   } = loginData;
+
+  const filteredIdentities = filterIdentities(identities);
 
   const [includeCredentials, setIncludeCredentials] = useState(hasRequestedCredentials);
 
@@ -128,7 +131,7 @@ const Login = (props: LoginProps) => {
       setActiveVerusId(
         address.length == 0
           ? null
-          : identities.find((x: Identity) => address === x.identity.identityaddress)
+          : filteredIdentities.find((x: Identity) => address === x.identity.identityaddress)
       )
     );
   };
@@ -204,7 +207,7 @@ const Login = (props: LoginProps) => {
               <MenuItem value="">
                 <em>Select a VerusID</em>
               </MenuItem>
-              {identities.map((id: Identity, index: number) => {
+              {filteredIdentities.map((id: Identity, index: number) => {
                 return (
                   <MenuItem
                     key={index}
