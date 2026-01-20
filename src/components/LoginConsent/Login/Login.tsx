@@ -1,33 +1,29 @@
 import React, {useState} from 'react';
 import {useSelector} from 'react-redux';
-import {navigateBackGenericRequest, setExternalAction, setNavigationPath} from '../../../redux/reducers/navigation/navigation.actions';
-import {
-  CONSENT_TO_SCOPE,
-  EXTERNAL_ACTION,
-  EXTERNAL_CHAIN_START,
-  REDIRECT,
-  PROVISIONING_FORM,
-  CREDENTIALS_REVIEW
-} from '../../../utils/constants';
-import {checkAndUpdateIdentities, setActiveVerusId} from '../../../redux/reducers/identity/identity.actions';
-import {setError} from '../../../redux/reducers/error/error.actions';
-import {getCredentialsByScope} from '../../../rpc/calls/getCredentials';
+
 import Button from '@mui/material/Button';
-import MenuItem from '@mui/material/MenuItem';
-import FormControl from '@mui/material/FormControl';
-import Select from '@mui/material/Select';
-import {VerusIdLogo} from "../../../images";
 import Checkbox from '@mui/material/Checkbox';
+import FormControl from '@mui/material/FormControl';
 import FormControlLabel from '@mui/material/FormControlLabel';
-import {setCredentials} from '../../../redux/reducers/credentials/credentials.actions';
-import {createAndSignLoginResponse} from '../../../utils/loginResponse';
-import {RootState} from '../../../redux/store';
+import MenuItem from '@mui/material/MenuItem';
+import Select from '@mui/material/Select';
 import {SelectChangeEvent} from '@mui/material/Select';
-import {LoginConsentRequest, GenericRequest} from 'verus-typescript-primitives';
-import {isGenericRequest} from '../../../utils/genericRequest';
-import {extractLoginDataV1, extractLoginDataV2, LoginData} from '../../../utils/login/loginDataExtractors';
-import {Identity} from '../../../redux/reducers/signatureInfo/signatureInfo.types';
-import {useAppDispatch} from '../../../redux/hooks';
+
+import {GenericRequest, LoginConsentRequest} from 'verus-typescript-primitives';
+
+import {checkAndUpdateIdentities, setActiveVerusId} from '#/redux/reducers/identity/identity.actions';
+import {setCredentials} from '#/redux/reducers/credentials/credentials.actions';
+import {setError} from '#/redux/reducers/error/error.actions';
+import {navigateBackGenericRequest, navigateGenericRequest, setExternalAction, setNavigationPath} from '#/redux/reducers/navigation/navigation.actions';
+import {useAppDispatch} from '#/redux/hooks';
+import {RootState} from '#/redux/store';
+import {VerusIdLogo} from '#/images';
+import {getCredentialsByScope} from '#/rpc/calls/getCredentials';
+import {CONSENT_TO_SCOPE, CREDENTIALS_REVIEW, EXTERNAL_ACTION, EXTERNAL_CHAIN_START, PROVISIONING_FORM, REDIRECT} from '#/utils/constants';
+import {createAndSignLoginResponse} from '#/utils/loginResponse';
+import {isGenericRequest} from '#/utils/genericRequest';
+import {extractLoginDataV1, extractLoginDataV2, LoginData} from '#/utils/login/loginDataExtractors';
+import {Identity} from '#/redux/reducers/signatureInfo/signatureInfo.types';
 
 interface LoginProps {
   canProcessRequest: () => boolean;
@@ -76,45 +72,49 @@ const Login = (props: LoginProps) => {
     userActions.map(action => dispatch(action));
 
     if (canProcessRequest()) {
-      const loginIdentity = activeIdentity.identity.identityaddress;
+      if (isGenericRequest) {
+        dispatch(navigateGenericRequest());
+      } else {
+        const loginIdentity = activeIdentity.identity.identityaddress;
 
-      try {
-        if (includeCredentials && hasRequestedCredentials) {
+        try {
+          if (includeCredentials && hasRequestedCredentials) {
           // Get the associated credentials based on the signing id.
-          let credentials: unknown[] = [];
-          try {
-            credentials = await getCredentialsByScope(
-              chainId,
-              loginIdentity,
+            let credentials: unknown[] = [];
+            try {
+              credentials = await getCredentialsByScope(
+                chainId,
+                loginIdentity,
               signatureInfo.signedBy!.identity.identityaddress,
               requestedDataKeys // Pass the requested credentials
-            );
-          } catch (e) {
+              );
+            } catch (e) {
             // Ignore the error if it means that there are no credentials to be fetched.
-            if (e instanceof Error && !e.message.includes("No z-address found for identity")) {
-              throw e;
+              if (e instanceof Error && !e.message.includes("No z-address found for identity")) {
+                throw e;
+              }
             }
+
+            dispatch(setCredentials(credentials));
+
+            setLoading(false);
+            dispatch(setNavigationPath(CREDENTIALS_REVIEW));
+          } else {
+            const signedResponse = await createAndSignLoginResponse(
+              chainId,
+              deeplinkData,
+              loginIdentity,
+              []
+            );
+
+            setRequestResult(signedResponse, () => {
+              dispatch(setNavigationPath(REDIRECT));
+            });
           }
-
-          dispatch(setCredentials(credentials));
-
+        } catch(e) {
           setLoading(false);
-          dispatch(setNavigationPath(CREDENTIALS_REVIEW));
-        } else {
-          const signedResponse = await createAndSignLoginResponse(
-            chainId,
-            deeplinkData,
-            loginIdentity,
-            []
-          );
-
-          setRequestResult(signedResponse, () => {
-            dispatch(setNavigationPath(REDIRECT));
-          });
+          dispatch(setError(e));
         }
-      } catch(e) {
-        setLoading(false);
-        dispatch(setError(e));
       }
     } else {
       dispatch(setExternalAction(EXTERNAL_CHAIN_START));
