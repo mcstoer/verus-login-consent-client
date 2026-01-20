@@ -25,7 +25,7 @@ import {RootState} from '../../../redux/store';
 import {SelectChangeEvent} from '@mui/material/Select';
 import {LoginConsentRequest, GenericRequest} from 'verus-typescript-primitives';
 import {isGenericRequest} from '../../../utils/genericRequest';
-import {extractLoginDataV1, extractLoginDataV2, LoginData} from '../../../utils/loginDataExtractors';
+import {extractLoginDataV1, extractLoginDataV2, LoginData} from '../../../utils/login/loginDataExtractors';
 import {Identity} from '../../../redux/reducers/signatureInfo/signatureInfo.types';
 import {useAppDispatch} from '../../../redux/hooks';
 

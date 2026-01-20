@@ -11,6 +11,7 @@ import {chainMetadata} from './reducers/chainMetadata/chainMetadata.reducer';
 import {deeplink} from './reducers/deeplink/deeplinkSlice';
 import {genericResponse} from './reducers/genericResponse/genericResponse.reducer';
 import {identityUpdate} from './reducers/identityUpdate/identityUpdate.reducer';
+import genericRequestReducer from './reducers/genericRequest';
 
 const rootReducer = combineReducers({
   navigation,
@@ -25,6 +26,7 @@ const rootReducer = combineReducers({
   deeplink,
   genericResponse,
   identityUpdate,
+  genericRequest: genericRequestReducer,
 });
 
 export default rootReducer;

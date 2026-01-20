@@ -1,7 +1,7 @@
 import {AnyAction, ThunkAction} from '@reduxjs/toolkit';
 import {SET_EXTERNAL_ACTION, SET_NAVIGATION_PATH, SET_CURRENT_DETAIL_INDEX, PUSH_TO_NAVIGATION_STACK, POP_FROM_NAVIGATION_STACK, CLEAR_NAVIGATION_STACK} from './navigation.types';
 import {readNavigationPath} from './navigation.util';
-import {getNextDetail, getStartPathForDetail} from '../../../utils/detailNavigation';
+import {getNextDetail, getStartPathForDetail, runDetailPrepFunction} from '#/utils/detailNavigation';
 import {GENERIC_REQUEST_DEEPLINK_VDXF_KEY, GenericRequest} from 'verus-typescript-primitives';
 import {
   IDENTITY_UPDATE_RESULT,
@@ -119,7 +119,7 @@ const getNextPathInDetail = (currentPath: string): string | null => {
   return WITHIN_DETAIL_NEXT_PATHS[currentPath] || null;
 };
 
-export const navigateGenericRequest = (): ThunkAction<void, RootState, unknown, AnyAction> => (dispatch, getState) => {
+export const navigateGenericRequest = (): ThunkAction<Promise<void>, RootState, undefined, AnyAction> => async (dispatch, getState) => {
   const state = getState();
   const currentPath = state.navigation.path;
   const deeplinkId = state.deeplink.id;
@@ -149,6 +149,10 @@ export const navigateGenericRequest = (): ThunkAction<void, RootState, unknown, 
       // More details to process - navigate to the start of the next detail
       nextPath = getStartPathForDetail(nextDetail);
       newDetailIndex = currentDetailIndex + 1;
+
+      // Run the prep function for the next detail
+      // The prep function should check state to avoid redundant work
+      await runDetailPrepFunction(nextDetail, dispatch, getState);
     } else {
       // All details complete - navigate to finalization
       nextPath = GENERIC_FINALIZATION;
@@ -181,7 +185,7 @@ export const navigateGenericRequest = (): ThunkAction<void, RootState, unknown, 
  * Navigates backward in the generic request flow.
  * Returns to the previous path in the navigation stack.
  */
-export const navigateBackGenericRequest = (): ThunkAction<void, RootState, unknown, AnyAction> => (dispatch, getState) => {
+export const navigateBackGenericRequest = (): ThunkAction<void, RootState, undefined, AnyAction> => (dispatch, getState) => {
   const state = getState();
   const navigationStack = state.navigation.navigationStack || [];
   const currentDetailIndex = state.navigation.currentDetailIndex || 0;

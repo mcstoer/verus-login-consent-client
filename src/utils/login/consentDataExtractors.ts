@@ -1,0 +1,127 @@
+import {
+  AuthenticationRequestDetails,
+  AuthenticationRequestOrdinalVDXFObject,
+  GenericRequest,
+  LoginConsentRequest,
+  RecipientConstraint,
+  ResponseURI,
+} from 'verus-typescript-primitives';
+import {CREDENTIALS, SCOPES, SUPPORTED_CREDENTIALS} from '#/utils/constants';
+import {convertFqnToDisplayFormat} from '#/utils/fullyqualifiedname';
+import {Identity} from '#/redux/reducers/signatureInfo/signatureInfo.types';
+import {unixToDate} from '#/utils/math';
+import {getSystemNameFromSystemId} from '#/utils/systems';
+
+export interface ConsentData {
+  signerFqn: string;
+  permissionsText: string;
+  systemId: string;
+  expiryLabel?: string;
+  constraintsLabels?: string[];
+  responseURIsLabels?: string[];
+}
+
+// extractConsentDataV1 extracts display data from a LoginConsentRequest for the consent screen.
+export const extractConsentDataV1 = (
+  request: LoginConsentRequest,
+  signedBy: Identity,
+): ConsentData => {
+  const signerFqn = convertFqnToDisplayFormat(signedBy.fullyqualifiedname);
+  const systemId = request.system_id;
+
+  const requestedPermissions = request.challenge.requested_access;
+  const permissionsDescriptions: string[] = [];
+
+  if (requestedPermissions != null) {
+    for (const permission of requestedPermissions) {
+      if (SCOPES[permission.vdxfkey]) {
+        permissionsDescriptions.push(SCOPES[permission.vdxfkey].description);
+      } else if (SUPPORTED_CREDENTIALS.includes(permission.vdxfkey) && CREDENTIALS[permission.vdxfkey]) {
+        permissionsDescriptions.push("Get " + CREDENTIALS[permission.vdxfkey].description + " credential");
+      }
+    }
+  }
+
+  const permissionsText = permissionsDescriptions.join(", ");
+
+  const responseURIsLabels = request.challenge.redirect_uris.map((uri) => uri.toString());
+
+  return {
+    signerFqn,
+    permissionsText,
+    systemId,
+    responseURIsLabels,
+  };
+};
+
+const getExpiryLabel = (authReqDetail: AuthenticationRequestDetails) => {
+  if (!authReqDetail?.hasExpiryTime()) return null;
+  return unixToDate(authReqDetail.expiryTime.toNumber());
+};
+
+const getConstraintLabel = (constraint: RecipientConstraint) => {
+  const identityLabel = constraint.identity.address;
+  let constraintLabel = identityLabel;
+
+  try {
+    constraintLabel = constraint.identity.toIAddress();
+  } catch {
+    constraintLabel = identityLabel;
+  }
+
+  if (constraint.type === AuthenticationRequestDetails.REQUIRED_SYSTEM) {
+    const systemName = getSystemNameFromSystemId(constraintLabel);
+    if (systemName) constraintLabel = systemName;
+  }
+
+  switch (constraint.type) {
+  case AuthenticationRequestDetails.REQUIRED_ID:
+    return `Required identity: ${constraintLabel}`;
+  case AuthenticationRequestDetails.REQUIRED_SYSTEM:
+    return `Required system: ${constraintLabel}`;
+  case AuthenticationRequestDetails.REQUIRED_PARENT:
+    return `Required parent: ${constraintLabel}`;
+  default:
+    return `Constraint: ${constraintLabel}`;
+  }
+};
+
+// extractConsentDataV2 extracts display data from a GenericRequestfor the consent screen.
+export const extractConsentDataV2 = (
+  request: GenericRequest,
+  signedBy: Identity,
+  currentDetailIndex: number,
+): ConsentData => {
+  const signerFqn = convertFqnToDisplayFormat(signedBy.fullyqualifiedname);
+  const systemId = request.signature?.systemID.toIAddress() || "";
+
+  const permissionsText = "Authenticate with VerusID";
+
+  const ordinalWrapper = request.details[currentDetailIndex];
+
+  if (!(ordinalWrapper instanceof AuthenticationRequestOrdinalVDXFObject)) {
+    throw new Error('Detail is not an AuthenticationRequestOrdinalVDXFObject');
+  }
+
+  const authRequestDetail = ordinalWrapper.data;
+  const expiryLabel = getExpiryLabel(authRequestDetail);
+  const constraints = authRequestDetail && authRequestDetail.recipientConstraints ? authRequestDetail.recipientConstraints : [];
+  const responseURIs = authRequestDetail && authRequestDetail.responseURIs ? authRequestDetail.responseURIs : [];
+
+  const constraintsLabels = constraints.map(getConstraintLabel);
+  const responseURIsLabels = responseURIs.map((uri: ResponseURI) => uri.toString());
+
+  return {
+    signerFqn,
+    permissionsText,
+    systemId,
+    expiryLabel,
+    constraintsLabels,
+    responseURIsLabels,
+  };
+};
+
+
+
+
+

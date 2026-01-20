@@ -1,6 +1,6 @@
 import {GenericRequest, OrdinalVDXFObject, VDXF_ORDINAL_AUTHENTICATION_REQUEST} from 'verus-typescript-primitives';
-import {Dispatch} from '@reduxjs/toolkit';
 import {CONSENT_TO_SCOPE, GENERIC_FINALIZATION} from './constants';
+import {RootState, AppDispatch} from '../redux/store';
 
 /**
  * Maps detail types to their initial navigation paths.
@@ -14,9 +14,9 @@ const DETAIL_TYPE_TO_START_PATH: Record<string, string> = {
  * Maps detail types to their preparation functions.
  * These functions run before navigating to a detail's first screen.
  * Use them to initialize Redux state, fetch data, or perform validation.
+ * They receive dispatch and getState to check current state and avoid redundant work.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type DetailPrepFunction = (detail: OrdinalVDXFObject, dispatch: Dispatch<any>) => Promise<void>;
+type DetailPrepFunction = (detail: OrdinalVDXFObject, dispatch: AppDispatch, getState: () => RootState) => Promise<void>;
 
 const DETAIL_TYPE_PREP_FUNCTIONS: Record<string, DetailPrepFunction> = {
   // Add prep functions as detail types are implemented
@@ -24,8 +24,30 @@ const DETAIL_TYPE_PREP_FUNCTIONS: Record<string, DetailPrepFunction> = {
   [VDXF_ORDINAL_AUTHENTICATION_REQUEST.toNumber()]: async () => {
     // No prep needed for authentication request at this time
     // Possibly handle the recipientConstraints here in the future
+    // When implementing a real prep function, you'll have access to:
+    // - detail: the OrdinalVDXFObject to prepare
+    // - dispatch: to dispatch Redux actions
+    // - getState: to check current state and avoid redundant work
+    console.log('No prep function needed for authentication request detail');
     return;
   }
+
+  // Example of a prep function that checks state to avoid redundant work:
+  // [SOME_DETAIL_TYPE]: async (detail, dispatch, getState) => {
+  //   const state = getState();
+  //
+  //   // Check if this detail has already been prepped
+  //   const alreadyPrepped = state.someSlice.preppedDetails?.[detail.id];
+  //   if (alreadyPrepped) {
+  //     console.log('Detail already prepared, skipping prep');
+  //     return;
+  //   }
+  //
+  //   // Perform preparation work
+  //   const prepData = await fetchSomeData(detail);
+  //   dispatch(setSomeData(prepData));
+  //   dispatch(markDetailAsPrepped(detail.id));
+  // }
 };
 
 /**
@@ -49,17 +71,18 @@ export const getStartPathForDetail = (detail: OrdinalVDXFObject): string => {
 /**
  * Runs the preparation function for a detail type, if one exists.
  * Prep functions are used to initialize state before navigating to a detail's screens.
+ * The prep function receives getState so it can check if preparation has already been done.
  */
 export const runDetailPrepFunction = async (
   detail: OrdinalVDXFObject,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  dispatch: Dispatch<any>
+  dispatch: AppDispatch,
+  getState: () => RootState
 ): Promise<void> => {
   const detailType = detail.type;
   const prepFunction = DETAIL_TYPE_PREP_FUNCTIONS[detailType.toNumber()];
 
   if (prepFunction) {
-    await prepFunction(detail, dispatch);
+    await prepFunction(detail, dispatch, getState);
   }
 };
 

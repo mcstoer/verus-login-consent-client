@@ -1,4 +1,4 @@
-import React, {useState, useMemo} from 'react';
+import React, {useState} from 'react';
 import {useSelector} from 'react-redux';
 import Button from '@mui/material/Button';
 import {GenericRequest, LoginConsentRequest} from 'verus-typescript-primitives';
@@ -9,9 +9,9 @@ import {navigateGenericRequest, setExternalAction, setNavigationPath} from '#/re
 import {RootState} from '#/redux/store';
 import {RequestCard} from '#/containers/RequestCard/RequestCard';
 import {VerusIdLogo} from '#/images';
-import {CREDENTIALS, EXTERNAL_ACTION, EXTERNAL_CHAIN_START, SCOPES, SELECT_LOGIN_ID, SUPPORTED_CREDENTIALS} from '#/utils/constants';
-import {convertFqnToDisplayFormat} from '#/utils/fullyqualifiedname';
-import {isGenericRequest} from '#/utils/genericRequest';
+import {EXTERNAL_ACTION, EXTERNAL_CHAIN_START, SELECT_LOGIN_ID} from '#/utils/constants';
+import {extractConsentDataV1, extractConsentDataV2} from '#/utils/login/consentDataExtractors';
+import {Identity} from '#/redux/reducers/signatureInfo/signatureInfo.types';
 
 interface ConsentProps {
   canProcessRequest: () => boolean;
@@ -23,7 +23,7 @@ const Consent: React.FC<ConsentProps> = (props) => {
   const dispatch = useAppDispatch();
   const [loading, setLoading] = useState<boolean>(false);
   const deeplinkData = useSelector((state: RootState) => state.deeplink.data);
-  const deeplinkId = useSelector((state: RootState) => state.deeplink.id);
+  const currentDetailIndex = useSelector((state: RootState) => state.navigation.currentDetailIndex);
   const chainId = useSelector((state: RootState) => state.chainMetadata.chainId);
   const chainName = useSelector((state: RootState) => state.chainMetadata.chainName);
   const signatureInfo = useSelector((state: RootState) => state.signatureInfo);
@@ -31,37 +31,13 @@ const Consent: React.FC<ConsentProps> = (props) => {
   const {sigBlockInfo, signedBy, signingRevocationIdentity, signingRecoveryIdentity} = signatureInfo;
   const {time} = sigBlockInfo;
 
-  let signerFqn = "";
-  let permissionsText = "";
-  let systemId = "";
+  const isGenericRequest = deeplinkData instanceof GenericRequest;
 
-  if (deeplinkData instanceof GenericRequest) {
-    signerFqn = signedBy.fullyqualifiedname;
-    permissionsText = "Authenticate with VerusID";
-    systemId = (deeplinkData as GenericRequest).signature?.systemID.toIAddress();
-  } else if (deeplinkData instanceof LoginConsentRequest) {
-    systemId = deeplinkData.system_id;
-    // Convert the fully qualified name into a nicer format for VRSC.
-    signerFqn = convertFqnToDisplayFormat(signedBy.fullyqualifiedname);
+  const consentData = isGenericRequest
+    ? extractConsentDataV2(deeplinkData, signedBy as Identity, currentDetailIndex)
+    : extractConsentDataV1(deeplinkData as LoginConsentRequest, signedBy as Identity);
 
-    permissionsText = useMemo(() => {
-      const requestedPermissions = deeplinkData.challenge.requested_access;
-      const permissionsDescriptions: string[] = [];
-
-      if (requestedPermissions != null) {
-        // Match permissions to the possible ids in the scopes.
-        for (const permission of requestedPermissions) {
-          if (SCOPES[permission.vdxfkey]) {
-            permissionsDescriptions.push(SCOPES[permission.vdxfkey].description);
-          } else if (SUPPORTED_CREDENTIALS.includes(permission.vdxfkey) && CREDENTIALS[permission.vdxfkey]) {
-            permissionsDescriptions.push("Get " + CREDENTIALS[permission.vdxfkey].description + " credential");
-          }
-        }
-      }
-
-      return permissionsDescriptions.join(", ");
-    }, [deeplinkData.challenge.requested_access]);
-  }
+  const {signerFqn, permissionsText, systemId} = consentData;
 
   const tryLogin = async (): Promise<void> => {
     setLoading(true);
@@ -70,7 +46,7 @@ const Consent: React.FC<ConsentProps> = (props) => {
     userActions.map(action => dispatch(action));
 
     if (canProcessRequest()) {
-      if (isGenericRequest(deeplinkId)) {
+      if (isGenericRequest) {
         dispatch(navigateGenericRequest());
       } else {
         dispatch(setNavigationPath(SELECT_LOGIN_ID));

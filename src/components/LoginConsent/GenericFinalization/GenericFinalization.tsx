@@ -29,7 +29,7 @@ const GenericFinalization: React.FC<GenericFinalizationProps> = (props) => {
     }
 
     setLoading(true);
-    
+
     try {
       await completeLoginConsent({response});
     } catch (error) {

@@ -5,8 +5,8 @@ import {
   LOGIN_CONSENT_ID_PROVISIONING_WEBHOOK_VDXF_KEY,
   VDXF_ORDINAL_AUTHENTICATION_REQUEST,
 } from 'verus-typescript-primitives';
-import {SUPPORTED_CREDENTIALS} from './constants';
-import {Identity} from '../redux/reducers/signatureInfo/signatureInfo.types';
+import {SUPPORTED_CREDENTIALS} from '../constants';
+import {Identity} from '../../redux/reducers/signatureInfo/signatureInfo.types';
 
 // The data for displaying the identity selection UI for login.
 export interface LoginData {
