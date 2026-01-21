@@ -9,7 +9,7 @@ import {credentials} from './reducers/credentials/credentials.reducer';
 import {signatureInfo} from './reducers/signatureInfo/signatureInfo.reducer';
 import {chainMetadata} from './reducers/chainMetadata/chainMetadata.reducer';
 import {deeplink} from './reducers/deeplink/deeplinkSlice';
-import {genericResponse} from './reducers/genericResponse/genericResponse.reducer';
+import genericResponseReducer from './reducers/genericResponse/genericResponseSlice';
 import {identityUpdate} from './reducers/identityUpdate/identityUpdate.reducer';
 import genericRequestReducer from './reducers/genericRequest';
 
@@ -24,7 +24,7 @@ const rootReducer = combineReducers({
   signatureInfo,
   chainMetadata,
   deeplink,
-  genericResponse,
+  genericResponse: genericResponseReducer,
   identityUpdate,
   genericRequest: genericRequestReducer,
 });

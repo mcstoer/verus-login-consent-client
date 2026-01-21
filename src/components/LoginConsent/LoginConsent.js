@@ -8,7 +8,7 @@ import {checkAndUpdateAll, checkAndUpdateChainInfo} from '../../redux/reducers/i
 import {setExternalAction, setNavigationPath} from '../../redux/reducers/navigation/navigation.actions';
 import {setOriginApp} from '../../redux/reducers/origin/origin.actions';
 import {setSignatureInfo} from '../../redux/reducers/signatureInfo/signatureInfo.actions';
-import {setGenericResponse} from '../../redux/reducers/genericResponse/genericResponse.actions';
+import {setGenericResponse} from '../../redux/reducers/genericResponse/genericResponseSlice';
 import {closePlugin} from '../../rpc/calls/closePlugin';
 import {getBlock} from '../../rpc/calls/getBlock';
 import {getCurrency} from '../../rpc/calls/getCurrency';

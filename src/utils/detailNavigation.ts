@@ -1,6 +1,6 @@
-import {GenericRequest, OrdinalVDXFObject, VDXF_ORDINAL_AUTHENTICATION_REQUEST} from 'verus-typescript-primitives';
+import {AuthenticationRequestOrdinalVDXFObject, AuthenticationResponseDetails, AuthenticationResponseOrdinalVDXFObject, GenericRequest, OrdinalVDXFObject, VDXF_ORDINAL_AUTHENTICATION_REQUEST} from 'verus-typescript-primitives';
 import {CONSENT_TO_SCOPE, GENERIC_FINALIZATION} from './constants';
-import {RootState, AppDispatch} from '../redux/store';
+import {RootState, AppDispatch} from '#/redux/store';
 
 /**
  * Maps detail types to their initial navigation paths.
@@ -51,6 +51,60 @@ const DETAIL_TYPE_PREP_FUNCTIONS: Record<string, DetailPrepFunction> = {
 };
 
 /**
+ * Maps detail types to their response generator functions.
+ * These functions are called when a detail completes to construct the response
+ * from the current Redux state.
+ */
+type DetailResponseGenerator = (
+  request: GenericRequest,
+  detailIndex: number,
+  getState: () => RootState
+) => OrdinalVDXFObject | null;
+
+const DETAIL_TYPE_RESPONSE_GENERATORS: Record<string, DetailResponseGenerator> = {
+  [VDXF_ORDINAL_AUTHENTICATION_REQUEST.toNumber()]: (request, detailIndex, getState) => {
+    const state = getState();
+    const ordinalWrapper = request.details[detailIndex];
+
+    if (!(ordinalWrapper instanceof AuthenticationRequestOrdinalVDXFObject)) {
+      throw new Error('Detail is not an AuthenticationRequestOrdinalVDXFObject');
+    }
+
+    const authRequestDetail = ordinalWrapper.data;
+
+    console.log('Generating authentication response from state:', {
+      activeIdentity: state.identity.activeIdentity,
+      detailIndex
+    });
+
+    const authResponseDetail = new AuthenticationResponseOrdinalVDXFObject({
+      data: new AuthenticationResponseDetails({
+        requestID: authRequestDetail.requestID,
+      })
+    });
+
+    return authResponseDetail;
+  }
+
+  // Example of a more complete response generator:
+  // [SOME_DETAIL_TYPE]: (request, detailIndex, getState) => {
+  //   const state = getState();
+  //   const detail = request.details[detailIndex];
+  //   const responseData = state.someSlice.responseData;
+  //
+  //   if (!responseData) {
+  //     console.warn('No response data available for detail');
+  //     return null;
+  //   }
+  //
+  //   return new SomeResponseOrdinalVDXFObject({
+  //     ...responseData,
+  //     // Additional response fields
+  //   });
+  // }
+};
+
+/**
  * Determines the starting navigation path for a given detail type.
  * Throws an error if the detail type is not recognized.
  */
@@ -84,6 +138,33 @@ export const runDetailPrepFunction = async (
   if (prepFunction) {
     await prepFunction(detail, dispatch, getState);
   }
+};
+
+/**
+ * Generates a response detail from the current Redux state.
+ * Returns null if the detail type doesn't have a response generator or
+ * if the current state doesn't allow generating a response.
+ */
+export const generateDetailResponse = (
+  request: GenericRequest,
+  detailIndex: number,
+  getState: () => RootState
+): OrdinalVDXFObject | null => {
+  if (detailIndex >= request.details.length) {
+    console.error(`Invalid detail index: ${detailIndex}`);
+    return null;
+  }
+
+  const detail = request.details[detailIndex];
+  const detailType = detail.type;
+  const responseGenerator = DETAIL_TYPE_RESPONSE_GENERATORS[detailType.toNumber()];
+
+  if (!responseGenerator) {
+    console.log(`No response generator defined for detail type: ${detailType}`);
+    return null;
+  }
+
+  return responseGenerator(request, detailIndex, getState);
 };
 
 /**

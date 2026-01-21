@@ -72,7 +72,7 @@ const Login = (props: LoginProps) => {
     userActions.map(action => dispatch(action));
 
     if (canProcessRequest()) {
-      if (isGenericRequest) {
+      if (isGenericRequest(deeplinkId)) {
         dispatch(navigateGenericRequest());
       } else {
         const loginIdentity = activeIdentity.identity.identityaddress;
