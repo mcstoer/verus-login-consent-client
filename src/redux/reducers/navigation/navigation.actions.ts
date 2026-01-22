@@ -2,7 +2,7 @@ import {AnyAction, ThunkAction} from '@reduxjs/toolkit';
 import {SET_EXTERNAL_ACTION, SET_NAVIGATION_PATH, SET_CURRENT_DETAIL_INDEX, PUSH_TO_NAVIGATION_STACK, POP_FROM_NAVIGATION_STACK, CLEAR_NAVIGATION_STACK} from './navigation.types';
 import {readNavigationPath} from './navigation.util';
 import {getNextDetail, getStartPathForDetail, runDetailPrepFunction, generateDetailResponse} from '#/utils/detailNavigation';
-import {GENERIC_REQUEST_DEEPLINK_VDXF_KEY, GenericRequest, GenericResponse} from 'verus-typescript-primitives';
+import {GENERIC_REQUEST_DEEPLINK_VDXF_KEY, GenericRequest, GenericResponse, OrdinalVDXFObject} from 'verus-typescript-primitives';
 import {
   IDENTITY_UPDATE_RESULT,
   PROVISIONING_RESULT,
@@ -17,9 +17,9 @@ import {
   VERUS_LOGIN_CONSENT_UI
 } from '#/utils/constants';
 import {RootState} from '#/redux/store';
-import {updateResponseDetails} from '../genericResponse/genericResponseSlice';
-import {setError} from '../error/error.actions';
+import {setError} from '#/redux/reducers/error/error.actions';
 import {closePlugin} from '#/rpc/calls/closePlugin';
+import {removeResponseDetail, selectAllResponseDetails, upsertResponseDetail} from '#/redux/reducers/genericResponse/genericResponseSlice';
 
 /**
  * TODO: Implement this function as a new API endpoint
@@ -27,8 +27,9 @@ import {closePlugin} from '#/rpc/calls/closePlugin';
  */
 const signGenericResponse = async (chainId: string, response: GenericResponse): Promise<unknown> => {
   // TODO: Replace with actual RPC call to sign the GenericResponse
+  console.log(`Signing GenericResponse on chain ${chainId}:`, response);
   console.warn('signGenericResponse is not yet implemented - using stub');
-  return response.toJson();
+  throw new Error('signGenericResponse is not implemented');
 };
 
 /**
@@ -106,6 +107,7 @@ export const clearNavigationStack = () => {
 const DETAIL_COMPLETION_PATHS: Record<string, boolean> = {
   [IDENTITY_UPDATE_RESULT]: true,
   [PROVISIONING_RESULT]: true,
+  [SELECT_LOGIN_ID]: true,
   // Add other detail type completion paths as they are implemented
 };
 
@@ -141,9 +143,8 @@ export const navigateGenericRequest = (): ThunkAction<Promise<void>, RootState, 
   const state = getState();
   const currentPath = state.navigation.path;
   const deeplinkId = state.deeplink.id;
-  const deeplinkData = state.deeplink.data as GenericRequest;
+  const genericRequest = state.deeplink.data as GenericRequest;
   const currentDetailIndex = state.navigation.currentDetailIndex || 0;
-  const genericResponse = state.genericResponse.response as GenericResponse;
   const chainId = state.chainMetadata.chainId;
 
   // Validate that the deeplink is a generic request
@@ -163,26 +164,19 @@ export const navigateGenericRequest = (): ThunkAction<Promise<void>, RootState, 
   // Check if current path marks detail completion
   if (DETAIL_COMPLETION_PATHS[currentPath]) {
     // Generate a response detail if possible
-    const responseToAdd = generateDetailResponse(deeplinkData, currentDetailIndex, getState);
+    const responseToAdd = generateDetailResponse(genericRequest, currentDetailIndex, getState);
     console.log(`Generated response from state for detail ${currentDetailIndex}`);
 
     if (responseToAdd) {
-      // Add or replace the response detail
-      const newDetails = [...genericResponse.details];
-
-      if (currentDetailIndex < newDetails.length) {
-        newDetails[currentDetailIndex] = responseToAdd;
-        console.log(`Updated existing detail at index ${currentDetailIndex}`);
-      } else {
-        newDetails.push(responseToAdd);
-        console.log(`Appended new detail at index ${currentDetailIndex}`);
-      }
-
-      dispatch(updateResponseDetails(newDetails));
+      const detailHexBuffer = responseToAdd.toBuffer().toString('hex');
+      dispatch(upsertResponseDetail({
+        index: currentDetailIndex,
+        hexBuffer: detailHexBuffer,
+      }));
     }
 
     // Detail is complete, check if there are more details or if we should finalize
-    const nextDetail = getNextDetail(deeplinkData, currentDetailIndex);
+    const nextDetail = getNextDetail(genericRequest, currentDetailIndex);
 
     if (nextDetail) {
       // More details to process - navigate to the start of the next detail
@@ -201,21 +195,31 @@ export const navigateGenericRequest = (): ThunkAction<Promise<void>, RootState, 
 
         // Get the updated response from state after our dispatch
         const finalState = getState();
-        const finalResponse = finalState.genericResponse.response as GenericResponse;
+        const responseDetails = selectAllResponseDetails(finalState);
+        responseDetails.sort((a, b) => a.index - b.index);
+
+        const ordinals = responseDetails.map(detail =>
+          OrdinalVDXFObject.createFromBuffer(Buffer.from(detail.hexBuffer, 'hex')).obj
+        );
+
+        const response = new GenericResponse({
+          requestID: genericRequest.requestID,
+          requestHash: genericRequest.getRawDataSha256(),
+          details: ordinals,
+        });
+
+        console.log('Constructed complete GenericResponse:', response);
 
         // Sign the complete GenericResponse
         signedResponse = await signGenericResponse(
           chainId,
-          finalResponse
+          response
         );
 
+        return;
+
         console.log('Generic request completed successfully');
-      } catch (e) {
-        console.error('Error finalizing generic request:', e);
-        error = e as Error;
-        dispatch(setError(error));
-      } finally {
-        // Always attempt to close the plugin with either success or error result
+
         try {
           const windowId = state.rpc.windowId;
           await closePlugin(
@@ -227,6 +231,10 @@ export const navigateGenericRequest = (): ThunkAction<Promise<void>, RootState, 
         } catch (closeError) {
           console.error('Error closing plugin:', closeError);
         }
+      } catch (e) {
+        console.error('Error finalizing generic request:', e);
+        error = e as Error;
+        dispatch(setError(error));
       }
 
       return; // Exit early - request complete or error occurred
@@ -294,6 +302,7 @@ export const navigateBackGenericRequest = (): ThunkAction<void, RootState, undef
   dispatch(setNavigationPath(previousPath));
 
   if (newDetailIndex !== currentDetailIndex) {
+    dispatch(removeResponseDetail(currentDetailIndex));
     dispatch(setCurrentDetailIndex(newDetailIndex));
   }
 

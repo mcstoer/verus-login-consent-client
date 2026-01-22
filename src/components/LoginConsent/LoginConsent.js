@@ -1,14 +1,13 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import {connect} from 'react-redux';
-import {LoginConsentRequest, LOGIN_CONSENT_REQUEST_VDXF_KEY, GENERIC_REQUEST_DEEPLINK_VDXF_KEY, GenericRequest, GenericResponse} from 'verus-typescript-primitives';
+import {LoginConsentRequest, LOGIN_CONSENT_REQUEST_VDXF_KEY, GENERIC_REQUEST_DEEPLINK_VDXF_KEY, GenericRequest} from 'verus-typescript-primitives';
 import {setChainMetadata} from '../../redux/reducers/chainMetadata/chainMetadata.actions';
 import {setError} from '../../redux/reducers/error/error.actions';
 import {checkAndUpdateAll, checkAndUpdateChainInfo} from '../../redux/reducers/identity/identity.actions';
 import {setExternalAction, setNavigationPath} from '../../redux/reducers/navigation/navigation.actions';
 import {setOriginApp} from '../../redux/reducers/origin/origin.actions';
 import {setSignatureInfo} from '../../redux/reducers/signatureInfo/signatureInfo.actions';
-import {setGenericResponse} from '../../redux/reducers/genericResponse/genericResponseSlice';
 import {closePlugin} from '../../rpc/calls/closePlugin';
 import {getBlock} from '../../rpc/calls/getBlock';
 import {getCurrency} from '../../rpc/calls/getCurrency';
@@ -114,13 +113,6 @@ class LoginConsent extends React.Component {
 
       case GENERIC_REQUEST_DEEPLINK_VDXF_KEY.vdxfid: {
         const genericRequest = new GenericRequest(request);
-        const response = new GenericResponse({
-          requestID: genericRequest.requestID,
-          requestHash: genericRequest.getRawDataSha256(),
-          details: [],
-        });
-
-        this.props.dispatch(setGenericResponse(response));
 
         // Initialize detail processing - navigate to first detail
         if (genericRequest.details.length > 0) {

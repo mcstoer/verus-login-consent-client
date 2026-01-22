@@ -7,7 +7,7 @@ const store = configureStore({
     getDefaultMiddleware({
       serializableCheck: {
         ignoredActions: ['deeplink/setDeeplinkData', 'genericResponse/SET_GENERIC_RESPONSE'],
-        ignoredPaths: ['deeplink.data', 'genericResponse.response', 'error.error'],
+        ignoredPaths: ['deeplink.data', 'error.error'],
       },
     }),
 });

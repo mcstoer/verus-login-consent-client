@@ -5,41 +5,30 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import PageLayout from '../../common/PageLayout';
-import {GenericResponse, GenericRequest} from 'verus-typescript-primitives';
+import {useAppDispatch} from '#/redux/hooks';
+import {navigateGenericRequest} from '#/redux/reducers/navigation/navigation.actions';
+import {RootState} from '#/redux/store';
 
-interface GenericFinalizationProps {
-  completeLoginConsent: (params: {response: GenericResponse}) => Promise<void>;
-}
-
-const GenericFinalization: React.FC<GenericFinalizationProps> = (props) => {
-  const {completeLoginConsent} = props;
+const GenericFinalization: React.FC = () => {
+  const dispatch = useAppDispatch();
   const [loading, setLoading] = useState(false);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const response: GenericResponse | null = useSelector((state: any) => state.genericResponse.response);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const request: GenericRequest = useSelector((state: any) => state.deeplink.data);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const chainName: string = useSelector((state: any) => state.chainMetadata.chainName);
+  const chainName: string = useSelector((state: RootState) => state.chainMetadata.chainName);
 
   const handleComplete = async () => {
-    if (!response) {
-      console.error('Cannot complete: no response available');
-      return;
-    }
 
     setLoading(true);
 
     try {
-      await completeLoginConsent({response});
+      dispatch(navigateGenericRequest());
     } catch (error) {
       console.error('Error completing request:', error);
       setLoading(false);
     }
   };
 
-  const detailsProcessed = response?.details?.length || 0;
-  const totalDetails = request?.details?.length || 0;
+  const detailsProcessed = 0;
+  const totalDetails = 1;
 
   return (
     <PageLayout
