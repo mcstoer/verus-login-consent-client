@@ -2,7 +2,7 @@ import {AnyAction, ThunkAction} from '@reduxjs/toolkit';
 import {SET_EXTERNAL_ACTION, SET_NAVIGATION_PATH, SET_CURRENT_DETAIL_INDEX, PUSH_TO_NAVIGATION_STACK, POP_FROM_NAVIGATION_STACK, CLEAR_NAVIGATION_STACK} from './navigation.types';
 import {readNavigationPath} from './navigation.util';
 import {getNextDetail, getStartPathForDetail, runDetailPrepFunction, generateDetailResponse} from '#/utils/detailNavigation';
-import {GENERIC_REQUEST_DEEPLINK_VDXF_KEY, GenericRequest, GenericResponse, OrdinalVDXFObject} from 'verus-typescript-primitives';
+import {CompactAddressObject, GENERIC_REQUEST_DEEPLINK_VDXF_KEY, GenericRequest, GenericResponse, HASH_TYPE_SHA256, OrdinalVDXFObject, VerifiableSignatureData} from 'verus-typescript-primitives';
 import {
   IDENTITY_UPDATE_RESULT,
   PROVISIONING_RESULT,
@@ -20,17 +20,9 @@ import {RootState} from '#/redux/store';
 import {setError} from '#/redux/reducers/error/error.actions';
 import {closePlugin} from '#/rpc/calls/closePlugin';
 import {removeResponseDetail, selectAllResponseDetails, upsertResponseDetail} from '#/redux/reducers/genericResponse/genericResponseSlice';
-
-/**
- * TODO: Implement this function as a new API endpoint
- * Stub function for signing a GenericResponse
- */
-const signGenericResponse = async (chainId: string, response: GenericResponse): Promise<unknown> => {
-  // TODO: Replace with actual RPC call to sign the GenericResponse
-  console.log(`Signing GenericResponse on chain ${chainId}:`, response);
-  console.warn('signGenericResponse is not yet implemented - using stub');
-  throw new Error('signGenericResponse is not implemented');
-};
+import { signGenericResponse } from '#/rpc/calls/signGenericResponse';
+import { Identity } from '../signatureInfo/signatureInfo.types';
+import BN from '#/utils/bn-polyfill';
 
 /**
  * Sets the navigation path in the redux store.
@@ -202,11 +194,26 @@ export const navigateGenericRequest = (): ThunkAction<Promise<void>, RootState, 
           OrdinalVDXFObject.createFromBuffer(Buffer.from(detail.hexBuffer, 'hex')).obj
         );
 
+        const signingIdentity = state.identity.activeIdentity as Identity;
+        const systemAddress = signingIdentity.identity.systemid;
+        const identityAddress = signingIdentity.identity.identityaddress;
+
+        const signature = new VerifiableSignatureData({
+          systemID: CompactAddressObject.fromIAddress(systemAddress),
+          identityID: CompactAddressObject.fromIAddress(identityAddress),
+        });
+
         const response = new GenericResponse({
           requestID: genericRequest.requestID,
           requestHash: genericRequest.getRawDataSha256(),
           details: ordinals,
+          signature,
+          createdAt: new BN((Date.now() / 1000).toFixed(0))
         });
+
+        // Even if the signature is included, if the response is not set as signed,
+        // then the signature will be skipped in serialization.
+        response.setSigned();
 
         console.log('Constructed complete GenericResponse:', response);
 
@@ -216,9 +223,9 @@ export const navigateGenericRequest = (): ThunkAction<Promise<void>, RootState, 
           response
         );
 
-        return;
-
         console.log('Generic request completed successfully');
+
+        return;
 
         try {
           const windowId = state.rpc.windowId;

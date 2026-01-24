@@ -45,6 +45,7 @@ export const API_SIGN_ID_PROVISIONING_REQUEST = 'verusid/provision/sign_id_provi
 export const API_SIGN_IDENTITY_UPDATE_RESPONSE = 'verusid/identity/sign_identity_update_response';
 export const API_SIGN_LOGIN_RESPONSE = 'verusid/login/sign_response';
 export const API_VERIFY_GENERIC_REQUEST = 'verusid/generic/verify_generic_request';
+export const API_SIGN_GENERIC_RESPONSE = 'verusid/generic/sign_generic_response';
 export const API_VERIFY_ID_PROVISIONING_RESPONSE = 'verusid/provision/verify_id_provisioning_response';
 export const API_VERIFY_IDENTITY_UPDATE_REQUEST = 'verusid/identity/verify_identity_update_request';
 export const API_VERIFY_LOGIN_REQUEST = 'verusid/login/verify_request';
