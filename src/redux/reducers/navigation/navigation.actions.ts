@@ -1,8 +1,8 @@
 import {AnyAction, ThunkAction} from '@reduxjs/toolkit';
+import {CompactAddressObject, GENERIC_REQUEST_DEEPLINK_VDXF_KEY, GenericRequest, GenericResponse, OrdinalVDXFObject, VerifiableSignatureData} from 'verus-typescript-primitives';
 import {SET_EXTERNAL_ACTION, SET_NAVIGATION_PATH, SET_CURRENT_DETAIL_INDEX, PUSH_TO_NAVIGATION_STACK, POP_FROM_NAVIGATION_STACK, CLEAR_NAVIGATION_STACK} from './navigation.types';
 import {readNavigationPath} from './navigation.util';
 import {getNextDetail, getStartPathForDetail, runDetailPrepFunction, generateDetailResponse} from '#/utils/detailNavigation';
-import {CompactAddressObject, GENERIC_REQUEST_DEEPLINK_VDXF_KEY, GenericRequest, GenericResponse, HASH_TYPE_SHA256, OrdinalVDXFObject, VerifiableSignatureData} from 'verus-typescript-primitives';
 import {
   IDENTITY_UPDATE_RESULT,
   PROVISIONING_RESULT,
@@ -20,8 +20,8 @@ import {RootState} from '#/redux/store';
 import {setError} from '#/redux/reducers/error/error.actions';
 import {closePlugin} from '#/rpc/calls/closePlugin';
 import {removeResponseDetail, selectAllResponseDetails, upsertResponseDetail} from '#/redux/reducers/genericResponse/genericResponseSlice';
-import { signGenericResponse } from '#/rpc/calls/signGenericResponse';
-import { Identity } from '../signatureInfo/signatureInfo.types';
+import {signGenericResponse} from '#/rpc/calls/signGenericResponse';
+import {Identity} from '#/redux/reducers/signatureInfo/signatureInfo.types';
 import BN from '#/utils/bn-polyfill';
 
 /**
@@ -179,7 +179,7 @@ export const navigateGenericRequest = (): ThunkAction<Promise<void>, RootState, 
       await runDetailPrepFunction(nextDetail, dispatch, getState);
     } else {
       // All details complete - sign and finalize the request
-      let signedResponse: unknown = null;
+      let signedResponse: GenericResponse | null = null;
       let error: Error | null = null;
 
       try {
@@ -223,9 +223,9 @@ export const navigateGenericRequest = (): ThunkAction<Promise<void>, RootState, 
           response
         );
 
-        console.log('Generic request completed successfully');
+        const responseHexBuffer =  signedResponse.toBuffer().toString('hex');
 
-        return;
+        console.log('Generic request completed successfully');
 
         try {
           const windowId = state.rpc.windowId;
@@ -233,7 +233,7 @@ export const navigateGenericRequest = (): ThunkAction<Promise<void>, RootState, 
             VERUS_LOGIN_CONSENT_UI,
             windowId,
             true,
-            error ? {error: error.message} : signedResponse
+            error ? {error: error.message} : responseHexBuffer,
           );
         } catch (closeError) {
           console.error('Error closing plugin:', closeError);

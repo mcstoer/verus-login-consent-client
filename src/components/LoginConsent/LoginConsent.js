@@ -1,30 +1,37 @@
-import PropTypes from 'prop-types';
-import React from 'react';
-import {connect} from 'react-redux';
-import {LoginConsentRequest, LOGIN_CONSENT_REQUEST_VDXF_KEY, GENERIC_REQUEST_DEEPLINK_VDXF_KEY, GenericRequest} from 'verus-typescript-primitives';
-import {setChainMetadata} from '../../redux/reducers/chainMetadata/chainMetadata.actions';
-import {setError} from '../../redux/reducers/error/error.actions';
-import {checkAndUpdateAll, checkAndUpdateChainInfo} from '../../redux/reducers/identity/identity.actions';
-import {setExternalAction, setNavigationPath} from '../../redux/reducers/navigation/navigation.actions';
-import {setOriginApp} from '../../redux/reducers/origin/origin.actions';
-import {setSignatureInfo} from '../../redux/reducers/signatureInfo/signatureInfo.actions';
-import {closePlugin} from '../../rpc/calls/closePlugin';
-import {getBlock} from '../../rpc/calls/getBlock';
-import {getCurrency} from '../../rpc/calls/getCurrency';
-import {getIdentity} from '../../rpc/calls/getIdentity';
-import {getPlugin} from '../../rpc/calls/getPlugin';
-import {getSignatureInfo} from '../../rpc/calls/getSignatureInfo';
-import {getStartPathForDetail, runDetailPrepFunction} from '../../utils/detailNavigation';
+import {setChainMetadata} from '#/redux/reducers/chainMetadata/chainMetadata.actions';
+import {setError} from '#/redux/reducers/error/error.actions';
+import {
+  checkAndUpdateAll,
+  checkAndUpdateChainInfo,
+} from '#/redux/reducers/identity/identity.actions';
+import {setExternalAction, setNavigationPath} from '#/redux/reducers/navigation/navigation.actions';
+import {setOriginApp} from '#/redux/reducers/origin/origin.actions';
+import {completeRequest} from '#/redux/reducers/rpc/rpcSlice';
+import {setSignatureInfo} from '#/redux/reducers/signatureInfo/signatureInfo.actions';
+import {getBlock} from '#/rpc/calls/getBlock';
+import {getCurrency} from '#/rpc/calls/getCurrency';
+import {getIdentity} from '#/rpc/calls/getIdentity';
+import {getPlugin} from '#/rpc/calls/getPlugin';
+import {getSignatureInfo} from '#/rpc/calls/getSignatureInfo';
 import {
   API_GET_CHAIN_INFO,
   API_GET_IDENTITIES,
+  CONSENT_TO_SCOPE,
   EXTERNAL_ACTION,
   EXTERNAL_CHAIN_START,
-  CONSENT_TO_SCOPE,
-  VERUS_LOGIN_CONSENT_UI,
-} from "../../utils/constants";
-import {checkGenericRequest} from '../../utils/genericRequest';
-import {checkLoginConsentRequest} from '../../utils/loginConsentRequest';
+} from '#/utils/constants';
+import {getStartPathForDetail, runDetailPrepFunction} from '#/utils/detailNavigation';
+import {checkGenericRequest} from '#/utils/genericRequest';
+import {checkLoginConsentRequest} from '#/utils/loginConsentRequest';
+import PropTypes from 'prop-types';
+import React from 'react';
+import {connect} from 'react-redux';
+import {
+  GENERIC_REQUEST_DEEPLINK_VDXF_KEY,
+  GenericRequest,
+  LOGIN_CONSENT_REQUEST_VDXF_KEY,
+  LoginConsentRequest,
+} from 'verus-typescript-primitives';
 import {LoginConsentRender} from './LoginConsent.render';
 
 class LoginConsent extends React.Component {
@@ -32,7 +39,7 @@ class LoginConsent extends React.Component {
     super(props);
 
     this.state = {
-      requestResult: null
+      requestResult: null,
     };
 
     this.completeLoginConsent = this.completeLoginConsent.bind(this);
@@ -45,26 +52,19 @@ class LoginConsent extends React.Component {
   async componentDidUpdate(lastProps) {
     if (
       lastProps !== this.props &&
-      ((lastProps.rpcPassword !== this.props.rpcPassword &&
-        this.props.originAppId != null) ||
-        (lastProps.originAppId !== this.props.originAppId &&
-          this.props.rpcPassword != null))
+      ((lastProps.rpcPassword !== this.props.rpcPassword && this.props.originAppId != null) ||
+        (lastProps.originAppId !== this.props.originAppId && this.props.rpcPassword != null))
     ) {
       try {
         this.props.dispatch(
-          setOriginApp(
-            await getPlugin(this.props.originAppId, this.props.originAppBuiltin)
-          )
+          setOriginApp(await getPlugin(this.props.originAppId, this.props.originAppBuiltin)),
         );
       } catch (e) {
         this.props.dispatch(setError(e));
       }
     }
 
-    if (
-      lastProps !== this.props &&
-      lastProps.deeplinkData !== this.props.deeplinkData
-    ) {
+    if (lastProps !== this.props && lastProps.deeplinkData !== this.props.deeplinkData) {
       await this.handleRequest();
     }
   }
@@ -79,12 +79,14 @@ class LoginConsent extends React.Component {
 
     // Add a small delay so that the Redux store is updated since
     // React 18 has concurrent rendering.
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     if (!this.canProcessRequest()) {
-      this.props.dispatch(setChainMetadata({
-        chainId: mainChain
-      }));
+      this.props.dispatch(
+        setChainMetadata({
+          chainId: mainChain,
+        }),
+      );
       this.props.dispatch(setExternalAction(EXTERNAL_CHAIN_START));
       this.props.dispatch(setNavigationPath(EXTERNAL_ACTION));
       return;
@@ -95,10 +97,12 @@ class LoginConsent extends React.Component {
     const chainId = currencyInfo.name.toUpperCase();
 
     // Store chain metadata in dedicated reducer
-    this.props.dispatch(setChainMetadata({
-      chainName: currencyInfo.name,
-      chainId: chainId,
-    }));
+    this.props.dispatch(
+      setChainMetadata({
+        chainName: currencyInfo.name,
+        chainId: chainId,
+      }),
+    );
 
     const actions = await checkAndUpdateAll(chainId);
     actions.map((action) => this.props.dispatch(action));
@@ -107,32 +111,32 @@ class LoginConsent extends React.Component {
       await this.checkRequest(this.props.deeplinkId, request);
 
       switch (this.props.deeplinkId) {
-      case LOGIN_CONSENT_REQUEST_VDXF_KEY.vdxfid:
-        this.props.dispatch(setNavigationPath(CONSENT_TO_SCOPE));
-        break;
+        case LOGIN_CONSENT_REQUEST_VDXF_KEY.vdxfid:
+          this.props.dispatch(setNavigationPath(CONSENT_TO_SCOPE));
+          break;
 
-      case GENERIC_REQUEST_DEEPLINK_VDXF_KEY.vdxfid: {
-        const genericRequest = new GenericRequest(request);
+        case GENERIC_REQUEST_DEEPLINK_VDXF_KEY.vdxfid: {
+          const genericRequest = new GenericRequest(request);
 
-        // Initialize detail processing - navigate to first detail
-        if (genericRequest.details.length > 0) {
-          const firstDetail = genericRequest.details[0];
+          // Initialize detail processing - navigate to first detail
+          if (genericRequest.details.length > 0) {
+            const firstDetail = genericRequest.details[0];
 
-          // Run prep function for the first detail (if any)
-          await runDetailPrepFunction(firstDetail, this.props.dispatch);
+            // Run prep function for the first detail (if any)
+            await runDetailPrepFunction(firstDetail, this.props.dispatch);
 
-          // Navigate to the first screen of the first detail
-          const startPath = getStartPathForDetail(firstDetail);
-          this.props.dispatch(setNavigationPath(startPath));
-        } else {
-          throw new Error('GenericRequest contains no details to process');
+            // Navigate to the first screen of the first detail
+            const startPath = getStartPathForDetail(firstDetail);
+            this.props.dispatch(setNavigationPath(startPath));
+          } else {
+            throw new Error('GenericRequest contains no details to process');
+          }
+
+          break;
         }
 
-        break;
-      }
-
-      default:
-        throw new Error(`Unsupported deeplink type for navigation: ${this.props.deeplinkId}`);
+        default:
+          throw new Error(`Unsupported deeplink type for navigation: ${this.props.deeplinkId}`);
       }
     } else {
       this.props.dispatch(setExternalAction(EXTERNAL_CHAIN_START));
@@ -151,70 +155,93 @@ class LoginConsent extends React.Component {
 
       // Switch on the deeplink type to determine how to handle the request
       switch (deeplinkId) {
-      case LOGIN_CONSENT_REQUEST_VDXF_KEY.vdxfid: {
-        request = new LoginConsentRequest(req);
-        await checkLoginConsentRequest(chainId, request);
-        signingId = request.signing_id;
-        signatureString = request.signature.signature;
+        case LOGIN_CONSENT_REQUEST_VDXF_KEY.vdxfid: {
+          request = new LoginConsentRequest(req);
+          await checkLoginConsentRequest(chainId, request);
+          signingId = request.signing_id;
+          signatureString = request.signature.signature;
 
-        const signedBy = await getIdentity(chainId, signingId);
-
-        // Get information on the signature for displaying later.
-        const sigInfo = await getSignatureInfo(chainId, signingId, signatureString, signedBy.identity.identityaddress);
-        const sigBlockInfo = await getBlock(chainId, sigInfo.height.toString());
-
-        // Get the identities of the revocation and recovery i-addresses to display for anti-phishing.
-        const signingRevocationIdentity = await getIdentity(chainId, signedBy.identity.revocationauthority);
-        const signingRecoveryIdentity = await getIdentity(chainId, signedBy.identity.recoveryauthority);
-
-        // Store signature information in dedicated reducer
-        this.props.dispatch(setSignatureInfo({
-          signedBy: signedBy,
-          sigBlockInfo: sigBlockInfo,
-          signingRevocationIdentity: signingRevocationIdentity,
-          signingRecoveryIdentity: signingRecoveryIdentity
-        }));
-        break;
-      }
-
-      case GENERIC_REQUEST_DEEPLINK_VDXF_KEY.vdxfid:
-        request = new GenericRequest(req);
-        await checkGenericRequest(chainId, request);
-        if (request.isSigned) {
-          signingId = request.signature.identityID.toIAddress();
-          signatureString = request.signature.signatureAsVch.toString('base64');
-          // TODO: Reduce duplication with the other requests
           const signedBy = await getIdentity(chainId, signingId);
 
           // Get information on the signature for displaying later.
-          const sigInfo = await getSignatureInfo(chainId, signingId, signatureString, signedBy.identity.identityaddress);
+          const sigInfo = await getSignatureInfo(
+            chainId,
+            signingId,
+            signatureString,
+            signedBy.identity.identityaddress,
+          );
           const sigBlockInfo = await getBlock(chainId, sigInfo.height.toString());
 
-          const signingRevocationIdentity = await getIdentity(chainId, signingId);
-          const signingRecoveryIdentity = await getIdentity(chainId, signingId);
+          // Get the identities of the revocation and recovery i-addresses to display for anti-phishing.
+          const signingRevocationIdentity = await getIdentity(
+            chainId,
+            signedBy.identity.revocationauthority,
+          );
+          const signingRecoveryIdentity = await getIdentity(
+            chainId,
+            signedBy.identity.recoveryauthority,
+          );
 
-          this.props.dispatch(setSignatureInfo({
-            signedBy: signedBy,
-            sigBlockInfo: sigBlockInfo,
-            signingRevocationIdentity: signingRevocationIdentity,
-            signingRecoveryIdentity: signingRecoveryIdentity
-          }));
+          // Store signature information in dedicated reducer
+          this.props.dispatch(
+            setSignatureInfo({
+              signedBy: signedBy,
+              sigBlockInfo: sigBlockInfo,
+              signingRevocationIdentity: signingRevocationIdentity,
+              signingRecoveryIdentity: signingRecoveryIdentity,
+            }),
+          );
+          break;
         }
-        break;
 
-      default:
-        throw new Error(`Unsupported deeplink type: ${deeplinkId}`);
+        case GENERIC_REQUEST_DEEPLINK_VDXF_KEY.vdxfid:
+          request = new GenericRequest(req);
+          await checkGenericRequest(chainId, request);
+          if (request.isSigned) {
+            signingId = request.signature.identityID.toIAddress();
+            signatureString = request.signature.signatureAsVch.toString('base64');
+            // TODO: Reduce duplication with the other requests
+            const signedBy = await getIdentity(chainId, signingId);
+
+            // Get information on the signature for displaying later.
+            const sigInfo = await getSignatureInfo(
+              chainId,
+              signingId,
+              signatureString,
+              signedBy.identity.identityaddress,
+            );
+            const sigBlockInfo = await getBlock(chainId, sigInfo.height.toString());
+
+            const signingRevocationIdentity = await getIdentity(chainId, signingId);
+            const signingRecoveryIdentity = await getIdentity(chainId, signingId);
+
+            this.props.dispatch(
+              setSignatureInfo({
+                signedBy: signedBy,
+                sigBlockInfo: sigBlockInfo,
+                signingRevocationIdentity: signingRevocationIdentity,
+                signingRecoveryIdentity: signingRecoveryIdentity,
+              }),
+            );
+          }
+          break;
+
+        default:
+          throw new Error(`Unsupported deeplink type: ${deeplinkId}`);
       }
-    } catch(e) {
+    } catch (e) {
       console.error(e);
       this.props.dispatch(setError(new Error(e.message)));
     }
   }
 
   getRequestResult(res, cb) {
-    this.setState({
-      requestResult: res
-    }, () => cb());
+    this.setState(
+      {
+        requestResult: res,
+      },
+      () => cb(),
+    );
   }
 
   canProcessRequest() {
@@ -228,18 +255,7 @@ class LoginConsent extends React.Component {
   }
 
   async completeLoginConsent(result = null, error = null) {
-    try {
-      await closePlugin(
-        VERUS_LOGIN_CONSENT_UI,
-        this.props.windowId,
-        true,
-        result != null
-          ? result
-          : {error: error != null ? error.message : error}
-      );
-    } catch(e) {
-      this.props.dispatch(setError(e));
-    }
+    this.props.dispatch(completeRequest(result, error));
   }
 
   render() {
@@ -265,7 +281,7 @@ LoginConsent.propTypes = {
   chainId: PropTypes.string,
   chainName: PropTypes.string,
   mainChain: PropTypes.string,
-  signatureInfo: PropTypes.object
+  signatureInfo: PropTypes.object,
 };
 
 const mapStateToProps = (state) => {
@@ -286,7 +302,7 @@ const mapStateToProps = (state) => {
     chainId: state.chainMetadata.chainId,
     chainName: state.chainMetadata.chainName,
     mainChain: state.chainMetadata.mainChain,
-    signatureInfo: state.signatureInfo
+    signatureInfo: state.signatureInfo,
   };
 };
 

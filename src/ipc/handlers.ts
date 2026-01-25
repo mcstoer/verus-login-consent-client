@@ -4,16 +4,29 @@ import {
   LOGIN_CONSENT_REQUEST_VDXF_KEY,
   LoginConsentRequest,
   VERUSPAY_INVOICE_VDXF_KEY,
-  VerusPayInvoice
+  VerusPayInvoice,
 } from 'verus-typescript-primitives';
 import {DEVMODE, MOCK_IPC} from '#/env';
 import {setMainChain} from '#/redux/reducers/chainMetadata/chainMetadata.actions';
 import {setDeeplinkData} from '#/redux/reducers/deeplink/deeplinkSlice';
 import {setError} from '#/redux/reducers/error/error.actions';
 import {setOriginAppBuiltin, setOriginAppId} from '#/redux/reducers/origin/origin.actions';
-import {setRpcExpiryMargin, setRpcPassword, setRpcPort, setRpcPostEncryption, setRpcWindowId} from '#/redux/reducers/rpc/rpc.actions';
+import {
+  setRpcExpiryMargin,
+  setRpcPassword,
+  setRpcPort,
+  setRpcPostEncryption,
+  setRpcWindowId,
+} from '#/redux/reducers/rpc/rpcSlice';
 import store from '#/redux/store';
-import {IPC_INIT_MESSAGE, IPC_LOGIN_CONSENT_REQUEST_METHOD, IPC_ORIGIN_DEV, IPC_ORIGIN_DEV_LOCALHOST, IPC_ORIGIN_PRODUCTION, IPC_PUSH_MESSAGE} from '../utils/constants';
+import {
+  IPC_INIT_MESSAGE,
+  IPC_LOGIN_CONSENT_REQUEST_METHOD,
+  IPC_ORIGIN_DEV,
+  IPC_ORIGIN_DEV_LOCALHOST,
+  IPC_ORIGIN_PRODUCTION,
+  IPC_PUSH_MESSAGE,
+} from '../utils/constants';
 import {RPC_PASSWORD, RPC_PORT} from '#/utils/mocks';
 
 // TODO: Move these types to a dedicated file
@@ -65,46 +78,44 @@ interface IpcPushMessage {
 
 type IpcMessage = IpcInitMessage | IpcPushMessage;
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const parseDeeplinkByType = (deeplinkRawData: any, deeplinkId: string): LoginConsentRequest | VerusPayInvoice | GenericRequest => {
+const parseDeeplinkByType = (
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  deeplinkRawData: any,
+  deeplinkId: string,
+): LoginConsentRequest | VerusPayInvoice | GenericRequest => {
   // Always use fromJson or other similar methods when possible as some of the deeplink data has a
   // different representation between JSON and the class definition.
   switch (deeplinkId) {
-  case LOGIN_CONSENT_REQUEST_VDXF_KEY.vdxfid:
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return new LoginConsentRequest(deeplinkRawData as any);
+    case LOGIN_CONSENT_REQUEST_VDXF_KEY.vdxfid:
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return new LoginConsentRequest(deeplinkRawData as any);
 
-  case VERUSPAY_INVOICE_VDXF_KEY.vdxfid:
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return VerusPayInvoice.fromJson(deeplinkRawData as any);
+    case VERUSPAY_INVOICE_VDXF_KEY.vdxfid:
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return VerusPayInvoice.fromJson(deeplinkRawData as any);
 
-  case GENERIC_REQUEST_DEEPLINK_VDXF_KEY.vdxfid: {
-    // The generic request is sent as the QR string to be base64 encoded.
-    const req = GenericRequest.fromQrString(deeplinkRawData);
-    return req;
-  }
-  default:
-    throw new Error(`Unsupported deeplink ID: ${deeplinkId}`);
+    case GENERIC_REQUEST_DEEPLINK_VDXF_KEY.vdxfid: {
+      // The generic request is sent as the QR string to be base64 encoded.
+      const req = GenericRequest.fromQrString(deeplinkRawData);
+      return req;
+    }
+    default:
+      throw new Error(`Unsupported deeplink ID: ${deeplinkId}`);
   }
 };
 
 const updateReduxStore = (data: IpcPushMessage): void => {
   // Add the name of daemon guaranteed to be running on desktop so
   // it can be used to look up other chains.
-  store.dispatch(
-    setMainChain(data.data.origin_app_info.main_chain_ticker)
-  );
+  store.dispatch(setMainChain(data.data.origin_app_info.main_chain_ticker));
 
-  const deeplinkData = parseDeeplinkByType(
-    data.data.deeplink.data,
-    data.data.deeplink.id
-  );
+  const deeplinkData = parseDeeplinkByType(data.data.deeplink.data, data.data.deeplink.id);
 
   store.dispatch(
     setDeeplinkData({
       id: data.data.deeplink.id,
-      data: deeplinkData
-    })
+      data: deeplinkData,
+    }),
   );
 
   store.dispatch(setOriginAppBuiltin(data.data.origin_app_info.search_builtin));
@@ -129,7 +140,7 @@ const setupRpcConfig = (data: IpcInitMessage | null = null): void => {
       store.dispatch(setRpcPassword(window.bridge.getSecretSync().BuiltinSecret));
     }
   } catch (e) {
-    console.error("Error loading api secrets!");
+    console.error('Error loading api secrets!');
     console.error(e);
     throw e;
   }
@@ -138,11 +149,10 @@ const setupRpcConfig = (data: IpcInitMessage | null = null): void => {
 export const handleIpc = async (event: MessageEvent): Promise<void> => {
   try {
     if (
-      typeof event.data === "string" &&
+      typeof event.data === 'string' &&
       ((!DEVMODE && event.origin === IPC_ORIGIN_PRODUCTION) ||
-        (DEVMODE && event.origin === IPC_ORIGIN_DEV ||
-        (DEVMODE && event.origin === IPC_ORIGIN_DEV_LOCALHOST)
-        ))
+        (DEVMODE && event.origin === IPC_ORIGIN_DEV) ||
+        (DEVMODE && event.origin === IPC_ORIGIN_DEV_LOCALHOST))
     ) {
       const data = JSON.parse(event.data) as IpcMessage;
 
@@ -155,10 +165,10 @@ export const handleIpc = async (event: MessageEvent): Promise<void> => {
         setupRpcConfig();
         updateReduxStore(data as IpcPushMessage);
       }
-    } else if (typeof event.data === "string") {
+    } else if (typeof event.data === 'string') {
       console.log(`[IPC] recieved event message from unapproved origin (${event.origin}), blocked`);
     }
-  } catch(e) {
+  } catch (e) {
     console.error(e);
     store.dispatch(setError(new Error((e as Error).message)));
   }
