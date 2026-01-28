@@ -16,10 +16,14 @@ import {GenericRequest, LoginConsentRequest} from 'verus-typescript-primitives';
 
 import {useAppDispatch} from '#/redux/hooks';
 import {checkAndUpdateIdentities} from '#/redux/reducers/identity/identity.actions';
-import {navigateGenericRequest, setExternalAction, setNavigationPath} from '#/redux/reducers/navigation/navigation.actions';
+import {
+  navigateGenericRequest,
+  setExternalAction,
+  setNavigationPath,
+} from '#/redux/reducers/navigation/navigation.actions';
 import {RootState} from '#/redux/store';
-import PageLayout from '#/components/common/PageLayout';
-import IdentityDetails from '#/components/common/Identity';
+import PageLayout from '#/components/PageLayout';
+import IdentityDetails from '#/components/Identity';
 import {EXTERNAL_ACTION, EXTERNAL_CHAIN_START, SELECT_LOGIN_ID} from '#/utils/constants';
 import {extractConsentDataV1, extractConsentDataV2} from '#/utils/login/consentDataExtractors';
 import {Identity} from '#/redux/reducers/signatureInfo/signatureInfo.types';
@@ -30,7 +34,7 @@ interface ConsentProps {
   completeLoginConsent: () => Promise<void>;
 }
 
-const Consent: React.FC<ConsentProps> = (props) => {
+const Consent: React.FC<ConsentProps> = props => {
   const {canProcessRequest, completeLoginConsent} = props;
   const dispatch = useAppDispatch();
   const [loading, setLoading] = useState<boolean>(false);
@@ -43,7 +47,8 @@ const Consent: React.FC<ConsentProps> = (props) => {
   const chainName = useSelector((state: RootState) => state.chainMetadata.chainName);
   const signatureInfo = useSelector((state: RootState) => state.signatureInfo);
 
-  const {sigBlockInfo, signedBy, signingRevocationIdentity, signingRecoveryIdentity} = signatureInfo;
+  const {sigBlockInfo, signedBy, signingRevocationIdentity, signingRecoveryIdentity} =
+    signatureInfo;
   const {time} = sigBlockInfo;
 
   const isGenericRequest = deeplinkData instanceof GenericRequest;
@@ -104,7 +109,7 @@ const Consent: React.FC<ConsentProps> = (props) => {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        gap: 2
+        gap: 2,
       }}
       footerContent={
         <div style={{display: 'flex', justifyContent: 'flex-end', width: '100%'}}>
@@ -119,7 +124,7 @@ const Consent: React.FC<ConsentProps> = (props) => {
               padding: 8,
             }}
           >
-            {"Cancel"}
+            {'Cancel'}
           </Button>
           <Button
             variant="contained"
@@ -131,7 +136,7 @@ const Consent: React.FC<ConsentProps> = (props) => {
               padding: 8,
             }}
           >
-            {"Continue"}
+            {'Continue'}
           </Button>
         </div>
       }
@@ -160,7 +165,7 @@ const Consent: React.FC<ConsentProps> = (props) => {
                 secondary="System name"
                 slotProps={{
                   primary: {variant: 'subtitle1'},
-                  secondary: {color: 'text.secondary', variant: 'body2'}
+                  secondary: {color: 'text.secondary', variant: 'body2'},
                 }}
               />
             </ListItem>
@@ -171,39 +176,33 @@ const Consent: React.FC<ConsentProps> = (props) => {
                 secondary="Signed on"
                 slotProps={{
                   primary: {variant: 'subtitle1'},
-                  secondary: {color: 'text.secondary', variant: 'body2'}
+                  secondary: {color: 'text.secondary', variant: 'body2'},
                 }}
               />
             </ListItem>
 
             {permissionsLabels && permissionsLabels.length > 0 && (
               <>
-                <ListItemButton
-                  onClick={handlePermissionsClick}
-                >
+                <ListItemButton onClick={handlePermissionsClick}>
                   <ListItemText
                     primary="Permissions Requested"
                     secondary={openPermissions ? 'Click to collapse' : 'Click to expand'}
                     slotProps={{
                       primary: {variant: 'subtitle1'},
-                      secondary: {color: 'text.secondary', variant: 'body2'}
+                      secondary: {color: 'text.secondary', variant: 'body2'},
                     }}
                   />
                   {openPermissions ? <ExpandLess color="action" /> : <ExpandMore color="action" />}
                 </ListItemButton>
 
                 <Collapse in={openPermissions} timeout="auto" unmountOnExit>
-                  <List
-                    component="div"
-                    dense
-                    disablePadding
-                  >
+                  <List component="div" dense disablePadding>
                     {permissionsLabels.map((permission, index) => (
                       <ListItem key={index} divider sx={{pl: 6, pr: 2, py: 0.5, minHeight: 48}}>
                         <ListItemText
                           primary={`${permission}`}
                           slotProps={{
-                            primary: {variant: 'body2', sx: {lineHeight: 1.3}}
+                            primary: {variant: 'body2', sx: {lineHeight: 1.3}},
                           }}
                         />
                       </ListItem>
@@ -215,32 +214,26 @@ const Consent: React.FC<ConsentProps> = (props) => {
 
             {constraintsLabels && constraintsLabels.length > 0 && (
               <>
-                <ListItemButton
-                  onClick={handleConstraintsClick}
-                >
+                <ListItemButton onClick={handleConstraintsClick}>
                   <ListItemText
                     primary="Constraints"
                     secondary={openConstraints ? 'Click to collapse' : 'Click to expand'}
                     slotProps={{
                       primary: {variant: 'subtitle1'},
-                      secondary: {color: 'text.secondary', variant: 'body2'}
+                      secondary: {color: 'text.secondary', variant: 'body2'},
                     }}
                   />
                   {openConstraints ? <ExpandLess color="action" /> : <ExpandMore color="action" />}
                 </ListItemButton>
 
                 <Collapse in={openConstraints} timeout="auto" unmountOnExit>
-                  <List
-                    component="div"
-                    dense
-                    disablePadding
-                  >
+                  <List component="div" dense disablePadding>
                     {constraintsLabels.map((constraint, index) => (
                       <ListItem key={index} divider sx={{pl: 6, pr: 2, py: 0.5, minHeight: 48}}>
                         <ListItemText
                           primary={`${constraint}`}
                           slotProps={{
-                            primary: {variant: 'body2', sx: {lineHeight: 1.3}}
+                            primary: {variant: 'body2', sx: {lineHeight: 1.3}},
                           }}
                         />
                       </ListItem>
@@ -252,32 +245,26 @@ const Consent: React.FC<ConsentProps> = (props) => {
 
             {responseURIsLabels.length > 0 && (
               <>
-                <ListItemButton
-                  onClick={handleResponseURIsClick}
-                >
+                <ListItemButton onClick={handleResponseURIsClick}>
                   <ListItemText
                     primary="Response URIs"
                     secondary={openResponseURIs ? 'Click to collapse' : 'Click to expand'}
                     slotProps={{
                       primary: {variant: 'subtitle1'},
-                      secondary: {color: 'text.secondary', variant: 'body2'}
+                      secondary: {color: 'text.secondary', variant: 'body2'},
                     }}
                   />
                   {openResponseURIs ? <ExpandLess color="action" /> : <ExpandMore color="action" />}
                 </ListItemButton>
 
                 <Collapse in={openResponseURIs} timeout="auto" unmountOnExit>
-                  <List
-                    component="div"
-                    dense
-                    disablePadding
-                  >
+                  <List component="div" dense disablePadding>
                     {responseURIsLabels.map((uri, index) => (
                       <ListItem key={index} divider sx={{pl: 6, pr: 2, py: 0.5, minHeight: 48}}>
                         <ListItemText
                           primary={`${uri}`}
                           slotProps={{
-                            primary: {variant: 'body2', sx: {lineHeight: 1.3}}
+                            primary: {variant: 'body2', sx: {lineHeight: 1.3}},
                           }}
                         />
                       </ListItem>
@@ -292,7 +279,7 @@ const Consent: React.FC<ConsentProps> = (props) => {
                 secondary="Expires at"
                 slotProps={{
                   primary: {variant: 'subtitle1'},
-                  secondary: {color: 'text.secondary', variant: 'body2'}
+                  secondary: {color: 'text.secondary', variant: 'body2'},
                 }}
               />
             </ListItem>

@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React, {useState, useEffect} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
 import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -13,15 +13,15 @@ import Collapse from '@mui/material/Collapse';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import PageLayout from '../../common/PageLayout';
-import { setNavigationPath } from '../../../redux/reducers/navigation/navigation.actions';
-import { IDENTITY_UPDATE_CONFIRM, IDENTITY_UPDATE_CONTENTMULTIMAP } from '../../../utils/constants';
+import {setNavigationPath} from '../../../redux/reducers/navigation/navigation.actions';
+import {IDENTITY_UPDATE_CONFIRM, IDENTITY_UPDATE_CONTENTMULTIMAP} from '../../../utils/constants';
 // @ts-expect-error: the IdentityUpdateRequest was removed and needs to be re-added when the generic request is fully implemented.
-import { IdentityUpdateRequest, IdentityUpdateRequestDetails } from 'verus-typescript-primitives';
-import { getIdentity } from '../../../rpc/calls/getIdentity';
-import { SnackbarAlert } from '../../../containers/SnackbarAlert';
-import { convertFqnToDisplayFormat } from '../../../utils/fullyqualifiedname';
-import { createIdentityDescriptor } from '../../../utils/identity';
-import { setActiveVerusId } from '../../../redux/reducers/identity/identity.actions';
+import {IdentityUpdateRequest, IdentityUpdateRequestDetails} from 'verus-typescript-primitives';
+import {getIdentity} from '../../../rpc/calls/getIdentity';
+import {SnackbarAlert} from '../../../components/SnackbarAlert';
+import {convertFqnToDisplayFormat} from '../../../utils/fullyqualifiedname';
+import {createIdentityDescriptor} from '../../../utils/identity';
+import {setActiveVerusId} from '../../../redux/reducers/identity/identity.actions';
 
 interface IdentityFieldChange {
   field: string;
@@ -50,27 +50,34 @@ const processIdentityChanges = async (
   }
 
   if (identityChanges.primary_addresses?.length > 0) {
-    const newPrimaryAddresses = identityChanges.primary_addresses.map(addr => addr.toAddress()).sort().join('\n');
-    const oldPrimaryAddresses = currentIdentity.primaryaddresses ? currentIdentity.primaryaddresses.slice().sort().join('\n') : '';
+    const newPrimaryAddresses = identityChanges.primary_addresses
+      .map(addr => addr.toAddress())
+      .sort()
+      .join('\n');
+    const oldPrimaryAddresses = currentIdentity.primaryaddresses
+      ? currentIdentity.primaryaddresses.slice().sort().join('\n')
+      : '';
 
     if (newPrimaryAddresses !== oldPrimaryAddresses) {
       changes.push({
         field: 'Primary Addresses',
         newValue: newPrimaryAddresses,
-        oldValue: oldPrimaryAddresses
+        oldValue: oldPrimaryAddresses,
       });
     }
   }
 
   if (identityChanges.min_sigs) {
     const newMinSigs = identityChanges.min_sigs.toString();
-    const oldMinSigs = currentIdentity.minimumsignatures ? currentIdentity.minimumsignatures.toString() : '';
+    const oldMinSigs = currentIdentity.minimumsignatures
+      ? currentIdentity.minimumsignatures.toString()
+      : '';
 
     if (newMinSigs !== oldMinSigs) {
       changes.push({
         field: 'Minimum Signatures',
         newValue: newMinSigs,
-        oldValue: oldMinSigs
+        oldValue: oldMinSigs,
       });
     }
   }
@@ -79,9 +86,14 @@ const processIdentityChanges = async (
     if (identityChanges.revocation_authority.toAddress() !== currentIdentity.revocationauthority) {
       let newRevocationAuthorityDisplay = identityChanges.revocation_authority.toAddress();
       try {
-        const newRevocationIdentity = await getIdentity(chainId, identityChanges.revocation_authority.toAddress());
+        const newRevocationIdentity = await getIdentity(
+          chainId,
+          identityChanges.revocation_authority.toAddress()
+        );
         if (newRevocationIdentity?.identity?.name) {
-          const fqn = newRevocationIdentity.fullyqualifiedname ? convertFqnToDisplayFormat(newRevocationIdentity.fullyqualifiedname) : '';
+          const fqn = newRevocationIdentity.fullyqualifiedname
+            ? convertFqnToDisplayFormat(newRevocationIdentity.fullyqualifiedname)
+            : '';
           newRevocationAuthorityDisplay = createIdentityDescriptor(newRevocationIdentity, fqn);
         }
       } catch (error) {
@@ -91,9 +103,14 @@ const processIdentityChanges = async (
       let oldRevocationAuthorityDisplay = currentIdentity.revocationauthority || '';
       if (currentIdentity.revocationauthority) {
         try {
-          const oldRevocationIdentity = await getIdentity(chainId, currentIdentity.revocationauthority);
+          const oldRevocationIdentity = await getIdentity(
+            chainId,
+            currentIdentity.revocationauthority
+          );
           if (oldRevocationIdentity?.identity?.name) {
-            const fqn = oldRevocationIdentity.fullyqualifiedname ? convertFqnToDisplayFormat(oldRevocationIdentity.fullyqualifiedname) : '';
+            const fqn = oldRevocationIdentity.fullyqualifiedname
+              ? convertFqnToDisplayFormat(oldRevocationIdentity.fullyqualifiedname)
+              : '';
             oldRevocationAuthorityDisplay = createIdentityDescriptor(oldRevocationIdentity, fqn);
           }
         } catch (error) {
@@ -104,7 +121,7 @@ const processIdentityChanges = async (
       changes.push({
         field: 'Revocation Authority',
         newValue: newRevocationAuthorityDisplay,
-        oldValue: oldRevocationAuthorityDisplay
+        oldValue: oldRevocationAuthorityDisplay,
       });
     }
   }
@@ -113,9 +130,14 @@ const processIdentityChanges = async (
     if (identityChanges.recovery_authority.toAddress() !== currentIdentity.recoveryauthority) {
       let newRecoveryAuthorityDisplay = identityChanges.recovery_authority.toAddress();
       try {
-        const newRecoveryIdentity = await getIdentity(chainId, identityChanges.recovery_authority.toAddress());
+        const newRecoveryIdentity = await getIdentity(
+          chainId,
+          identityChanges.recovery_authority.toAddress()
+        );
         if (newRecoveryIdentity?.identity?.name) {
-          const fqn = newRecoveryIdentity.fullyqualifiedname ? convertFqnToDisplayFormat(newRecoveryIdentity.fullyqualifiedname) : '';
+          const fqn = newRecoveryIdentity.fullyqualifiedname
+            ? convertFqnToDisplayFormat(newRecoveryIdentity.fullyqualifiedname)
+            : '';
           newRecoveryAuthorityDisplay = createIdentityDescriptor(newRecoveryIdentity, fqn);
         }
       } catch (error) {
@@ -127,7 +149,9 @@ const processIdentityChanges = async (
         try {
           const oldRecoveryIdentity = await getIdentity(chainId, currentIdentity.recoveryauthority);
           if (oldRecoveryIdentity?.identity?.name) {
-            const fqn = oldRecoveryIdentity.fullyqualifiedname ? convertFqnToDisplayFormat(oldRecoveryIdentity.fullyqualifiedname) : '';
+            const fqn = oldRecoveryIdentity.fullyqualifiedname
+              ? convertFqnToDisplayFormat(oldRecoveryIdentity.fullyqualifiedname)
+              : '';
             oldRecoveryAuthorityDisplay = createIdentityDescriptor(oldRecoveryIdentity, fqn);
           }
         } catch (error) {
@@ -138,20 +162,22 @@ const processIdentityChanges = async (
       changes.push({
         field: 'Recovery Authority',
         newValue: newRecoveryAuthorityDisplay,
-        oldValue: oldRecoveryAuthorityDisplay
+        oldValue: oldRecoveryAuthorityDisplay,
       });
     }
   }
 
   if (identityChanges.private_addresses?.length > 0) {
-    const newPrivateAddresses = identityChanges.private_addresses.map(addr => addr.toAddressString()).join('\n');
+    const newPrivateAddresses = identityChanges.private_addresses
+      .map(addr => addr.toAddressString())
+      .join('\n');
     const oldPrivateAddresses = currentIdentity.privateaddress || '';
 
     if (newPrivateAddresses !== oldPrivateAddresses) {
       changes.push({
         field: 'Private Addresses',
         newValue: newPrivateAddresses,
-        oldValue: oldPrivateAddresses
+        oldValue: oldPrivateAddresses,
       });
     }
   }
@@ -164,7 +190,7 @@ const processIdentityChanges = async (
       changes.push({
         field: 'Timelock',
         newValue: newTimelock,
-        oldValue: oldTimelock
+        oldValue: oldTimelock,
       });
     }
   }
@@ -176,10 +202,10 @@ const IdentityUpdateCore: React.FC = () => {
   const dispatch = useDispatch();
   const [loading, setLoading] = useState<boolean>(false);
   const [changes, setChanges] = useState<IdentityFieldChange[]>([]);
-  const [openDropdowns, setOpenDropdowns] = useState<{ [key: number]: boolean }>({});
+  const [openDropdowns, setOpenDropdowns] = useState<{[key: number]: boolean}>({});
   const [fetchError, setFetchError] = useState({
     showError: false,
-    description: ''
+    description: '',
   });
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -196,7 +222,7 @@ const IdentityUpdateCore: React.FC = () => {
   const handleDropdownToggle = (index: number) => {
     setOpenDropdowns(prev => ({
       ...prev,
-      [index]: !prev[index]
+      [index]: !prev[index],
     }));
   };
 
@@ -217,7 +243,7 @@ const IdentityUpdateCore: React.FC = () => {
         const errorMessage = error instanceof Error ? error.message : 'Failed to load identity';
         setFetchError({
           showError: true,
-          description: errorMessage
+          description: errorMessage,
         });
         setChanges([]);
       } finally {
@@ -254,10 +280,10 @@ const IdentityUpdateCore: React.FC = () => {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        gap: 2
+        gap: 2,
       }}
       footerContent={
-        <div style={{ display: 'flex', justifyContent: 'flex-end', width: '100%' }}>
+        <div style={{display: 'flex', justifyContent: 'flex-end', width: '100%'}}>
           <Button
             variant="text"
             disabled={loading}
@@ -269,7 +295,7 @@ const IdentityUpdateCore: React.FC = () => {
               padding: 8,
             }}
           >
-            {"Back"}
+            {'Back'}
           </Button>
           <Button
             variant="contained"
@@ -281,7 +307,7 @@ const IdentityUpdateCore: React.FC = () => {
               padding: 8,
             }}
           >
-            {"Next"}
+            {'Next'}
           </Button>
         </div>
       }
@@ -305,7 +331,7 @@ const IdentityUpdateCore: React.FC = () => {
                 alignItems: 'center',
                 justifyContent: 'center',
                 padding: 4,
-                textAlign: 'center'
+                textAlign: 'center',
               }}
             >
               <Typography variant="h6" color="text.secondary" gutterBottom>
@@ -316,24 +342,20 @@ const IdentityUpdateCore: React.FC = () => {
             <List>
               {changes.map((change, index) => (
                 <React.Fragment key={index}>
-                  <ListItem dense sx={{ pb: 0 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <ListItem dense sx={{pb: 0}}>
+                    <Box sx={{display: 'flex', alignItems: 'center'}}>
                       <Typography variant="subtitle1" fontWeight="bold">
                         {change.field}
                       </Typography>
                     </Box>
                   </ListItem>
 
-                  <ListItemButton
-                    divider
-                    dense
-                    onClick={() => handleDropdownToggle(index)}
-                  >
+                  <ListItemButton divider dense onClick={() => handleDropdownToggle(index)}>
                     <ListItemText
                       primary="New value"
                       secondary={change.newValue}
                       slotProps={{
-                        primary: { variant: 'body2', color: 'text.secondary' },
+                        primary: {variant: 'body2', color: 'text.secondary'},
                         secondary: {
                           variant: 'body1',
                           color: 'text.primary',
@@ -341,34 +363,38 @@ const IdentityUpdateCore: React.FC = () => {
                             wordBreak: 'break-all',
                             userSelect: 'text',
                             cursor: 'text',
-                            whiteSpace: 'pre-line'
+                            whiteSpace: 'pre-line',
                           },
                           // Allows the user to select the text without opening the dropdown.
-                          onMouseDown: (e) => e.stopPropagation(),
-                          onMouseUp: (e) => e.stopPropagation(),
-                          onClick: (e) => e.stopPropagation()
-                        }
+                          onMouseDown: e => e.stopPropagation(),
+                          onMouseUp: e => e.stopPropagation(),
+                          onClick: e => e.stopPropagation(),
+                        },
                       }}
                     />
-                    {openDropdowns[index] ? <ExpandLess color="action" /> : <ExpandMore color="action" />}
+                    {openDropdowns[index] ? (
+                      <ExpandLess color="action" />
+                    ) : (
+                      <ExpandMore color="action" />
+                    )}
                   </ListItemButton>
 
                   <Collapse in={openDropdowns[index]} timeout="auto" unmountOnExit>
                     <List component="div" dense disablePadding>
-                      <ListItem divider dense sx={{ pr: 2 }}>
+                      <ListItem divider dense sx={{pr: 2}}>
                         <ListItemText
                           primary="Previous value"
                           secondary={change.oldValue}
                           slotProps={{
-                            primary: { variant: 'body2', color: 'text.secondary' },
+                            primary: {variant: 'body2', color: 'text.secondary'},
                             secondary: {
                               variant: 'body1',
                               color: 'text.primary',
                               sx: {
                                 wordBreak: 'break-all',
-                                whiteSpace: 'pre-line'
-                              }
-                            }
+                                whiteSpace: 'pre-line',
+                              },
+                            },
                           }}
                         />
                       </ListItem>
@@ -383,7 +409,7 @@ const IdentityUpdateCore: React.FC = () => {
       <SnackbarAlert
         open={fetchError.showError}
         text={fetchError.description}
-        handleClose={() => setFetchError({ showError: false, description: '' })}
+        handleClose={() => setFetchError({showError: false, description: ''})}
       />
     </PageLayout>
   );

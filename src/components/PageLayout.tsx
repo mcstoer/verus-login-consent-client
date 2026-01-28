@@ -1,6 +1,6 @@
 import React from 'react';
-import { Box, Container, SxProps, Theme, Typography, CircularProgress } from '@mui/material';
-import { VerusIdLogo } from "../../images";
+import {Box, Container, SxProps, Theme, Typography, CircularProgress} from '@mui/material';
+import {VerusIdLogo} from '#/images';
 
 interface PageLayoutProps {
   children?: React.ReactNode;
@@ -23,27 +23,27 @@ const PageLayout: React.FC<PageLayoutProps> = ({
   footerContent,
   contentStyle = {},
   containerStyle = {},
-  loading = false
+  loading = false,
 }) => {
   return (
     <Box
       sx={{
-        display: "flex",
-        flexDirection: "column",
+        display: 'flex',
+        flexDirection: 'column',
         flex: 1,
-        height: "100%",
-        ...containerStyle
+        height: '100%',
+        ...containerStyle,
       }}
     >
       <Container
         maxWidth={false}
         sx={{
-          height: "100%",
-          display: "flex",
+          height: '100%',
+          display: 'flex',
           padding: 4,
-          flexDirection: "column",
-          alignItems: "center",
-          flex: 1
+          flexDirection: 'column',
+          alignItems: 'center',
+          flex: 1,
         }}
       >
         {showLogo && (
@@ -54,7 +54,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({
             sx={{
               width: logoWidth,
               height: logoHeight,
-              objectFit: 'contain'
+              objectFit: 'contain',
             }}
           />
         )}
@@ -62,9 +62,9 @@ const PageLayout: React.FC<PageLayoutProps> = ({
         {title && (
           <Box
             sx={{
-              width: "100%",
-              display: "flex",
-              justifyContent: "center",
+              width: '100%',
+              display: 'flex',
+              justifyContent: 'center',
               padding: 1,
             }}
           >
@@ -77,20 +77,22 @@ const PageLayout: React.FC<PageLayoutProps> = ({
         {/* Main content area */}
         <Box
           sx={{
-            width: "100%",
-            display: "flex",
-            flexDirection: "column",
-            height: "56vh",
-            ...contentStyle
+            width: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            height: '56vh',
+            ...contentStyle,
           }}
         >
           {loading ? (
-            <Box sx={{
-              display: 'flex',
-              flex: 1,
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>
+            <Box
+              sx={{
+                display: 'flex',
+                flex: 1,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
               <CircularProgress />
             </Box>
           ) : (
@@ -102,21 +104,21 @@ const PageLayout: React.FC<PageLayoutProps> = ({
         {footerContent && (
           <Box
             sx={{
-              width: "100%",
-              display: "flex",
-              flexDirection: "row",
-              alignItems: "flex-end",
-              justifyContent: "flex-end",
-              marginTop: "auto",
+              width: '100%',
+              display: 'flex',
+              flexDirection: 'row',
+              alignItems: 'flex-end',
+              justifyContent: 'flex-end',
+              marginTop: 'auto',
               paddingTop: 2,
             }}
           >
             <Box
               sx={{
-                display: "flex",
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "flex-end",
+                display: 'flex',
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'flex-end',
               }}
             >
               {footerContent}

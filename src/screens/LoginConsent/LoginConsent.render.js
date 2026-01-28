@@ -13,13 +13,12 @@ import {
   IDENTITY_UPDATE_CORE,
   IDENTITY_UPDATE_CONTENTMULTIMAP,
   IDENTITY_UPDATE_RESULT,
-  GENERIC_FINALIZATION,
-} from '../../utils/constants';
+} from '#/utils/constants';
 import ExternalAction from './ExternalAction/ExternalAction';
-import Loading from '../Loading';
+import Loading from '#components/Loading';
 import Error from './Error/Error';
 import Login from './Login/Login';
-import {setError} from '../../redux/reducers/error/error.actions';
+import {setError} from '#/redux/reducers/error/error.actions';
 import Redirect from './Redirect/Redirect';
 import Consent from './Consent/Consent';
 import ProvisionIdentityForm from './ProvisionIdentity/ProvisionIdentityForm/ProvisionIdentityForm';
@@ -30,9 +29,8 @@ import IdentityUpdateConfirm from './IdentityUpdate/Confirm';
 import IdentityUpdateCore from './IdentityUpdate/Core';
 import IdentityUpdateContentMultiMap from './IdentityUpdate/ContentMultiMap';
 import IdentityUpdateResult from './IdentityUpdate/Result';
-import GenericFinalization from './GenericFinalization/GenericFinalization';
 
-export const LoginConsentRender = function() {
+export const LoginConsentRender = function () {
   const COMPONENT_PROPS = {
     pathArray: this.props.pathArray,
     completeLoginConsent: this.completeLoginConsent,
@@ -40,78 +38,23 @@ export const LoginConsentRender = function() {
     setRequestResult: this.getRequestResult,
     canProcessRequest: this.canProcessRequest,
     handleRequest: this.handleRequest,
-    checkRequest: this.checkRequest
+    checkRequest: this.checkRequest,
   };
 
   const COMPONENT_MAP = {
-    [EXTERNAL_ACTION]: (
-      <ExternalAction
-        {...COMPONENT_PROPS}
-      />
-    ),
-    [REDIRECT]: (
-      <Redirect
-        {...COMPONENT_PROPS}
-      />
-    ),
-    [SELECT_LOGIN_ID]: (
-      <Login
-        {...COMPONENT_PROPS}
-      />
-    ),
-    [CONSENT_TO_SCOPE]: (
-      <Consent
-        {...COMPONENT_PROPS}
-      />
-    ),
-    [IDENTITY_UPDATE_CONFIRM]: (
-      <IdentityUpdateConfirm
-        {...COMPONENT_PROPS}
-      />
-    ),
-    [IDENTITY_UPDATE_CORE]: (
-      <IdentityUpdateCore
-        {...COMPONENT_PROPS}
-      />
-    ),
-    [IDENTITY_UPDATE_CONTENTMULTIMAP]: (
-      <IdentityUpdateContentMultiMap
-        {...COMPONENT_PROPS}
-      />
-    ),
-    [IDENTITY_UPDATE_RESULT]: (
-      <IdentityUpdateResult
-        {...COMPONENT_PROPS}
-      />
-    ),
-    [CREDENTIALS_REVIEW]: (
-      <CredentialsReview
-        {...COMPONENT_PROPS}
-      />
-    ),
-    [PROVISIONING_FORM]: (
-      <ProvisionIdentityForm
-        {...COMPONENT_PROPS}
-      />
-    ),
-    [PROVISIONING_CONFIRM]: (
-      <ProvisionIdentityConfirm
-        {...COMPONENT_PROPS}
-      />
-    ),
-    [PROVISIONING_RESULT]: (
-      <ProvisionIdentityResult
-        {...COMPONENT_PROPS}
-      />
-    ),
-    [GENERIC_FINALIZATION]: (
-      <GenericFinalization
-        {...COMPONENT_PROPS}
-      />
-    ),
-    [LOADING_DISPLAY]: (
-      <Loading />
-    )
+    [EXTERNAL_ACTION]: <ExternalAction {...COMPONENT_PROPS} />,
+    [REDIRECT]: <Redirect {...COMPONENT_PROPS} />,
+    [SELECT_LOGIN_ID]: <Login {...COMPONENT_PROPS} />,
+    [CONSENT_TO_SCOPE]: <Consent {...COMPONENT_PROPS} />,
+    [IDENTITY_UPDATE_CONFIRM]: <IdentityUpdateConfirm {...COMPONENT_PROPS} />,
+    [IDENTITY_UPDATE_CORE]: <IdentityUpdateCore {...COMPONENT_PROPS} />,
+    [IDENTITY_UPDATE_CONTENTMULTIMAP]: <IdentityUpdateContentMultiMap {...COMPONENT_PROPS} />,
+    [IDENTITY_UPDATE_RESULT]: <IdentityUpdateResult {...COMPONENT_PROPS} />,
+    [CREDENTIALS_REVIEW]: <CredentialsReview {...COMPONENT_PROPS} />,
+    [PROVISIONING_FORM]: <ProvisionIdentityForm {...COMPONENT_PROPS} />,
+    [PROVISIONING_CONFIRM]: <ProvisionIdentityConfirm {...COMPONENT_PROPS} />,
+    [PROVISIONING_RESULT]: <ProvisionIdentityResult {...COMPONENT_PROPS} />,
+    [LOADING_DISPLAY]: <Loading />,
   };
 
   return this.props.error != null ? (
@@ -128,5 +71,3 @@ export const LoginConsentRender = function() {
     <Loading />
   );
 };
-
-

@@ -25,7 +25,6 @@ import {
 import {
   IDENTITY_UPDATE_RESULT,
   PROVISIONING_RESULT,
-  GENERIC_FINALIZATION,
   IDENTITY_UPDATE_CONFIRM,
   IDENTITY_UPDATE_CORE,
   IDENTITY_UPDATE_CONTENTMULTIMAP,
@@ -269,7 +268,7 @@ export const navigateGenericRequest =
       if (!nextPathInDetail) {
         // No next path defined for current path - this might be an error
         console.warn(`No next path defined for: ${currentPath}`);
-        nextPath = GENERIC_FINALIZATION; // Fallback to finalization
+        throw new Error('No next path defined for current path');
       } else {
         nextPath = nextPathInDetail;
       }

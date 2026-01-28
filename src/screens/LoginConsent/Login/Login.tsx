@@ -10,7 +10,7 @@ import Select, {SelectChangeEvent} from '@mui/material/Select';
 
 import {GenericRequest, LoginConsentRequest} from 'verus-typescript-primitives';
 
-import PageLayout from '#/components/common/PageLayout';
+import PageLayout from '#/components/PageLayout';
 import {useAppDispatch} from '#/redux/hooks';
 import {setCredentials} from '#/redux/reducers/credentials/credentials.actions';
 import {setError} from '#/redux/reducers/error/error.actions';

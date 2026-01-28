@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { PROVISIONING_FORM, PROVISIONING_RESULT } from '../../../../utils/constants';
-import { setNavigationPath } from '../../../../redux/reducers/navigation/navigation.actions';
+import React, {useState} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
+import {PROVISIONING_FORM, PROVISIONING_RESULT} from '../../../../utils/constants';
+import {setNavigationPath} from '../../../../redux/reducers/navigation/navigation.actions';
 import Button from '@mui/material/Button';
-import { VerusIdLogo } from '../../../../images';
+import {VerusIdLogo} from '../../../../images';
 import Card from '@mui/material/Card';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
@@ -21,37 +21,31 @@ import {
   LOGIN_CONSENT_PROVISIONING_RESULT_STATE_PENDINGAPPROVAL,
   LOGIN_CONSENT_PROVISIONING_RESULT_STATE_COMPLETE,
 } from 'verus-typescript-primitives';
-import { getIdentity } from '../../../../rpc/calls/getIdentity';
-import { getVdxfId } from '../../../../rpc/calls/getVdxfId';
-import { signIdProvisioningRequest } from '../../../../rpc/calls/signIdProvisioningRequest';
+import {getIdentity} from '../../../../rpc/calls/getIdentity';
+import {getVdxfId} from '../../../../rpc/calls/getVdxfId';
+import {signIdProvisioningRequest} from '../../../../rpc/calls/signIdProvisioningRequest';
 import axios from 'axios';
-import { SnackbarAlert } from '../../../../containers/SnackbarAlert';
-import { verifyIdProvisioningResponse } from '../../../../rpc/calls/verifyIdProvisioningResponse';
+import {SnackbarAlert} from '../../../../components/SnackbarAlert';
+import {verifyIdProvisioningResponse} from '../../../../rpc/calls/verifyIdProvisioningResponse';
 import {
   setProvisioningName,
   setProvisioningResponse,
   setRequestedFqn,
-  setRequestedId
+  setRequestedId,
 } from '../../../../redux/reducers/provision/provision.actions';
 
 const ProvisionIdentityConfirm = () => {
   const dispatch = useDispatch();
-  const deeplinkData = useSelector((state) => state.deeplink.data);
-  const chainId = useSelector((state) => state.chainMetadata.chainId);
-  const provisioningInfo = useSelector((state) => state.provision.provisioningInfo);
-  const identityToProvisionField = useSelector((state) => state.provision.identityToProvisionField);
-  const primaryAddress = useSelector((state) => state.provision.primaryAddress);
+  const deeplinkData = useSelector(state => state.deeplink.data);
+  const chainId = useSelector(state => state.chainMetadata.chainId);
+  const provisioningInfo = useSelector(state => state.provision.provisioningInfo);
+  const identityToProvisionField = useSelector(state => state.provision.identityToProvisionField);
+  const primaryAddress = useSelector(state => state.provision.primaryAddress);
 
-  const {
-    provAddress,
-    provSystemId,
-    provFqn,
-    provParent,
-    friendlyNameMap,
-  } = provisioningInfo;
+  const {provAddress, provSystemId, provFqn, provParent, friendlyNameMap} = provisioningInfo;
 
   let displayIdentity;
-  
+
   if (provFqn) {
     displayIdentity = provFqn.data;
   } else {
@@ -85,45 +79,48 @@ const ProvisionIdentityConfirm = () => {
   } else {
     displaySystemid = null;
   }
-  
+
   const [loading, setLoading] = useState(false);
 
   const [submissionError, setSubmissionError] = useState({
     showError: false,
-    description: '' 
+    description: '',
   });
 
   const handleProvisioningResponse = async (response, requestedId, requestedFqn) => {
     const res = new LoginConsentProvisioningResponse(response);
-    
+
     // Check the response to see if it is valid and if there are errors.
     const verificationCheck = await verifyIdProvisioningResponse(res);
     const verified = verificationCheck.verified;
-  
+
     if (!verified) throw new Error('Failed to verify response from the provisioning service.');
-  
+
     const {decision} = res;
     const {result} = decision;
-    const {
-      error_desc,
-      state,
-    } = result;
-  
+    const {error_desc, state} = result;
+
     if (state === LOGIN_CONSENT_PROVISIONING_RESULT_STATE_FAILED.vdxfid) {
       throw new Error(error_desc);
-    } else if (state === LOGIN_CONSENT_PROVISIONING_RESULT_STATE_PENDINGAPPROVAL.vdxfid ||
-      state === LOGIN_CONSENT_PROVISIONING_RESULT_STATE_COMPLETE.vdxfid) { 
-  
+    } else if (
+      state === LOGIN_CONSENT_PROVISIONING_RESULT_STATE_PENDINGAPPROVAL.vdxfid ||
+      state === LOGIN_CONSENT_PROVISIONING_RESULT_STATE_COMPLETE.vdxfid
+    ) {
       if (!result.identity_address && !result.fully_qualified_name) {
-        throw new Error('Provisioning response did not contain an identity or fully qualified name.');
+        throw new Error(
+          'Provisioning response did not contain an identity or fully qualified name.'
+        );
       }
-  
-      if (result.identity_address && result.identity_address !== requestedId) { 
+
+      if (result.identity_address && result.identity_address !== requestedId) {
         throw new Error(`Provisioning response identity [${result.identity_address}]
           address does not match requested identity address[${requestedId}].`);
       }
-  
-      if (result.fully_qualified_name && result.fully_qualified_name.toLowerCase() !== requestedFqn.toLowerCase()) {
+
+      if (
+        result.fully_qualified_name &&
+        result.fully_qualified_name.toLowerCase() !== requestedFqn.toLowerCase()
+      ) {
         throw new Error(`Provisioning response fully qualified name [${result.fully_qualified_name.toLowerCase()}]
           does not match requested fully qualified name[${requestedFqn.toLowerCase()}].`);
       }
@@ -146,7 +143,7 @@ const ProvisionIdentityConfirm = () => {
       dispatch(setNavigationPath(PROVISIONING_RESULT));
     };
 
-    const submissionError = (msg) => {
+    const submissionError = msg => {
       setSubmissionError({
         showError: true,
         description: msg,
@@ -157,19 +154,18 @@ const ProvisionIdentityConfirm = () => {
     try {
       const loginRequest = new LoginConsentRequest(deeplinkData);
 
-      const webhookSubject = loginRequest.challenge.provisioning_info ? loginRequest.challenge.provisioning_info.find(x => {
-        return x.vdxfkey === LOGIN_CONSENT_ID_PROVISIONING_WEBHOOK_VDXF_KEY.vdxfid;
-      }) : null;
+      const webhookSubject = loginRequest.challenge.provisioning_info
+        ? loginRequest.challenge.provisioning_info.find(x => {
+            return x.vdxfkey === LOGIN_CONSENT_ID_PROVISIONING_WEBHOOK_VDXF_KEY.vdxfid;
+          })
+        : null;
 
       if (webhookSubject == null) throw new Error('No endpoint for ID provisioning');
 
       const webhookUrl = webhookSubject.data;
 
-      const identity =
-        identityToProvisionField != null
-          ? identityToProvisionField.trim()
-          : '';
-      
+      const identity = identityToProvisionField != null ? identityToProvisionField.trim() : '';
+
       let identityName;
       let isIAddress;
       let parent;
@@ -186,13 +182,12 @@ const ProvisionIdentityConfirm = () => {
 
       if (isIAddress) {
         const identityObj = await getIdentity(chainId, identity);
-  
+
         identityName = identityObj.identity.name;
         parent = identityObj.identity.parent;
         systemid = identityObj.identity.systemid;
         nameId = identity;
         requestedFqn = identityObj.fullyqualifiedname;
-        
       } else {
         identityName = identity.split('@')[0];
         parent = provParent ? provParent.data : null;
@@ -205,36 +200,36 @@ const ProvisionIdentityConfirm = () => {
 
       const provisionRequest = new LoginConsentProvisioningRequest({
         signing_address: primaryAddress,
-        
+
         challenge: new LoginConsentProvisioningChallenge({
           challenge_id: loginRequest.challenge.challenge_id,
           created_at: Number((Date.now() / 1000).toFixed(0)),
           name: identityName,
           system_id: systemid,
-          parent: parent
+          parent: parent,
         }),
       });
-      
-      const signedRequest = await signIdProvisioningRequest(chainId, provisionRequest, primaryAddress);
-      
-      // The responding server should include the error within the response instead of 
-      // using an error code.
-      const res = await axios.post(
-        webhookUrl,
-        signedRequest
+
+      const signedRequest = await signIdProvisioningRequest(
+        chainId,
+        provisionRequest,
+        primaryAddress
       );
+
+      // The responding server should include the error within the response instead of
+      // using an error code.
+      const res = await axios.post(webhookUrl, signedRequest);
 
       const provisionResponse = res.data;
       await handleProvisioningResponse(provisionResponse, nameId, requestedFqn);
 
       const provisioningName = (await getIdentity(chainId, loginRequest.signing_id)).identity.name;
-      
+
       submissionSuccess(res.data, requestedFqn, provisioningName, nameId);
     } catch (e) {
       submissionError(e.message);
     }
   };
-  
 
   return (
     <div
@@ -254,7 +249,7 @@ const ProvisionIdentityConfirm = () => {
           alignItems: 'center',
         }}
       >
-        <img src={VerusIdLogo} width={'55%'} height={'10%'}/>
+        <img src={VerusIdLogo} width={'55%'} height={'10%'} />
         <div
           style={{
             width: '100%',
@@ -275,70 +270,125 @@ const ProvisionIdentityConfirm = () => {
             {`Review the Provisioning Request`}
           </div>
         </div>
-        <Box sx={{
-          flex: 1,
-          width: '100%',
-        }}>
-          <Card square sx={{
-            marginTop: 1,
-            marginBottom: 1,
+        <Box
+          sx={{
+            flex: 1,
             width: '100%',
-            overflowY: 'scroll',
-            maxHeight: '54vh',
-          }}> 
+          }}
+        >
+          <Card
+            square
+            sx={{
+              marginTop: 1,
+              marginBottom: 1,
+              width: '100%',
+              overflowY: 'scroll',
+              maxHeight: '54vh',
+            }}
+          >
             <List>
               <ListItem>
-                <ListItemText primary='Identity' disableTypography sx={{ fontWeight: 'bold' , pr:4}}/>
-                <ListItemText primary={displayIdentity} disableTypography sx={{textAlign:'right'}}/>
+                <ListItemText
+                  primary="Identity"
+                  disableTypography
+                  sx={{fontWeight: 'bold', pr: 4}}
+                />
+                <ListItemText
+                  primary={displayIdentity}
+                  disableTypography
+                  sx={{textAlign: 'right'}}
+                />
               </ListItem>
-              {provAddress &&
+              {provAddress && (
                 <Box>
-                  <Divider/>
+                  <Divider />
                   <ListItem>
-                    <ListItemText primary='Identity address' disableTypography sx={{ fontWeight: 'bold' , pr:4}}/>
-                    <ListItemText primary={provAddress.data} disableTypography sx={{textAlign:'right'}}/>
+                    <ListItemText
+                      primary="Identity address"
+                      disableTypography
+                      sx={{fontWeight: 'bold', pr: 4}}
+                    />
+                    <ListItemText
+                      primary={provAddress.data}
+                      disableTypography
+                      sx={{textAlign: 'right'}}
+                    />
                   </ListItem>
                 </Box>
-              }
-              <Divider/>
+              )}
+              <Divider />
               <ListItem>
-                <ListItemText primary='Primary address (once received)' disableTypography sx={{ fontWeight: 'bold' , pr:4}}/>
-                <ListItemText primary={primaryAddress} disableTypography sx={{textAlign:'right'}}/>
+                <ListItemText
+                  primary="Primary address (once received)"
+                  disableTypography
+                  sx={{fontWeight: 'bold', pr: 4}}
+                />
+                <ListItemText
+                  primary={primaryAddress}
+                  disableTypography
+                  sx={{textAlign: 'right'}}
+                />
               </ListItem>
-              {displayParent &&
+              {displayParent && (
                 <Box>
-                  <Divider/>
+                  <Divider />
                   <ListItem>
-                    <ListItemText primary='Identity parent' disableTypography sx={{ fontWeight: 'bold' , pr:4}}/>
-                    <ListItemText primary={displayParent} disableTypography sx={{textAlign:'right'}}/>
+                    <ListItemText
+                      primary="Identity parent"
+                      disableTypography
+                      sx={{fontWeight: 'bold', pr: 4}}
+                    />
+                    <ListItemText
+                      primary={displayParent}
+                      disableTypography
+                      sx={{textAlign: 'right'}}
+                    />
                   </ListItem>
                 </Box>
-              }
-              {provFqn &&
+              )}
+              {provFqn && (
                 <Box>
-                  <Divider/>
+                  <Divider />
                   <ListItem>
-                    <ListItemText primary='Full identity name' disableTypography sx={{ fontWeight: 'bold' , pr:4}}/>
-                    <ListItemText primary={provFqn.data} disableTypography sx={{textAlign:'right'}}/>
+                    <ListItemText
+                      primary="Full identity name"
+                      disableTypography
+                      sx={{fontWeight: 'bold', pr: 4}}
+                    />
+                    <ListItemText
+                      primary={provFqn.data}
+                      disableTypography
+                      sx={{textAlign: 'right'}}
+                    />
                   </ListItem>
                 </Box>
-              }
-              {displaySystemid &&
+              )}
+              {displaySystemid && (
                 <Box>
-                  <Divider/>
+                  <Divider />
                   <ListItem>
-                    <ListItemText primary='Identity system ID' disableTypography sx={{ fontWeight: 'bold' , pr:4}}/>
-                    <ListItemText primary={displaySystemid} disableTypography sx={{textAlign:'right'}}/>
+                    <ListItemText
+                      primary="Identity system ID"
+                      disableTypography
+                      sx={{fontWeight: 'bold', pr: 4}}
+                    />
+                    <ListItemText
+                      primary={displaySystemid}
+                      disableTypography
+                      sx={{textAlign: 'right'}}
+                    />
                   </ListItem>
                 </Box>
-              }
+              )}
             </List>
           </Card>
         </Box>
         <SnackbarAlert
           open={submissionError.showError}
           text={submissionError.description}
-          handleClose={() => {setSubmissionError(false, '');}}
+          handleClose={() => {
+            setSubmissionError(false, '');
+          }}
         ></SnackbarAlert>
         <div
           style={{
@@ -358,9 +408,9 @@ const ProvisionIdentityConfirm = () => {
             }}
           >
             <Button
-              variant='text'
+              variant="text"
               disabled={loading}
-              color='secondary'
+              color="secondary"
               onClick={() => cancel()}
               style={{
                 width: 120,
@@ -371,8 +421,8 @@ const ProvisionIdentityConfirm = () => {
               {'Back'}
             </Button>
             <Button
-              variant='contained'
-              color='success'
+              variant="contained"
+              color="success"
               disabled={loading}
               onClick={() => submitData()}
               style={{
