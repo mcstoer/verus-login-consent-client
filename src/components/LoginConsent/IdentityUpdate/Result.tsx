@@ -1,13 +1,21 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import Button from '@mui/material/Button';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import Box from '@mui/material/Box';
 import PageLayout from '../../common/PageLayout';
-import { useSelector } from 'react-redux';
+import {useSelector} from 'react-redux';
 // @ts-expect-error: the IdentityUpdateRequest was removed and needs to be re-added when the generic request is fully implemented.
-import { IDENTITY_UPDATE_RESPONSE_VDXF_KEY, IdentityUpdateEnvelopeJson, IdentityUpdateRequest, IdentityUpdateRequestDetails, IdentityUpdateResponse, ResponseUriJson } from 'verus-typescript-primitives';
+import {
+  IDENTITY_UPDATE_RESPONSE_VDXF_KEY,
+  IdentityUpdateEnvelopeJson,
+  IdentityUpdateRequest,
+  IdentityUpdateRequestDetails,
+  IdentityUpdateResponse,
+  ResponseUriJson,
+} from 'verus-typescript-primitives';
 
 interface CompleteLoginConsentParams {
+  type: 'v1';
   responseKey: string;
   response: IdentityUpdateEnvelopeJson;
   redirect: ResponseUriJson;
@@ -17,8 +25,8 @@ interface IdentityUpdateResultProps {
   completeLoginConsent: (params: CompleteLoginConsentParams) => Promise<void>;
 }
 
-const IdentityUpdateResult: React.FC<IdentityUpdateResultProps> = (props) => {
-  const { completeLoginConsent } = props;
+const IdentityUpdateResult: React.FC<IdentityUpdateResultProps> = props => {
+  const {completeLoginConsent} = props;
   const [loading, setLoading] = useState<boolean>(false);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -28,7 +36,9 @@ const IdentityUpdateResult: React.FC<IdentityUpdateResultProps> = (props) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const deeplinkData: IdentityUpdateRequest = useSelector((state: any) => state.deeplink.data);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const response: IdentityUpdateResponse = useSelector((state: any) => state.identityUpdate.response);
+  const response: IdentityUpdateResponse = useSelector(
+    (state: any) => state.identityUpdate.response
+  );
 
   // Explicity set the type to IdentityUpdateRequestDetails since
   // otherwise it is IdentityUpdateResponseDetails.
@@ -39,9 +49,10 @@ const IdentityUpdateResult: React.FC<IdentityUpdateResultProps> = (props) => {
   const handleDone = async (): Promise<void> => {
     setLoading(true);
     completeLoginConsent({
+      type: 'v1',
       responseKey: IDENTITY_UPDATE_RESPONSE_VDXF_KEY.vdxfid,
       response: response.toJson(),
-      redirect: responseURI?.toJson()
+      redirect: responseURI?.toJson(),
     });
   };
 
@@ -52,10 +63,10 @@ const IdentityUpdateResult: React.FC<IdentityUpdateResultProps> = (props) => {
       contentStyle={{
         alignItems: 'center',
         justifyContent: 'center',
-        textAlign: 'center'
+        textAlign: 'center',
       }}
       footerContent={
-        <div style={{ display: 'flex', justifyContent: 'flex-end', width: '100%' }}>
+        <div style={{display: 'flex', justifyContent: 'flex-end', width: '100%'}}>
           <Button
             variant="contained"
             disabled={loading}
@@ -66,23 +77,21 @@ const IdentityUpdateResult: React.FC<IdentityUpdateResultProps> = (props) => {
               padding: 8,
             }}
           >
-            {"Done"}
+            {'Done'}
           </Button>
         </div>
       }
     >
-      <Box style={{ margin: 32 }}>
-        <CheckCircleIcon color="success" sx={{ fontSize: 72 }} />
+      <Box style={{margin: 32}}>
+        <CheckCircleIcon color="success" sx={{fontSize: 72}} />
       </Box>
-      <Box style={{ margin: 4 }}>
+      <Box style={{margin: 4}}>
         {`Your VerusID has been updated on the ${chainName || '???'} blockchain.`}
       </Box>
-      <Box style={{ margin: 4 }} color="text.secondary">
+      <Box style={{margin: 4}} color="text.secondary">
         {'This action may take a few minutes to confirm on-chain.'}
       </Box>
-      <Box style={{ margin: 8 }}>
-        {`Transaction ID: ${txid}`}
-      </Box>
+      <Box style={{margin: 8}}>{`Transaction ID: ${txid}`}</Box>
     </PageLayout>
   );
 };

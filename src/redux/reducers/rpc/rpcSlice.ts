@@ -3,6 +3,12 @@ import {RootState} from '#/redux/store';
 import {closePlugin} from '#/rpc/calls/closePlugin';
 import {VERUS_LOGIN_CONSENT_UI} from '#/utils/constants';
 import {createSlice, PayloadAction, ThunkAction} from '@reduxjs/toolkit';
+import {
+  GenericResponse,
+  LoginConsentResponse,
+  ResponseURI,
+  ResponseURIJson,
+} from 'verus-typescript-primitives';
 
 export interface RpcState {
   port: number | string | null;
@@ -14,10 +20,13 @@ export interface RpcState {
   windowId: number | null;
 }
 
+// Unknown units.
+const DEFAULT_EXPIRY_MARGIN = 60000;
+
 const initialState: RpcState = {
   port: null,
   password: null,
-  expiryMargin: 60000,
+  expiryMargin: DEFAULT_EXPIRY_MARGIN,
   appId: VERUS_LOGIN_CONSENT_UI,
   calledTimes: [],
   postEncryption: true,
@@ -48,33 +57,82 @@ const rpcSlice = createSlice({
     },
     addCalledTime: (state, action: PayloadAction<number>) => {
       const time = action.payload;
-      let newCalledTimes = [...state.calledTimes, time];
-      newCalledTimes = newCalledTimes.filter(
-        (x) => x > time - state.expiryMargin && x < time + state.expiryMargin,
+
+      const minTime = time - state.expiryMargin;
+      const maxTime = time + state.expiryMargin;
+
+      // Remove all non-recent times.
+      // TODO: Confirm that future times should be considered at all.
+      // If the times only increase, then we don't need to check maxTime.
+      state.calledTimes = state.calledTimes.filter(
+        existingTime => existingTime > minTime && existingTime < maxTime
       );
-      state.calledTimes = newCalledTimes;
+
+      state.calledTimes.push(time);
     },
   },
 });
 
-type CompleteRequestThunk = ThunkAction<
-  Promise<void>,
-  RootState,
-  unknown,
-  ReturnType<typeof setError>
->;
+type Redirect = {
+  type: string;
+  uri: string;
+};
 
-export function completeRequest(result?: unknown, error?: Error | null): CompleteRequestThunk {
+type SingleURIResult = {
+  type: 'v1';
+  responseKey: string;
+  response: LoginConsentResponse;
+  redirect: Redirect;
+};
+
+type MultiURIResult = {
+  type: 'v2';
+  response: GenericResponse;
+  uris: ResponseURI[];
+};
+
+type MultiURIResultSerialized = {
+  type: 'v2';
+  response: string;
+  uris: ResponseURIJson[];
+};
+
+type CompleteRequestResult = SingleURIResult | MultiURIResult;
+
+type SerializedResult = SingleURIResult | MultiURIResultSerialized;
+
+// With v2, the response and URIs need to be serialized before sending over by IPC.
+function serializeMultiURIResult(result: MultiURIResult): MultiURIResultSerialized {
+  return {
+    type: result.type,
+    response: result.response.toBuffer().toString('hex'),
+    uris: result.uris.map(uri => uri.toJson()),
+  };
+}
+
+function serializeResult(result: CompleteRequestResult): SerializedResult {
+  if (result.type === 'v2') {
+    return serializeMultiURIResult(result);
+  }
+  return result;
+}
+
+export function completeRequest(
+  result?: CompleteRequestResult,
+  error?: Error
+): ThunkAction<Promise<void>, RootState, unknown, ReturnType<typeof setError>> {
   return async (dispatch, getState) => {
     try {
       const state = getState();
       const windowId = state.rpc.windowId;
 
+      const finalResult = result ? serializeResult(result) : undefined;
+
       await closePlugin(
         VERUS_LOGIN_CONSENT_UI,
         windowId,
         true,
-        result ?? {error: error?.message ?? error},
+        finalResult ?? {error: error?.message ?? error}
       );
     } catch (e: unknown) {
       dispatch(setError(e));

@@ -1,19 +1,20 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
-import { 
-  RedirectRender
-} from './Redirect.render';
-import { LOGIN_CONSENT_REDIRECT_VDXF_KEY, LOGIN_CONSENT_RESPONSE_VDXF_KEY } from 'verus-typescript-primitives';
-import { SELECT_LOGIN_ID } from '../../../utils/constants';
-import { setNavigationPath } from '../../../redux/reducers/navigation/navigation.actions';
+import {connect} from 'react-redux';
+import {RedirectRender} from './Redirect.render';
+import {
+  LOGIN_CONSENT_REDIRECT_VDXF_KEY,
+  LOGIN_CONSENT_RESPONSE_VDXF_KEY,
+} from 'verus-typescript-primitives';
+import {SELECT_LOGIN_ID} from '../../../utils/constants';
+import {setNavigationPath} from '../../../redux/reducers/navigation/navigation.actions';
 
 class Redirect extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      loading: false
+      loading: false,
     };
 
     this.redirect = this.redirect.bind(this);
@@ -36,14 +37,13 @@ class Redirect extends React.Component {
   }
 
   cancel() {
-    this.props.dispatch(
-      setNavigationPath(this.props.previousPath || SELECT_LOGIN_ID)
-    );
+    this.props.dispatch(setNavigationPath(this.props.previousPath || SELECT_LOGIN_ID));
   }
 
   redirect() {
-    this.setState({ loading: true }, () => {
+    this.setState({loading: true}, () => {
       this.props.completeLoginConsent({
+        type: 'v1',
         responseKey: LOGIN_CONSENT_RESPONSE_VDXF_KEY.vdxfid,
         response: this.props.requestResult.response,
         redirect: this.redirectinfo,
@@ -64,7 +64,7 @@ Redirect.propTypes = {
   previousPath: PropTypes.string,
 };
 
-const mapStateToProps = (state) => {
+const mapStateToProps = state => {
   return {
     deeplinkData: state.deeplink.data,
     previousPath: state.navigation.previousPath,
