@@ -1,17 +1,20 @@
-import React, { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React, {useState} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
-import PageLayout from '../../common/PageLayout';
-import ContentMultiMapRenderer from './ContentMultiMapRenderer';
-import { setNavigationPath } from '../../../redux/reducers/navigation/navigation.actions';
-import { IDENTITY_UPDATE_CORE, IDENTITY_UPDATE_RESULT } from '../../../utils/constants';
+import PageLayout from '#/components/PageLayout';
+import ContentMultiMapRenderer from '../../../components/ContentMultiMapRenderer';
+import {setNavigationPath} from '../../../redux/reducers/navigation/navigationSlice';
+import {IDENTITY_UPDATE_CORE, IDENTITY_UPDATE_RESULT} from '../../../utils/constants';
 // @ts-expect-error: the IdentityUpdateRequest was removed and needs to be re-added when the generic request is fully implemented.
-import { IdentityUpdateRequest, IdentityUpdateRequestDetails } from 'verus-typescript-primitives';
-import { executeIdentityUpdateRequest } from '../../../rpc/calls/executeIdentityUpdateRequest';
-import { setIdentityUpdateTxid, setIdentityUpdateResponse } from '../../../redux/reducers/identityUpdate/identityUpdate.actions';
-import { createAndSignIdentityUpdateResponse } from '../../../utils/identityUpdateResponse';
+import {IdentityUpdateRequest, IdentityUpdateRequestDetails} from 'verus-typescript-primitives';
+import {executeIdentityUpdateRequest} from '../../../rpc/calls/executeIdentityUpdateRequest';
+import {
+  setIdentityUpdateTxid,
+  setIdentityUpdateResponse,
+} from '../../../redux/reducers/identityUpdate/identityUpdate.actions';
+import {createAndSignIdentityUpdateResponse} from '../../../utils/identityUpdateResponse';
 
 const IdentityUpdateContentMultiMap: React.FC = () => {
   const dispatch = useDispatch();
@@ -42,7 +45,7 @@ const IdentityUpdateContentMultiMap: React.FC = () => {
         chainId,
         deeplinkData,
         activeIdentity.identity.identityaddress,
-        txid,
+        txid
       );
 
       dispatch(setIdentityUpdateResponse(response));
@@ -50,7 +53,9 @@ const IdentityUpdateContentMultiMap: React.FC = () => {
       dispatch(setNavigationPath(IDENTITY_UPDATE_RESULT));
     } catch (error) {
       setLoading(false);
-      throw new Error(`Failed to execute identity update: ${error instanceof Error ? error.message : error}`);
+      throw new Error(
+        `Failed to execute identity update: ${error instanceof Error ? error.message : error}`
+      );
     }
   };
 
@@ -67,10 +72,10 @@ const IdentityUpdateContentMultiMap: React.FC = () => {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        gap: 2
+        gap: 2,
       }}
       footerContent={
-        <div style={{ display: 'flex', justifyContent: 'flex-end', width: '100%' }}>
+        <div style={{display: 'flex', justifyContent: 'flex-end', width: '100%'}}>
           <Button
             variant="text"
             disabled={loading}
@@ -82,7 +87,7 @@ const IdentityUpdateContentMultiMap: React.FC = () => {
               padding: 8,
             }}
           >
-            {"Back"}
+            {'Back'}
           </Button>
           <Button
             variant="contained"
@@ -94,7 +99,7 @@ const IdentityUpdateContentMultiMap: React.FC = () => {
               padding: 8,
             }}
           >
-            {"Finish"}
+            {'Finish'}
           </Button>
         </div>
       }

@@ -1,5 +1,5 @@
 import {combineReducers} from '@reduxjs/toolkit';
-import {navigation} from './reducers/navigation/navigation.reducer';
+import {navigation} from './reducers/navigation/navigationSlice';
 import {rpc} from './reducers/rpc/rpcSlice';
 import {identity} from './reducers/identity/identity.reducer';
 import {origin} from './reducers/origin/origin.reducer';

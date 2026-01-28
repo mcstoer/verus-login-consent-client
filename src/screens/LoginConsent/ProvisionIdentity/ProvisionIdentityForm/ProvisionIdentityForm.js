@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { PROVISIONING_CONFIRM, SELECT_LOGIN_ID } from '../../../../utils/constants';
-import { setNavigationPath } from '../../../../redux/reducers/navigation/navigation.actions';
-import { 
+import React, {useEffect, useState} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
+import {PROVISIONING_CONFIRM, SELECT_LOGIN_ID} from '../../../../utils/constants';
+import {setNavigationPath} from '../../../../redux/reducers/navigation/navigationSlice';
+import {
   ID_ADDRESS_VDXF_KEY,
   ID_SYSTEMID_VDXF_KEY,
   ID_FULLYQUALIFIEDNAME_VDXF_KEY,
@@ -19,20 +19,25 @@ import Box from '@mui/material/Box';
 import CircularProgress from '@mui/material/CircularProgress';
 import MenuItem from '@mui/material/MenuItem';
 import InputLabel from '@mui/material/InputLabel';
-import { VerusIdLogo } from '../../../../images';
-import { getIdentity } from '../../../../rpc/calls/getIdentity';
-import { setIdentityToProvisionField, setPrimaryAddress, setProvisioningInfo } from '../../../../redux/reducers/provision/provision.actions';
-import { getAddresses } from '../../../../rpc/calls/getAddresses';
+import {VerusIdLogo} from '../../../../images';
+import {getIdentity} from '../../../../rpc/calls/getIdentity';
+import {
+  setIdentityToProvisionField,
+  setPrimaryAddress,
+  setProvisioningInfo,
+} from '../../../../redux/reducers/provision/provision.actions';
+import {getAddresses} from '../../../../rpc/calls/getAddresses';
 
 const ProvisionIdentityForm = () => {
   const dispatch = useDispatch();
-  const deeplinkData = useSelector((state) => state.deeplink.data);
-  const chainId = useSelector((state) => state.chainMetadata.chainId);
-  const chainName = useSelector((state) => state.chainMetadata.chainName);
-  const identityToProvisionField = useSelector((state) => state.provision.identityToProvisionField);
-  const initialPrimaryAddress = useSelector((state) => state.provision.primaryAddress);
+  const deeplinkData = useSelector(state => state.deeplink.data);
+  const chainId = useSelector(state => state.chainMetadata.chainId);
+  const chainName = useSelector(state => state.chainMetadata.chainName);
+  const identityToProvisionField = useSelector(state => state.provision.identityToProvisionField);
+  const initialPrimaryAddress = useSelector(state => state.provision.primaryAddress);
 
-  const hasProvisioningInfo = deeplinkData != null && deeplinkData.challenge.provisioning_info != null;
+  const hasProvisioningInfo =
+    deeplinkData != null && deeplinkData.challenge.provisioning_info != null;
 
   const [friendlyNameMap, setFriendlyNameMap] = useState({});
 
@@ -50,20 +55,17 @@ const ProvisionIdentityForm = () => {
 
   const [formError, setFormError] = useState({
     error: false,
-    description: '' 
+    description: '',
   });
 
   useEffect(() => {
-
     // Extract the provisioning info from the request.
     const updateProvisioningInfoProcessedData = async () => {
       if (!hasProvisioningInfo) return;
-  
-      const findProvisioningInfo = (key) =>
-        deeplinkData.challenge.provisioning_info.find(
-          (x) => x.vdxfkey === key.vdxfid
-        );
-  
+
+      const findProvisioningInfo = key =>
+        deeplinkData.challenge.provisioning_info.find(x => x.vdxfkey === key.vdxfid);
+
       const address = findProvisioningInfo(ID_ADDRESS_VDXF_KEY);
       const systemId = findProvisioningInfo(ID_SYSTEMID_VDXF_KEY);
       const fqn = findProvisioningInfo(ID_FULLYQUALIFIEDNAME_VDXF_KEY);
@@ -80,7 +82,7 @@ const ProvisionIdentityForm = () => {
 
       // Get the addresses of the wallet so the identity can be provisioned to one of them.
       const addresses = await getAddresses(chainId, true, false);
-      const publicAddressObjects = addresses.public.filter((address) => address.tag === 'public');
+      const publicAddressObjects = addresses.public.filter(address => address.tag === 'public');
       // Extract just the r-address from the address object.
       const publicAddresses = publicAddressObjects.map(addressObj => addressObj.address);
       setPublicAddresses(publicAddresses);
@@ -88,20 +90,20 @@ const ProvisionIdentityForm = () => {
       if (initialPrimaryAddress && publicAddresses.includes(initialPrimaryAddress)) {
         setSelectedPublicAddress(initialPrimaryAddress);
       }
-    
+
       const provIdKey = address || fqn || null;
-  
+
       const identitykeys = provIdKey == null ? [] : [provIdKey];
       if (parent) identitykeys.push(parent);
       if (systemId) identitykeys.push(systemId);
-  
+
       const fetchIdentities = async () => {
         let newFriendlyNameMap = friendlyNameMap;
         for (const idKey of identitykeys) {
           if (idKey != null) {
             try {
               const identity = await getIdentity(chainId, idKey.data);
-  
+
               if (identity) {
                 // Get only the first part of the name to match the 'name' part of a getidentity call.
                 let name = '';
@@ -109,9 +111,8 @@ const ProvisionIdentityForm = () => {
                 if (firstDoxIndex === -1) name = identity.identity.name;
                 else name = identity.identity.name.substring(0, firstDoxIndex);
 
-                newFriendlyNameMap[identity.identity.identityaddress] =
-                  name;
-    
+                newFriendlyNameMap[identity.identity.identityaddress] = name;
+
                 if (provIdKey != null && idKey.data === provIdKey.data) {
                   setAssignedIdentity(identity.identity.identityaddress);
                   dispatch(setIdentityToProvisionField(name));
@@ -119,7 +120,7 @@ const ProvisionIdentityForm = () => {
                 if (idKey.vdxfkey === ID_PARENT_VDXF_KEY.vdxfid) {
                   const parentName = `.${identity.fullyqualifiedname}`;
                   setParentName(parentName);
-                } 
+                }
               }
             } catch {
               // If the given fully qualified name doesn't exist, then
@@ -142,27 +143,27 @@ const ProvisionIdentityForm = () => {
       fetchIdentities();
       setLoading(false);
     };
-    
+
     initializeState();
   }, []);
 
   const formHasError = () => {
     const identity = identityToProvisionField ? identityToProvisionField.trim() : '';
-  
+
     if (!identity) {
       setFormError({
         error: true,
-        description: 'Identity is a required field.'
+        description: 'Identity is a required field.',
       });
       return true;
     }
-  
+
     try {
       fromBase58Check(identity);
       if (parentName) {
         setFormError({
           error: true,
-          description: 'i-Address cannot have a parent name.'
+          description: 'i-Address cannot have a parent name.',
         });
         return true;
       }
@@ -171,7 +172,7 @@ const ProvisionIdentityForm = () => {
       if (!formattedId.endsWith('@')) {
         setFormError({
           error: true,
-          description: 'Identity not a valid identity handle or iAddress.'
+          description: 'Identity not a valid identity handle or iAddress.',
         });
         return true;
       }
@@ -180,9 +181,9 @@ const ProvisionIdentityForm = () => {
     // Clear any old errors.
     setFormError({
       error: false,
-      description: ''
+      description: '',
     });
-  
+
     return false;
   };
 
@@ -190,7 +191,7 @@ const ProvisionIdentityForm = () => {
     if (formHasError()) return;
 
     setLoading(true);
-  
+
     const identity = identityToProvisionField;
 
     let formattedId;
@@ -213,33 +214,37 @@ const ProvisionIdentityForm = () => {
         identityError = true;
         setFormError({
           error: true,
-          description: 'Identity name taken, please select a different name.'
+          description: 'Identity name taken, please select a different name.',
         });
       }
     } catch (e) {
       // Check for an invalid identity, otherwise the identity is valid since it does not already exist
       // and it is using valid characters.
-      if (e.message.includes('Identity parameter must be valid friendly name or identity address')) {
+      if (
+        e.message.includes('Identity parameter must be valid friendly name or identity address')
+      ) {
         identityError = true;
         setFormError({
           error: true,
-          description: `Identity name must not include / : * ? ' < > | @ .`
+          description: `Identity name must not include / : * ? ' < > | @ .`,
         });
       }
     }
-  
+
     setLoading(false);
 
     if (!identityError) {
       dispatch(setPrimaryAddress(selectedPublicAddress));
-      dispatch(setProvisioningInfo({
-        provAddress: provAddress,
-        provSystemId: provSystemId,
-        provFqn: provFqn,
-        provParent: provParent,
-        provWebhook: provWebhook,
-        friendlyNameMap: friendlyNameMap
-      }));
+      dispatch(
+        setProvisioningInfo({
+          provAddress: provAddress,
+          provSystemId: provSystemId,
+          provFqn: provFqn,
+          provParent: provParent,
+          provWebhook: provWebhook,
+          friendlyNameMap: friendlyNameMap,
+        })
+      );
       dispatch(setNavigationPath(PROVISIONING_CONFIRM));
     }
   };
@@ -266,7 +271,7 @@ const ProvisionIdentityForm = () => {
           alignItems: 'center',
         }}
       >
-        <img src={VerusIdLogo} width={'55%'} height={'10%'}/>
+        <img src={VerusIdLogo} width={'55%'} height={'10%'} />
         <div
           style={{
             width: '100%',
@@ -299,31 +304,37 @@ const ProvisionIdentityForm = () => {
             paddingTop: 2,
           }}
         >
-          {loading ?
-            <Box sx={{ 
-              display: 'flex',
-              flex: 1,
-              alignItems: 'center',
-            }}>
+          {loading ? (
+            <Box
+              sx={{
+                display: 'flex',
+                flex: 1,
+                alignItems: 'center',
+              }}
+            >
               <CircularProgress />
             </Box>
-            :
+          ) : (
             <Box
               sx={{
                 maxWidth: 560,
                 width: '100%',
-              }}>
-              <TextField fullWidth
-                variant='outlined'
+              }}
+            >
+              <TextField
+                fullWidth
+                variant="outlined"
                 error={formError.error}
                 helperText={formError.description}
                 label={parentName ? 'VerusID name' : 'i-Address or VerusID name'}
-                value={assignedIdentity
-                  ? friendlyNameMap[assignedIdentity]
-                    ? `${friendlyNameMap[assignedIdentity]}`
-                    : assignedIdentity
-                  : identityToProvisionField}
-                mode='outlined'
+                value={
+                  assignedIdentity
+                    ? friendlyNameMap[assignedIdentity]
+                      ? `${friendlyNameMap[assignedIdentity]}`
+                      : assignedIdentity
+                    : identityToProvisionField
+                }
+                mode="outlined"
                 disabled={assignedIdentity != null || loading}
                 onChange={event => {
                   const text = event.target.value;
@@ -332,44 +343,42 @@ const ProvisionIdentityForm = () => {
                   }
                 }}
                 InputProps={{
-                  endAdornment: 
-                    <InputAdornment position='end'>
-                      {parentName ? parentName : ``}
-                    </InputAdornment>,
+                  endAdornment: (
+                    <InputAdornment position="end">{parentName ? parentName : ``}</InputAdornment>
+                  ),
                 }}
-              >
-              </TextField>
+              ></TextField>
               <Box
                 sx={{
-                  paddingTop: '10vh'
-                }}>
+                  paddingTop: '10vh',
+                }}
+              >
                 <FormControl fullWidth>
-                  <InputLabel id='address-select-label'>Select a Primary Address</InputLabel>
+                  <InputLabel id="address-select-label">Select a Primary Address</InputLabel>
                   <Select
                     labelId="address-select-label"
-                    label='Select a Primary Address'
+                    label="Select a Primary Address"
                     value={selectedPublicAddress}
                     style={{
                       textAlign: 'start',
                       paddingTop: 2,
                     }}
-                    onChange={(e) => {
+                    onChange={e => {
                       return setSelectedPublicAddress(e.target.value);
                     }}
                   >
                     {publicAddresses.map(address => {
                       return (
-                        <MenuItem
-                          key={address}
-                          value={address}
-                        >{address}</MenuItem>
+                        <MenuItem key={address} value={address}>
+                          {address}
+                        </MenuItem>
                       );
                     })}
                   </Select>
                 </FormControl>
               </Box>
             </Box>
-          }
+          )}
         </div>
 
         <div
@@ -390,9 +399,9 @@ const ProvisionIdentityForm = () => {
             }}
           >
             <Button
-              variant='text'
+              variant="text"
               disabled={loading}
-              color='secondary'
+              color="secondary"
               onClick={() => cancel()}
               style={{
                 width: 120,
@@ -403,8 +412,8 @@ const ProvisionIdentityForm = () => {
               {'Back'}
             </Button>
             <Button
-              variant='contained'
-              color='primary'
+              variant="contained"
+              color="primary"
               disabled={loading || selectedPublicAddress === ''}
               onClick={() => submitData()}
               style={{

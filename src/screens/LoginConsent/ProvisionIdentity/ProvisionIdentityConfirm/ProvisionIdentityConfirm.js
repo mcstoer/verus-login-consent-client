@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import {PROVISIONING_FORM, PROVISIONING_RESULT} from '../../../../utils/constants';
-import {setNavigationPath} from '../../../../redux/reducers/navigation/navigation.actions';
+import {setNavigationPath} from '../../../../redux/reducers/navigation/navigationSlice';
 import Button from '@mui/material/Button';
 import {VerusIdLogo} from '../../../../images';
 import Card from '@mui/material/Card';

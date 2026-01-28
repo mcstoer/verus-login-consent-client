@@ -1,37 +1,42 @@
-import React, { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React, {useState} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
 import PropTypes from 'prop-types';
-import { setNavigationPath } from '../../../redux/reducers/navigation/navigation.actions';
-import { REDIRECT, SELECT_LOGIN_ID, SUPPORTED_CREDENTIALS, CREDENTIALS } from '../../../utils/constants';
-import { IDENTITY_CREDENTIAL_PLAINLOGIN } from 'verus-typescript-primitives';
+import {setNavigationPath} from '../../../redux/reducers/navigation/navigationSlice';
+import {
+  REDIRECT,
+  SELECT_LOGIN_ID,
+  SUPPORTED_CREDENTIALS,
+  CREDENTIALS,
+} from '../../../utils/constants';
+import {IDENTITY_CREDENTIAL_PLAINLOGIN} from 'verus-typescript-primitives';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
-import { VerusIdLogo } from "../../../images";
-import { PlainLoginCredential, UnknownCredential } from '../../common/Credential';
-import { createAndSignLoginResponse } from '../../../utils/loginResponse';
+import {VerusIdLogo} from '../../../images';
+import {PlainLoginCredential, UnknownCredential} from '#/components/Credential';
+import {createAndSignLoginResponse} from '../../../utils/loginResponse';
 import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
-import { convertFqnToDisplayFormat } from '../../../utils/fullyqualifiedname';
+import {convertFqnToDisplayFormat} from '../../../utils/fullyqualifiedname';
 
-const CredentialsReview = (props) => {
-  const { setRequestResult } = props;
+const CredentialsReview = props => {
+  const {setRequestResult} = props;
   const dispatch = useDispatch();
-  const deeplinkData = useSelector((state) => state.deeplink.data);
-  const chainId = useSelector((state) => state.chainMetadata.chainId);
+  const deeplinkData = useSelector(state => state.deeplink.data);
+  const chainId = useSelector(state => state.chainMetadata.chainId);
   const [loading, setLoading] = useState(false);
-  const activeIdentity = useSelector((state) => state.identity.activeIdentity);
-  const credentials = useSelector((state) => {
+  const activeIdentity = useSelector(state => state.identity.activeIdentity);
+  const credentials = useSelector(state => {
     if (state.credentials && state.credentials.credentials) {
       return state.credentials.credentials;
     }
     return [];
   });
 
-  const signatureInfo = useSelector((state) => state.signatureInfo);
-  const { signedBy } = signatureInfo;
+  const signatureInfo = useSelector(state => state.signatureInfo);
+  const {signedBy} = signatureInfo;
   // Convert the fully qualified name into a nicer format for VRSC.
   const signerFqn = convertFqnToDisplayFormat(signedBy.fullyqualifiedname);
 
@@ -70,68 +75,63 @@ const CredentialsReview = (props) => {
     const credentialId = `credential-${index}`;
     const credentialKey = credential.credentialKey;
 
-    switch(credentialKey) {
-    case IDENTITY_CREDENTIAL_PLAINLOGIN.vdxfid:
-      return (
-        <PlainLoginCredential
-          key={credentialId}
-          credential={credential}
-        />
-      );
-    default:
-      return (
-        <UnknownCredential
-          key={credentialId}
-          credential={credential}
-        />
-      );
+    switch (credentialKey) {
+      case IDENTITY_CREDENTIAL_PLAINLOGIN.vdxfid:
+        return <PlainLoginCredential key={credentialId} credential={credential} />;
+      default:
+        return <UnknownCredential key={credentialId} credential={credential} />;
     }
   };
 
   return (
     <div
       style={{
-        display: "flex",
-        flexDirection: "column",
+        display: 'flex',
+        flexDirection: 'column',
         flex: 1,
-        height: "100%",
+        height: '100%',
       }}
     >
       <div
         style={{
-          height: "100%",
-          display: "flex",
+          height: '100%',
+          display: 'flex',
           padding: 32,
-          flexDirection: "column",
-          alignItems: "center",
+          flexDirection: 'column',
+          alignItems: 'center',
         }}
       >
-        <img src={VerusIdLogo} width={'55%'} height={'10%'}/>
+        <img src={VerusIdLogo} width={'55%'} height={'10%'} />
         <div
           style={{
-            width: "100%",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
+            width: '100%',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
             padding: 16,
           }}
         >
-          {"Review credentials to be sent to " + signerFqn}
+          {'Review credentials to be sent to ' + signerFqn}
         </div>
 
-        <Card square sx={{
-          marginTop: 1,
-          marginBottom: 1,
-          width: '100%',
-          overflowY: 'scroll',
-          maxHeight: '54vh',
-        }}>
+        <Card
+          square
+          sx={{
+            marginTop: 1,
+            marginBottom: 1,
+            width: '100%',
+            overflowY: 'scroll',
+            maxHeight: '54vh',
+          }}
+        >
           <List>
             {/* Display fetched credentials */}
             {credentials.length > 0 && (
               <>
                 <List component="div">
-                  {credentials.map((credential, index) => renderCredentialComponent(credential, index))}
+                  {credentials.map((credential, index) =>
+                    renderCredentialComponent(credential, index)
+                  )}
                 </List>
               </>
             )}
@@ -147,40 +147,38 @@ const CredentialsReview = (props) => {
 
             {requestedCredentialKeys.length > 0 && credentials.length === 0 && (
               <ListItem>
-                <ListItemText
-                  primary="No credentials available to include."
-                  disableTypography
-                />
+                <ListItemText primary="No credentials available to include." disableTypography />
               </ListItem>
             )}
-
           </List>
         </Card>
 
         {/* Inform the user if there are missing credentials */}
         {missingCredentialKeys.length > 0 && (
-          <Alert severity="warning" sx={{ mt: 2, width: '90%', textAlign: 'left' }}>
+          <Alert severity="warning" sx={{mt: 2, width: '90%', textAlign: 'left'}}>
             <AlertTitle>The following requested credentials were not found:</AlertTitle>
-            {missingCredentialKeys.map(key => CREDENTIALS[key] ? CREDENTIALS[key].description : key).join(', ')}
+            {missingCredentialKeys
+              .map(key => (CREDENTIALS[key] ? CREDENTIALS[key].description : key))
+              .join(', ')}
           </Alert>
         )}
 
         <div
           style={{
-            width: "100%",
-            display: "flex",
-            flexDirection: "row",
-            alignItems: "flex-end",
-            justifyContent: "flex-end",
-            marginTop: 'auto'
+            width: '100%',
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'flex-end',
+            justifyContent: 'flex-end',
+            marginTop: 'auto',
           }}
         >
           <div
             style={{
-              display: "flex",
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "space-between",
+              display: 'flex',
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-between',
             }}
           >
             <Button
@@ -194,7 +192,7 @@ const CredentialsReview = (props) => {
                 padding: 8,
               }}
             >
-              {"Back"}
+              {'Back'}
             </Button>
             <Button
               variant="contained"
@@ -206,7 +204,7 @@ const CredentialsReview = (props) => {
                 padding: 8,
               }}
             >
-              {"Continue"}
+              {'Continue'}
             </Button>
           </div>
         </div>
@@ -216,7 +214,7 @@ const CredentialsReview = (props) => {
 };
 
 CredentialsReview.propTypes = {
-  setRequestResult: PropTypes.func.isRequired
+  setRequestResult: PropTypes.func.isRequired,
 };
 
 export default CredentialsReview;

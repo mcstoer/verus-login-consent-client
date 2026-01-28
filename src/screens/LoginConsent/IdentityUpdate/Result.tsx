@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import Button from '@mui/material/Button';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import Box from '@mui/material/Box';
-import PageLayout from '../../common/PageLayout';
+import PageLayout from '#/components/PageLayout';
 import {useSelector} from 'react-redux';
 // @ts-expect-error: the IdentityUpdateRequest was removed and needs to be re-added when the generic request is fully implemented.
 import {

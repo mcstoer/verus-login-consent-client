@@ -20,7 +20,7 @@ import {
   navigateGenericRequest,
   setExternalAction,
   setNavigationPath,
-} from '#/redux/reducers/navigation/navigation.actions';
+} from '#/redux/reducers/navigation/navigationSlice';
 import {RootState} from '#/redux/store';
 import PageLayout from '#/components/PageLayout';
 import IdentityDetails from '#/components/Identity';

@@ -2,9 +2,14 @@ import React from 'react';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 import Box from '@mui/material/Box';
-import { Credential, DATA_TYPE_OBJECT_CREDENTIAL, IDENTITY_CREDENTIAL_PLAINLOGIN, VdxfUniType } from 'verus-typescript-primitives';
-import { VDXF_ID_TO_READABLE } from '../../../utils/constants';
-import { PlainLoginCredential, UnknownCredential } from '../../common/Credential';
+import {
+  Credential,
+  DATA_TYPE_OBJECT_CREDENTIAL,
+  IDENTITY_CREDENTIAL_PLAINLOGIN,
+  VdxfUniType,
+} from 'verus-typescript-primitives';
+import {VDXF_ID_TO_READABLE} from '../utils/constants';
+import {PlainLoginCredential, UnknownCredential} from '#/components/Credential';
 
 interface VdxfKeyRendererProps {
   vdxfKey: string;
@@ -13,8 +18,12 @@ interface VdxfKeyRendererProps {
   vdxfIndex: number;
 }
 
-const VdxfKeyRenderer: React.FC<VdxfKeyRendererProps> = ({ vdxfKey, vdxfValue, index, vdxfIndex }) => {
-
+const VdxfKeyRenderer: React.FC<VdxfKeyRendererProps> = ({
+  vdxfKey,
+  vdxfValue,
+  index,
+  vdxfIndex,
+}) => {
   const getReadableName = (vdxfId: string): string => {
     return VDXF_ID_TO_READABLE[vdxfId] || vdxfId;
   };
@@ -26,7 +35,12 @@ const VdxfKeyRenderer: React.FC<VdxfKeyRendererProps> = ({ vdxfKey, vdxfValue, i
         jsonValue = JSON.stringify(value.toString('hex'), null, 2);
       } else if (typeof value === 'string') {
         jsonValue = JSON.stringify(value, null, 2);
-      } else if (value && typeof value === 'object' && 'toJson' in value && typeof value.toJson === 'function') {
+      } else if (
+        value &&
+        typeof value === 'object' &&
+        'toJson' in value &&
+        typeof value.toJson === 'function'
+      ) {
         jsonValue = JSON.stringify(value.toJson(), null, 2);
       } else {
         jsonValue = JSON.stringify(value, null, 2);
@@ -36,7 +50,7 @@ const VdxfKeyRenderer: React.FC<VdxfKeyRendererProps> = ({ vdxfKey, vdxfValue, i
     }
 
     return (
-      <ListItem dense sx={{ pl: 8 }}>
+      <ListItem dense sx={{pl: 8}}>
         <ListItemText
           primary="JSON Value:"
           secondary={jsonValue}
@@ -44,7 +58,7 @@ const VdxfKeyRenderer: React.FC<VdxfKeyRendererProps> = ({ vdxfKey, vdxfValue, i
             primary: {
               variant: 'caption',
               color: 'text.secondary',
-              sx: { fontSize: '0.6rem', fontWeight: 'bold' }
+              sx: {fontSize: '0.6rem', fontWeight: 'bold'},
             },
             secondary: {
               variant: 'body2',
@@ -57,9 +71,9 @@ const VdxfKeyRenderer: React.FC<VdxfKeyRendererProps> = ({ vdxfKey, vdxfValue, i
                 backgroundColor: 'rgba(0, 0, 0, 0.04)',
                 padding: '8px',
                 borderRadius: '4px',
-                marginTop: '4px'
-              }
-            }
+                marginTop: '4px',
+              },
+            },
           }}
         />
       </ListItem>
@@ -69,44 +83,36 @@ const VdxfKeyRenderer: React.FC<VdxfKeyRendererProps> = ({ vdxfKey, vdxfValue, i
   // Add temporary rendering based on the vdxfkey until UI design is finalized.
   const renderValueByVdxfKey = (): React.JSX.Element => {
     switch (vdxfKey) {
-    case DATA_TYPE_OBJECT_CREDENTIAL.vdxfid:
-      return renderCredential(vdxfValue as Credential);
-    };
+      case DATA_TYPE_OBJECT_CREDENTIAL.vdxfid:
+        return renderCredential(vdxfValue as Credential);
+    }
 
     return getJsonDisplay(vdxfValue);
   };
 
   const renderCredential = (cred: Credential): React.JSX.Element => {
     const credKey = cred.credentialKey;
-    switch(credKey) {
-    case IDENTITY_CREDENTIAL_PLAINLOGIN.vdxfid:
-      return (
-        <PlainLoginCredential
-          credential={cred}
-        />
-      );
-    default:
-      return (
-        <UnknownCredential
-          credential={cred}
-        />
-      );
+    switch (credKey) {
+      case IDENTITY_CREDENTIAL_PLAINLOGIN.vdxfid:
+        return <PlainLoginCredential credential={cred} />;
+      default:
+        return <UnknownCredential credential={cred} />;
     }
   };
 
   return (
     <Box key={`${index}-${vdxfIndex}`}>
-      <ListItem dense sx={{ pl: 6 }}>
+      <ListItem dense sx={{pl: 6}}>
         <ListItemText
           primary={getReadableName(vdxfKey)}
           secondary={vdxfKey}
           slotProps={{
-            primary: { variant: 'body2' },
+            primary: {variant: 'body2'},
             secondary: {
               color: 'text.secondary',
               variant: 'caption',
-              sx: { wordBreak: 'break-all', fontSize: '0.65rem' }
-            }
+              sx: {wordBreak: 'break-all', fontSize: '0.65rem'},
+            },
           }}
         />
       </ListItem>

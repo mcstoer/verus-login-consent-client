@@ -23,7 +23,7 @@ import {
   navigateGenericRequest,
   setExternalAction,
   setNavigationPath,
-} from '#/redux/reducers/navigation/navigation.actions';
+} from '#/redux/reducers/navigation/navigationSlice';
 import {Identity} from '#/redux/reducers/signatureInfo/signatureInfo.types';
 import {RootState} from '#/redux/store';
 import {getCredentialsByScope} from '#/rpc/calls/getCredentials';

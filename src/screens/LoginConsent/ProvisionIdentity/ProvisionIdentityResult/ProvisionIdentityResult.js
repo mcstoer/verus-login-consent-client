@@ -1,32 +1,35 @@
-import React, { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { PROVISIONING_FORM, SELECT_LOGIN_ID } from '../../../../utils/constants';
-import { setNavigationPath } from '../../../../redux/reducers/navigation/navigation.actions';
-import { setIdentities } from '../../../../redux/reducers/identity/identity.actions';
-import { VerusIdLogo } from '../../../../images';
+import React, {useState} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
+import {PROVISIONING_FORM, SELECT_LOGIN_ID} from '../../../../utils/constants';
+import {setNavigationPath} from '../../../../redux/reducers/navigation/navigationSlice';
+import {setIdentities} from '../../../../redux/reducers/identity/identity.actions';
+import {VerusIdLogo} from '../../../../images';
 import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
 import CircularProgress from '@mui/material/CircularProgress';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
-import { useInterval } from '../../../../utils/interval';
+import {useInterval} from '../../../../utils/interval';
 import axios from 'axios';
 import {
   LOGIN_CONSENT_PROVISIONING_ERROR_KEY_CREATION_FAILED,
   LOGIN_CONSENT_PROVISIONING_ERROR_KEY_NAMETAKEN,
   LOGIN_CONSENT_PROVISIONING_RESULT_STATE_FAILED,
-  LoginConsentProvisioningResponse
+  LoginConsentProvisioningResponse,
 } from 'verus-typescript-primitives';
-import { loadIdentities } from '../../../../rpc/calls/identities';
-import { verifyIdProvisioningResponse } from '../../../../rpc/calls/verifyIdProvisioningResponse';
-import { setIdentityToProvisionField, setPrimaryAddress } from '../../../../redux/reducers/provision/provision.actions';
+import {loadIdentities} from '../../../../rpc/calls/identities';
+import {verifyIdProvisioningResponse} from '../../../../rpc/calls/verifyIdProvisioningResponse';
+import {
+  setIdentityToProvisionField,
+  setPrimaryAddress,
+} from '../../../../redux/reducers/provision/provision.actions';
 
 export const checkForProvisioningStatus = async (
   infoUri,
   request,
   setCheckForId,
   setProvisioningError,
-  setCheckForProvisioningStatus,
+  setCheckForProvisioningStatus
 ) => {
   const failed = (description, allowRetry) => {
     setCheckForId(false);
@@ -42,7 +45,7 @@ export const checkForProvisioningStatus = async (
     failed('Provisioning timed out with no response from the provisioning service.', false);
     return;
   }
-  
+
   try {
     const res = await axios.get(infoUri);
     const provisioningResponse = new LoginConsentProvisioningResponse(res.data);
@@ -53,10 +56,19 @@ export const checkForProvisioningStatus = async (
       throw new Error('Failed to verify response from the provisioning service.');
     }
 
-    if (provisioningResponse.decision.result.state === LOGIN_CONSENT_PROVISIONING_RESULT_STATE_FAILED.vdxfid) {
-      if (provisioningResponse.decision.result.error_key === LOGIN_CONSENT_PROVISIONING_ERROR_KEY_NAMETAKEN.vdxfid) {
+    if (
+      provisioningResponse.decision.result.state ===
+      LOGIN_CONSENT_PROVISIONING_RESULT_STATE_FAILED.vdxfid
+    ) {
+      if (
+        provisioningResponse.decision.result.error_key ===
+        LOGIN_CONSENT_PROVISIONING_ERROR_KEY_NAMETAKEN.vdxfid
+      ) {
         failed('Name is already taken.', true);
-      } else if (provisioningResponse.decision.result.error_key === LOGIN_CONSENT_PROVISIONING_ERROR_KEY_CREATION_FAILED.vdxfid) {
+      } else if (
+        provisioningResponse.decision.result.error_key ===
+        LOGIN_CONSENT_PROVISIONING_ERROR_KEY_CREATION_FAILED.vdxfid
+      ) {
         failed('Unable to register the identity.', true);
       } else {
         failed('Provisioning failed for unknown reasons.', true);
@@ -97,18 +109,19 @@ export const checkForNewId = async (
 const ProvisionIdentityResult = () => {
   const dispatch = useDispatch();
 
-  const deeplinkData = useSelector((state) => state.deeplink.data);
-  const chainId = useSelector((state) => state.chainMetadata.chainId);
-  const provisioningResponse = useSelector((state) => state.provision.provisioningResponse);
-  const requestedFqn = useSelector((state) => state.provision.requestedFqn);
-  const requestedId = useSelector((state) => state.provision.requestedId);
-  const provisioningName = useSelector((state) => state.provision.provisioningName);
+  const deeplinkData = useSelector(state => state.deeplink.data);
+  const chainId = useSelector(state => state.chainMetadata.chainId);
+  const provisioningResponse = useSelector(state => state.provision.provisioningResponse);
+  const requestedFqn = useSelector(state => state.provision.requestedFqn);
+  const requestedId = useSelector(state => state.provision.requestedId);
+  const provisioningName = useSelector(state => state.provision.provisioningName);
   const provisioningCheckDelay = 600000; // Ten minute delay.
   const idCheckDelay = 5000; // 5 second delay.
 
   let formattedName = '';
   const lastDotIndex = requestedFqn.lastIndexOf('.');
-  if (lastDotIndex === -1) formattedName = requestedFqn; // return the original string if there's no dot
+  if (lastDotIndex === -1)
+    formattedName = requestedFqn; // return the original string if there's no dot
   else formattedName = requestedFqn.substring(0, lastDotIndex);
 
   const [checkForId, setCheckForId] = useState(true);
@@ -120,26 +133,28 @@ const ProvisionIdentityResult = () => {
   });
 
   useInterval(
-    async () => await checkForProvisioningStatus(
-      provisioningResponse.decision.result.info_uri,
-      deeplinkData,
-      setCheckForId,
-      setProvisioningError,
-      setCheckForProvisioningStatus,
-    ),
-    checkProvisioningStatus ? provisioningCheckDelay : null,
+    async () =>
+      await checkForProvisioningStatus(
+        provisioningResponse.decision.result.info_uri,
+        deeplinkData,
+        setCheckForId,
+        setProvisioningError,
+        setCheckForProvisioningStatus
+      ),
+    checkProvisioningStatus ? provisioningCheckDelay : null
   );
 
   useInterval(
-    async () => await checkForNewId(
-      dispatch,
-      chainId,
-      requestedId,
-      setCheckForId,
-      setCheckForProvisioningStatus,
-    ),
-    checkForId ? idCheckDelay : null,
-  ); 
+    async () =>
+      await checkForNewId(
+        dispatch,
+        chainId,
+        requestedId,
+        setCheckForId,
+        setCheckForProvisioningStatus
+      ),
+    checkForId ? idCheckDelay : null
+  );
 
   const finishSend = () => {
     // Clear the chosen name and address after leaving.
@@ -172,7 +187,7 @@ const ProvisionIdentityResult = () => {
           alignItems: 'center',
         }}
       >
-        <img src={VerusIdLogo} width={'55%'} height={'10%'}/>
+        <img src={VerusIdLogo} width={'55%'} height={'10%'} />
         <div
           style={{
             width: '100%',
@@ -190,29 +205,27 @@ const ProvisionIdentityResult = () => {
               padding: 8,
             }}
           >
-            <Box>
-              {`${formattedName}@ is being provisioned by ${provisioningName}@`}
-            </Box>
-            <Box>
-              {`Estimated waiting time is 5 minutes`}
-            </Box>
+            <Box>{`${formattedName}@ is being provisioned by ${provisioningName}@`}</Box>
+            <Box>{`Estimated waiting time is 5 minutes`}</Box>
           </div>
         </div>
 
-        <Box sx={{ 
-          display: 'flex',
-          flex: 1,
-          alignItems: 'center',
-          flexDirection: 'column',
-          justifyContent: 'center',
-        }}>
-          {checkForId ? 
-            <CircularProgress /> :
-            provisioningError.error ?
-              <ErrorIcon color='secondary' sx={{ fontSize: 72 }} /> 
-              :
-              <CheckCircleIcon color='success' sx={{ fontSize: 72 }} /> 
-          }
+        <Box
+          sx={{
+            display: 'flex',
+            flex: 1,
+            alignItems: 'center',
+            flexDirection: 'column',
+            justifyContent: 'center',
+          }}
+        >
+          {checkForId ? (
+            <CircularProgress />
+          ) : provisioningError.error ? (
+            <ErrorIcon color="secondary" sx={{fontSize: 72}} />
+          ) : (
+            <CheckCircleIcon color="success" sx={{fontSize: 72}} />
+          )}
           {!checkForId && provisioningError.error ? provisioningError.description : ``}
         </Box>
 
@@ -233,13 +246,13 @@ const ProvisionIdentityResult = () => {
               justifyContent: 'space-between',
             }}
           >
-            {provisioningError.error ?
+            {provisioningError.error ? (
               <Box>
-                {provisioningError.allowRetry &&
+                {provisioningError.allowRetry && (
                   <Button
-                    variant='text'
+                    variant="text"
                     disabled={checkForId}
-                    color='secondary'
+                    color="secondary"
                     onClick={() => retry()}
                     style={{
                       width: 120,
@@ -249,10 +262,10 @@ const ProvisionIdentityResult = () => {
                   >
                     {'Retry'}
                   </Button>
-                }
+                )}
                 <Button
-                  variant='contained'
-                  color='secondary'
+                  variant="contained"
+                  color="secondary"
                   disabled={checkForId}
                   onClick={() => finishSend()}
                   style={{
@@ -263,9 +276,9 @@ const ProvisionIdentityResult = () => {
                   {'Exit'}
                 </Button>
               </Box>
-              :
+            ) : (
               <Button
-                variant='contained'
+                variant="contained"
                 color={'success'}
                 disabled={checkForId}
                 onClick={() => finishSend()}
@@ -276,7 +289,7 @@ const ProvisionIdentityResult = () => {
               >
                 {'Done'}
               </Button>
-            }
+            )}
           </div>
         </div>
       </div>

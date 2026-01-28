@@ -12,8 +12,8 @@ import ListItemText from '@mui/material/ListItemText';
 import Collapse from '@mui/material/Collapse';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
-import PageLayout from '../../common/PageLayout';
-import {setNavigationPath} from '../../../redux/reducers/navigation/navigation.actions';
+import PageLayout from '#/components/PageLayout';
+import {setNavigationPath} from '../../../redux/reducers/navigation/navigationSlice';
 import {IDENTITY_UPDATE_CONFIRM, IDENTITY_UPDATE_CONTENTMULTIMAP} from '../../../utils/constants';
 // @ts-expect-error: the IdentityUpdateRequest was removed and needs to be re-added when the generic request is fully implemented.
 import {IdentityUpdateRequest, IdentityUpdateRequestDetails} from 'verus-typescript-primitives';

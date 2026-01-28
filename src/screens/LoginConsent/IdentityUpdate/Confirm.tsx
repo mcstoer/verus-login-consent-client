@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React, {useState} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
@@ -10,22 +10,22 @@ import ListItemButton from '@mui/material/ListItemButton';
 import Collapse from '@mui/material/Collapse';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
-import PageLayout from '../../common/PageLayout';
-import { setNavigationPath } from '../../../redux/reducers/navigation/navigation.actions';
-import { IDENTITY_UPDATE_CORE } from '../../../utils/constants';
-import { unixToDate } from '../../../utils/math';
-import { convertFqnToDisplayFormat } from '../../../utils/fullyqualifiedname';
-import { createIdentityDescriptor } from '../../../utils/identity';
+import PageLayout from '#/components/PageLayout';
+import {setNavigationPath} from '../../../redux/reducers/navigation/navigationSlice';
+import {IDENTITY_UPDATE_CORE} from '../../../utils/constants';
+import {unixToDate} from '../../../utils/math';
+import {convertFqnToDisplayFormat} from '../../../utils/fullyqualifiedname';
+import {createIdentityDescriptor} from '../../../utils/identity';
 // @ts-expect-error: the IdentityUpdateRequest was removed and needs to be re-added when the generic request is fully implemented.
-import { IdentityUpdateRequest } from 'verus-typescript-primitives';
-import { SignatureInfoState } from '../../../redux/reducers/signatureInfo/signatureInfo.types';
+import {IdentityUpdateRequest} from 'verus-typescript-primitives';
+import {SignatureInfoState} from '../../../redux/reducers/signatureInfo/signatureInfo.types';
 
 interface IdentityUpdateConfirmProps {
   completeLoginConsent: () => Promise<void>;
 }
 
-const IdentityUpdateConfirm: React.FC<IdentityUpdateConfirmProps> = (props) => {
-  const { completeLoginConsent } = props;
+const IdentityUpdateConfirm: React.FC<IdentityUpdateConfirmProps> = props => {
+  const {completeLoginConsent} = props;
   const dispatch = useDispatch();
   const [loading, setLoading] = useState<boolean>(false);
   const [openIdentity, setOpenIdentity] = useState<boolean>(false);
@@ -38,25 +38,28 @@ const IdentityUpdateConfirm: React.FC<IdentityUpdateConfirmProps> = (props) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const signatureInfo: SignatureInfoState = useSelector((state: any) => state.signatureInfo);
 
-  const { sigBlockInfo, signedBy, signingRevocationIdentity, signingRecoveryIdentity } = signatureInfo || {};
-  const { time } = sigBlockInfo || {};
+  const {sigBlockInfo, signedBy, signingRevocationIdentity, signingRecoveryIdentity} =
+    signatureInfo || {};
+  const {time} = sigBlockInfo || {};
 
   // Convert the fully qualified name into a nicer format for VRSC
-  const signerFqn = signedBy?.fullyqualifiedname ? convertFqnToDisplayFormat(signedBy.fullyqualifiedname) : '';
+  const signerFqn = signedBy?.fullyqualifiedname
+    ? convertFqnToDisplayFormat(signedBy.fullyqualifiedname)
+    : '';
   const systemDescriptor = `${chainName} (${deeplinkData.systemid.toAddress()})`;
 
   const handleIdentityClick = () => {
     setOpenIdentity(!openIdentity);
   };
 
-  const IdentityDetailItem: React.FC<{ field: string; value: string }> = ({ field, value }) => (
-    <ListItem divider sx={{ pl: 6, pr: 2, py: 0.5, minHeight: 48 }}>
+  const IdentityDetailItem: React.FC<{field: string; value: string}> = ({field, value}) => (
+    <ListItem divider sx={{pl: 6, pr: 2, py: 0.5, minHeight: 48}}>
       <ListItemText
         primary={value}
         secondary={field}
         slotProps={{
-          primary: { variant: 'body2', sx: { lineHeight: 1.3 } },
-          secondary: { color: 'text.secondary', variant: 'caption', sx: { lineHeight: 1.2 } }
+          primary: {variant: 'body2', sx: {lineHeight: 1.3}},
+          secondary: {color: 'text.secondary', variant: 'caption', sx: {lineHeight: 1.2}},
         }}
       />
     </ListItem>
@@ -79,10 +82,10 @@ const IdentityUpdateConfirm: React.FC<IdentityUpdateConfirmProps> = (props) => {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        gap: 2
+        gap: 2,
       }}
       footerContent={
-        <div style={{ display: 'flex', justifyContent: 'flex-end', width: '100%' }}>
+        <div style={{display: 'flex', justifyContent: 'flex-end', width: '100%'}}>
           <Button
             variant="text"
             disabled={loading}
@@ -94,7 +97,7 @@ const IdentityUpdateConfirm: React.FC<IdentityUpdateConfirmProps> = (props) => {
               padding: 8,
             }}
           >
-            {"Cancel"}
+            {'Cancel'}
           </Button>
           <Button
             variant="contained"
@@ -106,7 +109,7 @@ const IdentityUpdateConfirm: React.FC<IdentityUpdateConfirmProps> = (props) => {
               padding: 8,
             }}
           >
-            {"Next"}
+            {'Next'}
           </Button>
         </div>
       }
@@ -123,30 +126,24 @@ const IdentityUpdateConfirm: React.FC<IdentityUpdateConfirmProps> = (props) => {
       >
         <CardContent>
           <List>
-            <ListItemButton
-              divider
-              onClick={handleIdentityClick}
-            >
+            <ListItemButton divider onClick={handleIdentityClick}>
               <ListItemText
-                primary={signerFqn && signedBy?.identity?.identityaddress
-                  ? `${signerFqn} (${signedBy.identity.identityaddress})`
-                  : '-'
+                primary={
+                  signerFqn && signedBy?.identity?.identityaddress
+                    ? `${signerFqn} (${signedBy.identity.identityaddress})`
+                    : '-'
                 }
                 secondary="Requested by"
                 slotProps={{
-                  primary: { variant: 'subtitle1' },
-                  secondary: { color: 'text.secondary', variant: 'body2' }
+                  primary: {variant: 'subtitle1'},
+                  secondary: {color: 'text.secondary', variant: 'body2'},
                 }}
               />
               {openIdentity ? <ExpandLess color="action" /> : <ExpandMore color="action" />}
             </ListItemButton>
 
             <Collapse in={openIdentity} timeout="auto" unmountOnExit>
-              <List
-                component="div"
-                dense
-                disablePadding
-              >
+              <List component="div" dense disablePadding>
                 <IdentityDetailItem
                   field="Name"
                   value={(signedBy?.identity?.name as string) || '-'}
@@ -155,10 +152,7 @@ const IdentityUpdateConfirm: React.FC<IdentityUpdateConfirmProps> = (props) => {
                   field="Identity Address"
                   value={signedBy?.identity?.identityaddress || '-'}
                 />
-                <IdentityDetailItem
-                  field="Status"
-                  value={(signedBy?.status as string) || '-'}
-                />
+                <IdentityDetailItem field="Status" value={(signedBy?.status as string) || '-'} />
                 <IdentityDetailItem
                   field="Revocation Authority"
                   value={createIdentityDescriptor(signingRevocationIdentity)}
@@ -167,10 +161,7 @@ const IdentityUpdateConfirm: React.FC<IdentityUpdateConfirmProps> = (props) => {
                   field="Recovery Authority"
                   value={createIdentityDescriptor(signingRecoveryIdentity)}
                 />
-                <IdentityDetailItem
-                  field="System"
-                  value={systemDescriptor}
-                />
+                <IdentityDetailItem field="System" value={systemDescriptor} />
                 {signedBy?.identity?.primaryaddresses?.[0] && (
                   <IdentityDetailItem
                     field="Primary Address #1"
@@ -185,8 +176,8 @@ const IdentityUpdateConfirm: React.FC<IdentityUpdateConfirmProps> = (props) => {
                 primary={systemDescriptor || '-'}
                 secondary="System name"
                 slotProps={{
-                  primary: { variant: 'subtitle1' },
-                  secondary: { color: 'text.secondary', variant: 'body2' }
+                  primary: {variant: 'subtitle1'},
+                  secondary: {color: 'text.secondary', variant: 'body2'},
                 }}
               />
             </ListItem>
@@ -196,8 +187,8 @@ const IdentityUpdateConfirm: React.FC<IdentityUpdateConfirmProps> = (props) => {
                 primary={time ? unixToDate(time) : '-'}
                 secondary="Signed on"
                 slotProps={{
-                  primary: { variant: 'subtitle1' },
-                  secondary: { color: 'text.secondary', variant: 'body2' }
+                  primary: {variant: 'subtitle1'},
+                  secondary: {color: 'text.secondary', variant: 'body2'},
                 }}
               />
             </ListItem>

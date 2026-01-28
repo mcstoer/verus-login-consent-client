@@ -15,7 +15,7 @@ import {
   IDENTITY_UPDATE_RESULT,
 } from '#/utils/constants';
 import ExternalAction from './ExternalAction/ExternalAction';
-import Loading from '#components/Loading';
+import Loading from '#/components/Loading';
 import Error from './Error/Error';
 import Login from './Login/Login';
 import {setError} from '#/redux/reducers/error/error.actions';

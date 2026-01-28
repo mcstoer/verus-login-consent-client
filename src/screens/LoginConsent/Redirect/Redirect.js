@@ -7,7 +7,7 @@ import {
   LOGIN_CONSENT_RESPONSE_VDXF_KEY,
 } from 'verus-typescript-primitives';
 import {SELECT_LOGIN_ID} from '../../../utils/constants';
-import {setNavigationPath} from '../../../redux/reducers/navigation/navigation.actions';
+import {setNavigationPath} from '../../../redux/reducers/navigation/navigationSlice';
 
 class Redirect extends React.Component {
   constructor(props) {

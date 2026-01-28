@@ -4,7 +4,7 @@ import {
   checkAndUpdateAll,
   checkAndUpdateChainInfo,
 } from '#/redux/reducers/identity/identity.actions';
-import {setExternalAction, setNavigationPath} from '#/redux/reducers/navigation/navigation.actions';
+import {setExternalAction, setNavigationPath} from '#/redux/reducers/navigation/navigationSlice';
 import {setOriginApp} from '#/redux/reducers/origin/origin.actions';
 import {completeRequest} from '#/redux/reducers/rpc/rpcSlice';
 import {setSignatureInfo} from '#/redux/reducers/signatureInfo/signatureInfo.actions';
@@ -57,7 +57,7 @@ class LoginConsent extends React.Component {
     ) {
       try {
         this.props.dispatch(
-          setOriginApp(await getPlugin(this.props.originAppId, this.props.originAppBuiltin)),
+          setOriginApp(await getPlugin(this.props.originAppId, this.props.originAppBuiltin))
         );
       } catch (e) {
         this.props.dispatch(setError(e));
@@ -75,17 +75,17 @@ class LoginConsent extends React.Component {
 
     // Check if the main daemon is running.
     const chainActions = await checkAndUpdateChainInfo(mainChain);
-    chainActions.map((action) => this.props.dispatch(action));
+    chainActions.map(action => this.props.dispatch(action));
 
     // Add a small delay so that the Redux store is updated since
     // React 18 has concurrent rendering.
-    await new Promise((resolve) => setTimeout(resolve, 0));
+    await new Promise(resolve => setTimeout(resolve, 0));
 
     if (!this.canProcessRequest()) {
       this.props.dispatch(
         setChainMetadata({
           chainId: mainChain,
-        }),
+        })
       );
       this.props.dispatch(setExternalAction(EXTERNAL_CHAIN_START));
       this.props.dispatch(setNavigationPath(EXTERNAL_ACTION));
@@ -101,11 +101,11 @@ class LoginConsent extends React.Component {
       setChainMetadata({
         chainName: currencyInfo.name,
         chainId: chainId,
-      }),
+      })
     );
 
     const actions = await checkAndUpdateAll(chainId);
-    actions.map((action) => this.props.dispatch(action));
+    actions.map(action => this.props.dispatch(action));
 
     if (this.canProcessRequest()) {
       await this.checkRequest(this.props.deeplinkId, request);
@@ -168,18 +168,18 @@ class LoginConsent extends React.Component {
             chainId,
             signingId,
             signatureString,
-            signedBy.identity.identityaddress,
+            signedBy.identity.identityaddress
           );
           const sigBlockInfo = await getBlock(chainId, sigInfo.height.toString());
 
           // Get the identities of the revocation and recovery i-addresses to display for anti-phishing.
           const signingRevocationIdentity = await getIdentity(
             chainId,
-            signedBy.identity.revocationauthority,
+            signedBy.identity.revocationauthority
           );
           const signingRecoveryIdentity = await getIdentity(
             chainId,
-            signedBy.identity.recoveryauthority,
+            signedBy.identity.recoveryauthority
           );
 
           // Store signature information in dedicated reducer
@@ -189,7 +189,7 @@ class LoginConsent extends React.Component {
               sigBlockInfo: sigBlockInfo,
               signingRevocationIdentity: signingRevocationIdentity,
               signingRecoveryIdentity: signingRecoveryIdentity,
-            }),
+            })
           );
           break;
         }
@@ -208,7 +208,7 @@ class LoginConsent extends React.Component {
               chainId,
               signingId,
               signatureString,
-              signedBy.identity.identityaddress,
+              signedBy.identity.identityaddress
             );
             const sigBlockInfo = await getBlock(chainId, sigInfo.height.toString());
 
@@ -221,7 +221,7 @@ class LoginConsent extends React.Component {
                 sigBlockInfo: sigBlockInfo,
                 signingRevocationIdentity: signingRevocationIdentity,
                 signingRecoveryIdentity: signingRecoveryIdentity,
-              }),
+              })
             );
           }
           break;
@@ -240,7 +240,7 @@ class LoginConsent extends React.Component {
       {
         requestResult: res,
       },
-      () => cb(),
+      () => cb()
     );
   }
 
@@ -284,7 +284,7 @@ LoginConsent.propTypes = {
   signatureInfo: PropTypes.object,
 };
 
-const mapStateToProps = (state) => {
+const mapStateToProps = state => {
   return {
     path: state.navigation.path,
     pathArray: state.navigation.pathArray,
