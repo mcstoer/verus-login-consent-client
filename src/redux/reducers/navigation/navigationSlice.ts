@@ -139,6 +139,12 @@ export const navigateGenericRequest =
             hexBuffer: detailHexBuffer,
           })
         );
+      } else {
+        // Remove the detail at the location if there is none to add.
+        // This allows for previewing the next detail with previous completing it in cases without
+        // linear navigation, like provisioning. If the user previews provisioning after completing
+        // it, then navigating back out of the detail will not delete the completed provisioning.
+        dispatch(removeResponseDetail(currentDetailIndex));
       }
 
       const nextDetail = getNextDetail(genericRequest, currentDetailIndex);
@@ -267,7 +273,6 @@ export const navigateBackGenericRequest =
     );
 
     if (newDetailIndex !== currentDetailIndex) {
-      dispatch(removeResponseDetail(currentDetailIndex));
       dispatch(actions.setCurrentDetailIndex(newDetailIndex));
     }
 

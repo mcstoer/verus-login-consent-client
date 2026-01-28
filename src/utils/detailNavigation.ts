@@ -153,8 +153,7 @@ export const runDetailPrepFunction = async (
 
 /**
  * Generates a response detail from the current Redux state.
- * Returns null if the detail type doesn't have a response generator or
- * if the current state doesn't allow generating a response.
+ * Returns null if there should be no response detail.
  */
 export const generateDetailResponse = (
   request: GenericRequest,
