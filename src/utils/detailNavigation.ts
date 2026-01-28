@@ -1,13 +1,20 @@
-import {AuthenticationRequestOrdinalVDXFObject, AuthenticationResponseDetails, AuthenticationResponseOrdinalVDXFObject, GenericRequest, OrdinalVDXFObject, VDXF_ORDINAL_AUTHENTICATION_REQUEST} from 'verus-typescript-primitives';
-import {CONSENT_TO_SCOPE, GENERIC_FINALIZATION} from './constants';
-import {RootState, AppDispatch} from '#/redux/store';
+import {AppDispatch, RootState} from '#/redux/store';
+import {
+  AuthenticationRequestOrdinalVDXFObject,
+  AuthenticationResponseDetails,
+  AuthenticationResponseOrdinalVDXFObject,
+  GenericRequest,
+  OrdinalVDXFObject,
+  VDXF_ORDINAL_AUTHENTICATION_REQUEST,
+} from 'verus-typescript-primitives';
+import {CONSENT_TO_SCOPE} from './constants';
 
 /**
  * Maps detail types to their initial navigation paths.
  * Each detail type should have an entry that specifies where to start the detail flow.
  */
 const DETAIL_TYPE_TO_START_PATH: Record<string, string> = {
-  [VDXF_ORDINAL_AUTHENTICATION_REQUEST.toNumber()]: CONSENT_TO_SCOPE
+  [VDXF_ORDINAL_AUTHENTICATION_REQUEST.toNumber()]: CONSENT_TO_SCOPE,
 };
 
 /**
@@ -16,7 +23,11 @@ const DETAIL_TYPE_TO_START_PATH: Record<string, string> = {
  * Use them to initialize Redux state, fetch data, or perform validation.
  * They receive dispatch and getState to check current state and avoid redundant work.
  */
-type DetailPrepFunction = (detail: OrdinalVDXFObject, dispatch: AppDispatch, getState: () => RootState) => Promise<void>;
+type DetailPrepFunction = (
+  detail: OrdinalVDXFObject,
+  dispatch: AppDispatch,
+  getState: () => RootState
+) => Promise<void>;
 
 const DETAIL_TYPE_PREP_FUNCTIONS: Record<string, DetailPrepFunction> = {
   // Add prep functions as detail types are implemented
@@ -30,7 +41,7 @@ const DETAIL_TYPE_PREP_FUNCTIONS: Record<string, DetailPrepFunction> = {
     // - getState: to check current state and avoid redundant work
     console.log('No prep function needed for authentication request detail');
     return;
-  }
+  },
 
   // Example of a prep function that checks state to avoid redundant work:
   // [SOME_DETAIL_TYPE]: async (detail, dispatch, getState) => {
@@ -74,17 +85,17 @@ const DETAIL_TYPE_RESPONSE_GENERATORS: Record<string, DetailResponseGenerator> =
 
     console.log('Generating authentication response from state:', {
       activeIdentity: state.identity.activeIdentity,
-      detailIndex
+      detailIndex,
     });
 
     const authResponseDetail = new AuthenticationResponseOrdinalVDXFObject({
       data: new AuthenticationResponseDetails({
         requestID: authRequestDetail.requestID,
-      })
+      }),
     });
 
     return authResponseDetail;
-  }
+  },
 
   // Example of a more complete response generator:
   // [SOME_DETAIL_TYPE]: (request, detailIndex, getState) => {
@@ -115,7 +126,7 @@ export const getStartPathForDetail = (detail: OrdinalVDXFObject): string => {
   if (!startPath) {
     throw new Error(
       `Unknown detail type: ${detailType}. No navigation path defined. ` +
-      `Add an entry to DETAIL_TYPE_TO_START_PATH in detailNavigation.ts`
+        `Add an entry to DETAIL_TYPE_TO_START_PATH in detailNavigation.ts`
     );
   }
 
@@ -184,7 +195,7 @@ export const validateDetailTransition = (
   if (currentDetailIndex >= totalDetails) {
     throw new Error(
       `Invalid detail index: ${currentDetailIndex}. ` +
-      `Request only has ${totalDetails} detail(s).`
+        `Request only has ${totalDetails} detail(s).`
     );
   }
 };
@@ -200,37 +211,17 @@ export const getNextDetail = (
   const nextDetailIndex = currentDetailIndex + 1;
 
   if (nextDetailIndex >= request.details.length) {
-    return null; // All details complete
+    return null;
   }
 
   return request.details[nextDetailIndex];
 };
 
-/**
- * Determines the next navigation path after a detail completes.
- * Returns the path to navigate to after calling completeCurrentDetail().
- *
- * This function should be called by components to determine where to navigate
- * after completing a detail.
- *
- * @param request - The GenericRequest being processed
- * @param currentDetailIndex - The index of the detail that just completed
- * @returns The navigation path to dispatch
- */
-export const getNextNavigationPath = (
-  request: GenericRequest,
-  currentDetailIndex: number
-): string => {
-  const nextDetail = getNextDetail(request, currentDetailIndex);
-
-  if (nextDetail) {
-    // More details to process - navigate to the start of the next detail
-    const nextPath = getStartPathForDetail(nextDetail);
-    console.log(`Detail ${currentDetailIndex} complete. Advancing to detail ${currentDetailIndex + 1}: ${nextPath}`);
-    return nextPath;
-  } else {
-    // All details complete - navigate to finalization
-    console.log(`All ${request.details.length} detail(s) complete. Navigating to finalization.`);
-    return GENERIC_FINALIZATION;
+// Checks if based on the `currentDetailIndex` that we are at the last detail.
+export const isLastDetail = (request: GenericRequest, currentDetailIndex: number): boolean => {
+  if (!request || !request.details || request.details.length === 0) {
+    return false;
   }
+
+  return currentDetailIndex === request.details.length - 1;
 };
