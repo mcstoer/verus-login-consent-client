@@ -1,46 +1,48 @@
 import React, {useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
-import PropTypes from 'prop-types';
-import {setNavigationPath} from '../../../redux/reducers/navigation/navigationSlice';
 import {
-  REDIRECT,
-  SELECT_LOGIN_ID,
-  SUPPORTED_CREDENTIALS,
-  CREDENTIALS,
-} from '../../../utils/constants';
-import {IDENTITY_CREDENTIAL_PLAINLOGIN} from 'verus-typescript-primitives';
+  IDENTITY_CREDENTIAL_PLAINLOGIN,
+  LoginConsentRequest,
+  Credential,
+} from 'verus-typescript-primitives';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
-import {VerusIdLogo} from '../../../images';
-import {PlainLoginCredential, UnknownCredential} from '#/components/Credential';
-import {createAndSignLoginResponse} from '../../../utils/loginResponse';
 import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
-import {convertFqnToDisplayFormat} from '../../../utils/fullyqualifiedname';
+import {PlainLoginCredential, UnknownCredential} from '#/components/Credential';
+import PageLayout from '#/components/PageLayout';
+import {createAndSignLoginResponse} from '#/utils/loginResponse';
+import {convertFqnToDisplayFormat} from '#/utils/fullyqualifiedname';
+import {setNavigationPath} from '#/redux/reducers/navigation/navigationSlice';
+import {RootState} from '#/redux/store';
+import {REDIRECT, SELECT_LOGIN_ID, SUPPORTED_CREDENTIALS, CREDENTIALS} from '#/utils/constants';
 
-const CredentialsReview = props => {
-  const {setRequestResult} = props;
+interface CredentialsReviewProps {
+  setRequestResult: (response: unknown, callback: () => void) => void;
+}
+
+const CredentialsReview: React.FC<CredentialsReviewProps> = ({setRequestResult}) => {
   const dispatch = useDispatch();
-  const deeplinkData = useSelector(state => state.deeplink.data);
-  const chainId = useSelector(state => state.chainMetadata.chainId);
+  const deeplinkData = useSelector(
+    (state: RootState) => state.deeplink.data
+  ) as LoginConsentRequest;
+  const chainId = useSelector((state: RootState) => state.chainMetadata.chainId);
   const [loading, setLoading] = useState(false);
-  const activeIdentity = useSelector(state => state.identity.activeIdentity);
-  const credentials = useSelector(state => {
+  const activeIdentity = useSelector((state: RootState) => state.identity.activeIdentity);
+  const credentials = useSelector((state: RootState) => {
     if (state.credentials && state.credentials.credentials) {
-      return state.credentials.credentials;
+      return state.credentials.credentials as Credential[];
     }
     return [];
   });
 
-  const signatureInfo = useSelector(state => state.signatureInfo);
+  const signatureInfo = useSelector((state: RootState) => state.signatureInfo);
   const {signedBy} = signatureInfo;
-  // Convert the fully qualified name into a nicer format for VRSC.
-  const signerFqn = convertFqnToDisplayFormat(signedBy.fullyqualifiedname);
+  const signerFqn = convertFqnToDisplayFormat(signedBy!.fullyqualifiedname);
 
-  // Calculate requested and missing credentials
   const requestedCredentialKeys = deeplinkData.challenge.requested_access
     .filter(item => SUPPORTED_CREDENTIALS.includes(item.vdxfkey))
     .map(item => item.vdxfkey);
@@ -70,8 +72,7 @@ const CredentialsReview = props => {
     });
   };
 
-  // Determines which credential component to render based on credential type.
-  const renderCredentialComponent = (credential, index) => {
+  const renderCredentialComponent = (credential: Credential, index: number): React.JSX.Element => {
     const credentialId = `credential-${index}`;
     const credentialKey = credential.credentialKey;
 
@@ -84,137 +85,87 @@ const CredentialsReview = props => {
   };
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        flex: 1,
-        height: '100%',
-      }}
-    >
-      <div
-        style={{
-          height: '100%',
-          display: 'flex',
-          padding: 32,
-          flexDirection: 'column',
-          alignItems: 'center',
-        }}
-      >
-        <img src={VerusIdLogo} width={'55%'} height={'10%'} />
-        <div
-          style={{
-            width: '100%',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            padding: 16,
-          }}
-        >
-          {'Review credentials to be sent to ' + signerFqn}
-        </div>
-
-        <Card
-          square
-          sx={{
-            marginTop: 1,
-            marginBottom: 1,
-            width: '100%',
-            overflowY: 'scroll',
-            maxHeight: '54vh',
-          }}
-        >
-          <List>
-            {/* Display fetched credentials */}
-            {credentials.length > 0 && (
-              <>
-                <List component="div">
-                  {credentials.map((credential, index) =>
-                    renderCredentialComponent(credential, index)
-                  )}
-                </List>
-              </>
-            )}
-
-            {requestedCredentialKeys.length === 0 && (
-              <ListItem>
-                <ListItemText
-                  primary="No credentials requested by the application."
-                  disableTypography
-                />
-              </ListItem>
-            )}
-
-            {requestedCredentialKeys.length > 0 && credentials.length === 0 && (
-              <ListItem>
-                <ListItemText primary="No credentials available to include." disableTypography />
-              </ListItem>
-            )}
-          </List>
-        </Card>
-
-        {/* Inform the user if there are missing credentials */}
-        {missingCredentialKeys.length > 0 && (
-          <Alert severity="warning" sx={{mt: 2, width: '90%', textAlign: 'left'}}>
-            <AlertTitle>The following requested credentials were not found:</AlertTitle>
-            {missingCredentialKeys
-              .map(key => (CREDENTIALS[key] ? CREDENTIALS[key].description : key))
-              .join(', ')}
-          </Alert>
-        )}
-
-        <div
-          style={{
-            width: '100%',
-            display: 'flex',
-            flexDirection: 'row',
-            alignItems: 'flex-end',
-            justifyContent: 'flex-end',
-            marginTop: 'auto',
-          }}
-        >
-          <div
+    <PageLayout
+      title={'Review credentials to be sent to ' + signerFqn}
+      loading={loading}
+      footerContent={
+        <>
+          <Button
+            variant="text"
+            disabled={loading}
+            color="secondary"
+            onClick={() => cancel()}
             style={{
-              display: 'flex',
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'space-between',
+              width: 120,
+              marginRight: 32,
+              padding: 8,
             }}
           >
-            <Button
-              variant="text"
-              disabled={loading}
-              color="secondary"
-              onClick={() => cancel()}
-              style={{
-                width: 120,
-                marginRight: 32,
-                padding: 8,
-              }}
-            >
-              {'Back'}
-            </Button>
-            <Button
-              variant="contained"
-              color="primary"
-              disabled={loading}
-              onClick={() => continueLogin()}
-              style={{
-                width: 120,
-                padding: 8,
-              }}
-            >
-              {'Continue'}
-            </Button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
+            {'Back'}
+          </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            disabled={loading}
+            onClick={() => continueLogin()}
+            style={{
+              width: 120,
+              padding: 8,
+            }}
+          >
+            {'Continue'}
+          </Button>
+        </>
+      }
+    >
+      <Card
+        square
+        sx={{
+          marginTop: 1,
+          marginBottom: 1,
+          width: '100%',
+          overflowY: 'scroll',
+          maxHeight: '54vh',
+        }}
+      >
+        <List>
+          {credentials.length > 0 && (
+            <>
+              <List component="div">
+                {credentials.map((credential, index) =>
+                  renderCredentialComponent(credential, index)
+                )}
+              </List>
+            </>
+          )}
 
-CredentialsReview.propTypes = {
-  setRequestResult: PropTypes.func.isRequired,
+          {requestedCredentialKeys.length === 0 && (
+            <ListItem>
+              <ListItemText
+                primary="No credentials requested by the application."
+                disableTypography
+              />
+            </ListItem>
+          )}
+
+          {requestedCredentialKeys.length > 0 && credentials.length === 0 && (
+            <ListItem>
+              <ListItemText primary="No credentials available to include." disableTypography />
+            </ListItem>
+          )}
+        </List>
+      </Card>
+
+      {missingCredentialKeys.length > 0 && (
+        <Alert severity="warning" sx={{mt: 2, width: '90%', textAlign: 'left'}}>
+          <AlertTitle>The following requested credentials were not found:</AlertTitle>
+          {missingCredentialKeys
+            .map(key => (CREDENTIALS[key] ? CREDENTIALS[key].description : key))
+            .join(', ')}
+        </Alert>
+      )}
+    </PageLayout>
+  );
 };
 
 export default CredentialsReview;

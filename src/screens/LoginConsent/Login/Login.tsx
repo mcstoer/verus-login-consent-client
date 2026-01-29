@@ -125,7 +125,7 @@ const Login = (props: LoginProps) => {
           } else {
             const signedResponse = await createAndSignLoginResponse(
               chainId,
-              deeplinkData,
+              deeplinkData as LoginConsentRequest,
               loginIdentity,
               []
             );

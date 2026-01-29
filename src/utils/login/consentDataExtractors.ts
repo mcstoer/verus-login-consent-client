@@ -25,7 +25,7 @@ export interface ConsentData {
 // extractConsentDataV1 extracts display data from a LoginConsentRequest for the consent screen.
 export const extractConsentDataV1 = (
   request: LoginConsentRequest,
-  signedBy: Identity,
+  signedBy: Identity
 ): ConsentData => {
   const signerFqn = convertFqnToDisplayFormat(signedBy.fullyqualifiedname);
   const systemId = request.system_id;
@@ -37,8 +37,13 @@ export const extractConsentDataV1 = (
     for (const permission of requestedPermissions) {
       if (SCOPES[permission.vdxfkey]) {
         permissionsDescriptions.push(SCOPES[permission.vdxfkey].description);
-      } else if (SUPPORTED_CREDENTIALS.includes(permission.vdxfkey) && CREDENTIALS[permission.vdxfkey]) {
-        permissionsDescriptions.push("Get " + CREDENTIALS[permission.vdxfkey].description + " credential");
+      } else if (
+        SUPPORTED_CREDENTIALS.includes(permission.vdxfkey) &&
+        CREDENTIALS[permission.vdxfkey]
+      ) {
+        permissionsDescriptions.push(
+          'Get ' + CREDENTIALS[permission.vdxfkey].description + ' credential'
+        );
       }
     }
   }
@@ -74,14 +79,14 @@ const getConstraintLabel = (constraint: RecipientConstraint) => {
   }
 
   switch (constraint.type) {
-  case AuthenticationRequestDetails.REQUIRED_ID:
-    return `Required identity: ${constraintLabel}`;
-  case AuthenticationRequestDetails.REQUIRED_SYSTEM:
-    return `Required system: ${constraintLabel}`;
-  case AuthenticationRequestDetails.REQUIRED_PARENT:
-    return `Required parent: ${constraintLabel}`;
-  default:
-    return `Constraint: ${constraintLabel}`;
+    case AuthenticationRequestDetails.REQUIRED_ID:
+      return `Required identity: ${constraintLabel}`;
+    case AuthenticationRequestDetails.REQUIRED_SYSTEM:
+      return `Required system: ${constraintLabel}`;
+    case AuthenticationRequestDetails.REQUIRED_PARENT:
+      return `Required parent: ${constraintLabel}`;
+    default:
+      return `Constraint: ${constraintLabel}`;
   }
 };
 
@@ -89,10 +94,10 @@ const getConstraintLabel = (constraint: RecipientConstraint) => {
 export const extractConsentDataV2 = (
   request: GenericRequest,
   signedBy: Identity,
-  currentDetailIndex: number,
+  currentDetailIndex: number
 ): ConsentData => {
   const signerFqn = convertFqnToDisplayFormat(signedBy.fullyqualifiedname);
-  const systemId = request.signature?.systemID.toIAddress() || "";
+  const systemId = request.signature?.systemID.toIAddress() || '';
 
   // The generic request doesn't use permission labels since each detail displays their own info.
   const permissionsLabels = [];
@@ -105,8 +110,8 @@ export const extractConsentDataV2 = (
 
   const authRequestDetail = ordinalWrapper.data;
   const expiryLabel = getExpiryLabel(authRequestDetail);
-  const constraints = authRequestDetail?.recipientConstraints ?? [];
-  const responseURIs = authRequestDetail?.responseURIs ?? [];
+  const constraints = authRequestDetail.recipientConstraints ?? [];
+  const responseURIs = request.responseURIs ?? [];
 
   const constraintsLabels = constraints.map(getConstraintLabel);
   const responseURIsLabels = responseURIs.map((uri: ResponseURI) => uri.getUriString());
@@ -120,8 +125,3 @@ export const extractConsentDataV2 = (
     responseURIsLabels,
   };
 };
-
-
-
-
-

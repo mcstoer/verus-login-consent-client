@@ -1,38 +1,39 @@
 import BigNumber from 'bignumber.js';
-import { 
+import {
   Context,
   Credential,
   LoginConsentDecision,
-  LoginConsentResponse
+  LoginConsentRequest,
+  LoginConsentResponse,
 } from 'verus-typescript-primitives';
-import { signResponse } from '../rpc/calls/signResponse';
+import {signResponse} from '#/rpc/calls/signResponse';
 
-// Creates a LoginConsentResponse using a LoginConsentRequest and signs it by calling the main app.
-export const createAndSignLoginResponse = async (chainId, request, loginIdentity, credentials) => {
-
+export async function createAndSignLoginResponse(
+  chainId: string,
+  request: LoginConsentRequest,
+  loginIdentity: string,
+  credentials: Credential[]
+): Promise<LoginConsentResponse> {
   const context = new Context();
   for (const cred of credentials) {
+    // Always create a new object since getting the credentials doesn't create the object.
+    // TODO: Update this when the API is updated.
     const c = new Credential(cred);
     context.kv[cred.credentialKey] = c.toBuffer().toString('hex');
   }
 
-  let response = new LoginConsentResponse({
+  const response = new LoginConsentResponse({
     system_id: request.system_id,
     signing_id: loginIdentity,
     decision: new LoginConsentDecision({
       decision_id: request.challenge.challenge_id,
       context: context,
       request: request,
-      created_at: BigNumber(Date.now())
-        .dividedBy(1000)
-        .decimalPlaces(0)
-        .toNumber(),
-    })
+      created_at: BigNumber(Date.now()).dividedBy(1000).decimalPlaces(0).toNumber(),
+    }),
   });
 
-  // Include the chainId to tell the main app which chain to sign the response on.
   const signedResponse = await signResponse(chainId, response);
 
   return signedResponse;
-};
-
+}
