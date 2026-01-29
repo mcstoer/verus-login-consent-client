@@ -3,10 +3,12 @@ import {
   GenericRequest,
   OrdinalVDXFObject,
   VDXF_ORDINAL_AUTHENTICATION_REQUEST,
+  VDXF_ORDINAL_USER_DATA_REQUEST,
 } from 'verus-typescript-primitives';
-import {CONSENT_TO_SCOPE} from '../../utils/constants';
+import {CONSENT_TO_SCOPE, CREDENTIALS_REVIEW} from '#/utils/constants';
 import {generateAuthenticationResponse, prepareAuthenticationDetail} from './authentication';
 import {DetailPrepFunction, DetailResponseGenerator} from './types';
+import {prepareUserDataDetail} from './userData';
 
 /**
  * Maps detail types to their initial navigation paths.
@@ -14,6 +16,7 @@ import {DetailPrepFunction, DetailResponseGenerator} from './types';
  */
 const DETAIL_TYPE_TO_START_PATH: Record<string, string> = {
   [VDXF_ORDINAL_AUTHENTICATION_REQUEST.toNumber()]: CONSENT_TO_SCOPE,
+  [VDXF_ORDINAL_USER_DATA_REQUEST.toNumber()]: CREDENTIALS_REVIEW,
 };
 
 /**
@@ -24,23 +27,7 @@ const DETAIL_TYPE_TO_START_PATH: Record<string, string> = {
  */
 const DETAIL_TYPE_PREP_FUNCTIONS: Record<string, DetailPrepFunction> = {
   [VDXF_ORDINAL_AUTHENTICATION_REQUEST.toNumber()]: prepareAuthenticationDetail,
-
-  // Example of a prep function that checks state to avoid redundant work:
-  // [SOME_DETAIL_TYPE]: async (detail, dispatch, getState) => {
-  //   const state = getState();
-  //
-  //   // Check if this detail has already been prepped
-  //   const alreadyPrepped = state.someSlice.preppedDetails?.[detail.id];
-  //   if (alreadyPrepped) {
-  //     console.log('Detail already prepared, skipping prep');
-  //     return;
-  //   }
-  //
-  //   // Perform preparation work
-  //   const prepData = await fetchSomeData(detail);
-  //   dispatch(setSomeData(prepData));
-  //   dispatch(markDetailAsPrepped(detail.id));
-  // }
+  [VDXF_ORDINAL_USER_DATA_REQUEST.toNumber()]: prepareUserDataDetail,
 };
 
 /**

@@ -1,0 +1,27 @@
+import {RootState} from '#/redux/store';
+import {createEntityAdapter, createSlice} from '@reduxjs/toolkit';
+import {CredentialJson} from 'verus-typescript-primitives';
+
+interface UserData {
+  index: number;
+  data: CredentialJson[]; // Store the data as JSON.
+}
+
+const userDataAdapter = createEntityAdapter<UserData>({
+  selectId: detail => detail.index,
+});
+
+const userDataSlice = createSlice({
+  name: 'userData',
+  initialState: userDataAdapter.getInitialState(),
+  reducers: {
+    detailAdded: userDataAdapter.addOne,
+    detailUpdated: userDataAdapter.updateOne,
+  },
+});
+
+export const {selectById: selectDetailById, selectTotal: selectDetailCount} =
+  userDataAdapter.getSelectors((state: RootState) => state.genericRequest.userData);
+
+export const {detailAdded, detailUpdated} = userDataSlice.actions;
+export default userDataSlice.reducer;
