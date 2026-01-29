@@ -1,13 +1,12 @@
 import {AppDispatch, RootState} from '#/redux/store';
 import {
-  AuthenticationRequestOrdinalVDXFObject,
-  AuthenticationResponseDetails,
-  AuthenticationResponseOrdinalVDXFObject,
   GenericRequest,
   OrdinalVDXFObject,
   VDXF_ORDINAL_AUTHENTICATION_REQUEST,
 } from 'verus-typescript-primitives';
-import {CONSENT_TO_SCOPE} from './constants';
+import {CONSENT_TO_SCOPE} from '../../utils/constants';
+import {generateAuthenticationResponse, prepareAuthenticationDetail} from './authentication';
+import {DetailPrepFunction, DetailResponseGenerator} from './types';
 
 /**
  * Maps detail types to their initial navigation paths.
@@ -23,25 +22,8 @@ const DETAIL_TYPE_TO_START_PATH: Record<string, string> = {
  * Use them to initialize Redux state, fetch data, or perform validation.
  * They receive dispatch and getState to check current state and avoid redundant work.
  */
-type DetailPrepFunction = (
-  detail: OrdinalVDXFObject,
-  dispatch: AppDispatch,
-  getState: () => RootState
-) => Promise<void>;
-
 const DETAIL_TYPE_PREP_FUNCTIONS: Record<string, DetailPrepFunction> = {
-  // Add prep functions as detail types are implemented
-  // Example:
-  [VDXF_ORDINAL_AUTHENTICATION_REQUEST.toNumber()]: async () => {
-    // No prep needed for authentication request at this time
-    // Possibly handle the recipientConstraints here in the future
-    // When implementing a real prep function, you'll have access to:
-    // - detail: the OrdinalVDXFObject to prepare
-    // - dispatch: to dispatch Redux actions
-    // - getState: to check current state and avoid redundant work
-    console.log('No prep function needed for authentication request detail');
-    return;
-  },
+  [VDXF_ORDINAL_AUTHENTICATION_REQUEST.toNumber()]: prepareAuthenticationDetail,
 
   // Example of a prep function that checks state to avoid redundant work:
   // [SOME_DETAIL_TYPE]: async (detail, dispatch, getState) => {
@@ -66,36 +48,8 @@ const DETAIL_TYPE_PREP_FUNCTIONS: Record<string, DetailPrepFunction> = {
  * These functions are called when a detail completes to construct the response
  * from the current Redux state.
  */
-type DetailResponseGenerator = (
-  request: GenericRequest,
-  detailIndex: number,
-  getState: () => RootState
-) => OrdinalVDXFObject | null;
-
 const DETAIL_TYPE_RESPONSE_GENERATORS: Record<string, DetailResponseGenerator> = {
-  [VDXF_ORDINAL_AUTHENTICATION_REQUEST.toNumber()]: (request, detailIndex, getState) => {
-    const state = getState();
-    const ordinalWrapper = request.details[detailIndex];
-
-    if (!(ordinalWrapper instanceof AuthenticationRequestOrdinalVDXFObject)) {
-      throw new Error('Detail is not an AuthenticationRequestOrdinalVDXFObject');
-    }
-
-    const authRequestDetail = ordinalWrapper.data;
-
-    console.log('Generating authentication response from state:', {
-      activeIdentity: state.identity.activeIdentity,
-      detailIndex,
-    });
-
-    const authResponseDetail = new AuthenticationResponseOrdinalVDXFObject({
-      data: new AuthenticationResponseDetails({
-        requestID: authRequestDetail.requestID,
-      }),
-    });
-
-    return authResponseDetail;
-  },
+  [VDXF_ORDINAL_AUTHENTICATION_REQUEST.toNumber()]: generateAuthenticationResponse,
 
   // Example of a more complete response generator:
   // [SOME_DETAIL_TYPE]: (request, detailIndex, getState) => {

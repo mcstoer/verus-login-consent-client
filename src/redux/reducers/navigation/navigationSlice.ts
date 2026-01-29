@@ -13,7 +13,7 @@ import {
   getStartPathForDetail,
   runDetailPrepFunction,
   generateDetailResponse,
-} from '#/utils/detailNavigation';
+} from '#/features/details';
 import {
   IDENTITY_UPDATE_RESULT,
   PROVISIONING_RESULT,

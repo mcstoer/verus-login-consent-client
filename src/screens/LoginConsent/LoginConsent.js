@@ -20,7 +20,7 @@ import {
   EXTERNAL_ACTION,
   EXTERNAL_CHAIN_START,
 } from '#/utils/constants';
-import {getStartPathForDetail, runDetailPrepFunction} from '#/utils/detailNavigation';
+import {getStartPathForDetail, runDetailPrepFunction} from '#/features/details/detailNavigation';
 import {checkGenericRequest} from '#/utils/genericRequest';
 import {checkLoginConsentRequest} from '#/utils/loginConsentRequest';
 import PropTypes from 'prop-types';

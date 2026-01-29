@@ -35,7 +35,7 @@ import {
   PROVISIONING_FORM,
   REDIRECT,
 } from '#/utils/constants';
-import {isLastDetail} from '#/utils/detailNavigation';
+import {isLastDetail} from '#/features/details/detailNavigation';
 import {extractLoginDataV1, extractLoginDataV2, LoginData} from '#/utils/login/loginDataExtractors';
 import {createAndSignLoginResponse} from '#/utils/loginResponse';
 
