@@ -16,10 +16,7 @@ export async function createAndSignLoginResponse(
 ): Promise<LoginConsentResponse> {
   const context = new Context();
   for (const cred of credentials) {
-    // Always create a new object since getting the credentials doesn't create the object.
-    // TODO: Update this when the API is updated.
-    const c = new Credential(cred);
-    context.kv[cred.credentialKey] = c.toBuffer().toString('hex');
+    context.kv[cred.credentialKey] = cred.toBuffer().toString('hex');
   }
 
   const response = new LoginConsentResponse({

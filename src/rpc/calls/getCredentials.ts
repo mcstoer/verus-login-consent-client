@@ -1,27 +1,42 @@
-import { API_GET_CREDENTIALS_BY_SCOPE, NATIVE, POST } from "../../utils/constants";
-import { getApiData } from "../callCreator";
+import {Credential} from 'verus-typescript-primitives';
+import {API_GET_CREDENTIALS_BY_SCOPE, NATIVE, POST} from '#/utils/constants';
+import {getApiData} from '#/rpc/callCreator';
 
-/**
- * Gets the credentials from the address belonging to the scope filtered by the credentialKeys.
- */
-export const getCredentialsByScope = async (chainId, address, scope, credentialKeys) => {
+interface ApiResponse {
+  msg: string;
+  result: unknown;
+}
+
+export async function getCredentialsByScope(
+  chainId: string,
+  address: string,
+  scope: string,
+  credentialKeys: string[]
+): Promise<Credential[]> {
   try {
-    const res = await getApiData(
+    const res = (await getApiData(
       NATIVE,
       API_GET_CREDENTIALS_BY_SCOPE,
       {
         coin: chainId,
         address: address,
         scope: scope,
-        credentialKeys: credentialKeys
+        credentialKeys: credentialKeys,
       },
       POST,
       true
-    );
-    if (res.msg !== "success") throw new Error(res.result);
-    else return res.result;
+    )) as ApiResponse;
+
+    if (res.msg !== 'success') {
+      throw new Error(res.result as string);
+    }
+
+    const credentialArray = res.result as Array<Record<string, unknown>>;
+
+    return credentialArray.map(credentialData => new Credential(credentialData));
   } catch (e) {
-    console.error(e.message);
-    throw new Error(e.message);
+    const error = e as Error;
+    console.error(error.message);
+    throw new Error(error.message);
   }
-};
+}

@@ -28,8 +28,8 @@ export async function prepareUserDataDetail(
   const scopeIdentity = state.signatureInfo.signedBy;
   const index = state.navigation.currentDetailIndex;
   const currentIdentity = identity.activeIdentity as Identity;
-  const currentAddress = currentIdentity.identityaddress;
-  const scopeAddress = scopeIdentity.identityaddress;
+  const currentAddress = currentIdentity.identity.identityaddress;
+  const scopeAddress = scopeIdentity.identity.identityaddress;
 
   if (!(ordinal instanceof UserDataRequestOrdinalVDXFObject)) {
     throw new Error('Unable to handle non-user data detail');
@@ -47,18 +47,10 @@ export async function prepareUserDataDetail(
   const vdxfkeys = detail.searchDataKey.flatMap(obj => Object.keys(obj));
 
   // TODO: Figure out what to do for credentials that don't fetch
-  for (const key of vdxfkeys) {
-    const retrieved = (await getCredentialsByScope(
-      chainId,
-      currentAddress,
-      scopeAddress,
-      key
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    )) as Array<any>;
-    for (const cred of retrieved) {
-      const credential = new Credential(cred);
-      credentialsJSON.push(credential.toJson());
-    }
+  const retrieved = await getCredentialsByScope(chainId, currentAddress, scopeAddress, vdxfkeys);
+  for (const cred of retrieved) {
+    const credential = new Credential(cred);
+    credentialsJSON.push(credential.toJson());
   }
 
   dispatch(detailAdded({index, data: credentialsJSON}));
