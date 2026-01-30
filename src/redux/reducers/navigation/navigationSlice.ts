@@ -1,4 +1,33 @@
-import {createSlice, PayloadAction, ThunkAction, AnyAction} from '@reduxjs/toolkit';
+import {
+  generateDetailResponse,
+  getStartPathForDetail,
+  runDetailPrepFunction,
+} from '#/features/details';
+import {getDetailByIndex} from '#/features/details/detailNavigation';
+import {setError} from '#/redux/reducers/error/error.actions';
+import {
+  removeResponseDetail,
+  selectAllResponseDetails,
+  upsertResponseDetail,
+} from '#/redux/reducers/genericResponse/genericResponseSlice';
+import {Identity} from '#/redux/reducers/signatureInfo/signatureInfo.types';
+import {RootState} from '#/redux/store';
+import {signGenericResponse} from '#/rpc/calls/signGenericResponse';
+import BN from '#/utils/bn-polyfill';
+import {
+  CONSENT_TO_SCOPE,
+  CREDENTIALS_REVIEW,
+  IDENTITY_UPDATE_CONFIRM,
+  IDENTITY_UPDATE_CONTENTMULTIMAP,
+  IDENTITY_UPDATE_CORE,
+  IDENTITY_UPDATE_RESULT,
+  LOADING_DISPLAY,
+  PROVISIONING_CONFIRM,
+  PROVISIONING_FORM,
+  PROVISIONING_RESULT,
+  SELECT_LOGIN_ID,
+} from '#/utils/constants';
+import {AnyAction, createSlice, PayloadAction, ThunkAction} from '@reduxjs/toolkit';
 import {
   CompactAddressObject,
   GENERIC_REQUEST_DEEPLINK_VDXF_KEY,
@@ -7,36 +36,8 @@ import {
   OrdinalVDXFObject,
   VerifiableSignatureData,
 } from 'verus-typescript-primitives';
-import {readNavigationPath} from './navigation.util';
-import {
-  getNextDetail,
-  getStartPathForDetail,
-  runDetailPrepFunction,
-  generateDetailResponse,
-} from '#/features/details';
-import {
-  IDENTITY_UPDATE_RESULT,
-  PROVISIONING_RESULT,
-  IDENTITY_UPDATE_CONFIRM,
-  IDENTITY_UPDATE_CORE,
-  IDENTITY_UPDATE_CONTENTMULTIMAP,
-  PROVISIONING_FORM,
-  PROVISIONING_CONFIRM,
-  CONSENT_TO_SCOPE,
-  SELECT_LOGIN_ID,
-  LOADING_DISPLAY,
-} from '#/utils/constants';
-import {RootState} from '#/redux/store';
-import {setError} from '#/redux/reducers/error/error.actions';
-import {
-  removeResponseDetail,
-  selectAllResponseDetails,
-  upsertResponseDetail,
-} from '#/redux/reducers/genericResponse/genericResponseSlice';
-import {signGenericResponse} from '#/rpc/calls/signGenericResponse';
-import {Identity} from '#/redux/reducers/signatureInfo/signatureInfo.types';
-import BN from '#/utils/bn-polyfill';
 import {completeRequest} from '../rpc/rpcSlice';
+import {readNavigationPath} from './navigation.util';
 
 export interface NavigationState {
   path: string;
@@ -90,6 +91,7 @@ const DETAIL_COMPLETION_PATHS: Record<string, boolean> = {
   [IDENTITY_UPDATE_RESULT]: true,
   [PROVISIONING_RESULT]: true,
   [SELECT_LOGIN_ID]: true,
+  [CREDENTIALS_REVIEW]: true,
 };
 
 const WITHIN_DETAIL_NEXT_PATHS: Record<string, string> = {
@@ -125,7 +127,6 @@ export const navigateGenericRequest =
     console.log('dispatching navigateGenericRequest from path:', currentPath);
 
     let nextPath: string;
-    let newDetailIndex = currentDetailIndex;
 
     if (DETAIL_COMPLETION_PATHS[currentPath]) {
       const responseToAdd = generateDetailResponse(genericRequest, currentDetailIndex, getState);
@@ -147,13 +148,14 @@ export const navigateGenericRequest =
         dispatch(removeResponseDetail(currentDetailIndex));
       }
 
-      const nextDetail = getNextDetail(genericRequest, currentDetailIndex);
+      const newDetailIndex = currentDetailIndex + 1;
+      const nextDetail = getDetailByIndex(genericRequest, newDetailIndex);
 
       if (nextDetail) {
         nextPath = getStartPathForDetail(nextDetail);
-        newDetailIndex = currentDetailIndex + 1;
 
-        await runDetailPrepFunction(nextDetail, dispatch, getState);
+        await runDetailPrepFunction(nextDetail, newDetailIndex, dispatch, getState);
+        dispatch(actions.setCurrentDetailIndex(newDetailIndex));
       } else {
         let signedResponse: GenericResponse | null = null;
         let error: Error | null = null;
@@ -228,9 +230,6 @@ export const navigateGenericRequest =
       })
     );
 
-    if (newDetailIndex !== currentDetailIndex) {
-      dispatch(actions.setCurrentDetailIndex(newDetailIndex));
-    }
     console.log('navigated to path:', nextPath);
   };
 

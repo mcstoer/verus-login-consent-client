@@ -3,6 +3,7 @@ import pluginJs from '@eslint/js';
 import pluginReact from 'eslint-plugin-react';
 import stylisticJs from '@stylistic/eslint-plugin-js';
 import tseslint from 'typescript-eslint';
+import prettier from 'eslint-config-prettier';
 
 /** @type {import('eslint').Linter.Config[]} */
 export default [
@@ -22,6 +23,10 @@ export default [
     languageOptions: {
       globals: globals.browser,
     },
+  },
+  {
+    name: 'plugin/prettier',
+    ...prettier,
   },
   pluginJs.configs.recommended,
   pluginReact.configs.flat.recommended,

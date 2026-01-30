@@ -3,6 +3,7 @@ import {GenericRequest, OrdinalVDXFObject} from 'verus-typescript-primitives';
 
 export type DetailPrepFunction = (
   ordinal: OrdinalVDXFObject,
+  detailIndex: number,
   dispatch: AppDispatch,
   getState: () => RootState
 ) => Promise<void>;

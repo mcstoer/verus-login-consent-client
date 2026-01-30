@@ -1,5 +1,5 @@
 export {
-  getNextDetail,
+  getDetailByIndex,
   getStartPathForDetail,
   runDetailPrepFunction,
   generateDetailResponse,

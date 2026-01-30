@@ -2,8 +2,10 @@ import React, {useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import {
   IDENTITY_CREDENTIAL_PLAINLOGIN,
-  LoginConsentRequest,
   Credential,
+  VerusPayInvoice,
+  GenericRequest,
+  LoginConsentRequest,
 } from 'verus-typescript-primitives';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
@@ -15,10 +17,14 @@ import AlertTitle from '@mui/material/AlertTitle';
 import {PlainLoginCredential, UnknownCredential} from '#/components/Credential';
 import PageLayout from '#/components/PageLayout';
 import {createAndSignLoginResponse} from '#/utils/loginResponse';
-import {convertFqnToDisplayFormat} from '#/utils/fullyqualifiedname';
 import {setNavigationPath} from '#/redux/reducers/navigation/navigationSlice';
 import {RootState} from '#/redux/store';
-import {REDIRECT, SELECT_LOGIN_ID, SUPPORTED_CREDENTIALS, CREDENTIALS} from '#/utils/constants';
+import {REDIRECT, SELECT_LOGIN_ID} from '#/utils/constants';
+import {
+  extractCredentialsReviewDataV1,
+  extractCredentialsReviewDataV2,
+  selectUserDataCredentials,
+} from '#/features/login/credentialsReviewDataExtractors';
 
 interface CredentialsReviewProps {
   setRequestResult: (response: unknown, callback: () => void) => void;
@@ -26,32 +32,48 @@ interface CredentialsReviewProps {
 
 const CredentialsReview: React.FC<CredentialsReviewProps> = ({setRequestResult}) => {
   const dispatch = useDispatch();
-  const deeplinkData = useSelector(
-    (state: RootState) => state.deeplink.data
-  ) as LoginConsentRequest;
-  const chainId = useSelector((state: RootState) => state.chainMetadata.chainId);
+  const state = useSelector((state: RootState) => state);
+  const deeplinkData = state.deeplink.data;
+  const chainId = state.chainMetadata.chainId;
   const [loading, setLoading] = useState(false);
-  const activeIdentity = useSelector((state: RootState) => state.identity.activeIdentity);
-  const credentials = useSelector((state: RootState) => {
-    if (state.credentials && state.credentials.credentials) {
-      return state.credentials.credentials as Credential[];
-    }
-    return [];
-  });
+  const activeIdentity = state.identity.activeIdentity;
+  const currentDetailIndex = state.navigation.currentDetailIndex || 0;
 
-  const signatureInfo = useSelector((state: RootState) => state.signatureInfo);
-  const {signedBy} = signatureInfo;
-  const signerFqn = convertFqnToDisplayFormat(signedBy!.fullyqualifiedname);
+  // V1 for getting credentials
+  let v1Credentials: Credential[] = [];
+  if (state.credentials && state.credentials.credentials) {
+    v1Credentials = state.credentials.credentials as Credential[];
+  }
 
-  const requestedCredentialKeys = deeplinkData.challenge.requested_access
-    .filter(item => SUPPORTED_CREDENTIALS.includes(item.vdxfkey))
-    .map(item => item.vdxfkey);
-
-  const fetchedCredentialKeys = credentials.map(credential => credential.credentialKey);
-
-  const missingCredentialKeys = requestedCredentialKeys.filter(
-    key => !fetchedCredentialKeys.includes(key)
+  // V2 for getting credentials
+  const userDataCredentials = useSelector((state: RootState) =>
+    selectUserDataCredentials(state, currentDetailIndex)
   );
+
+  console.log('userDataCredentials', userDataCredentials);
+
+  if (deeplinkData instanceof VerusPayInvoice) {
+    throw new Error('Unable to handle a VerusPayInvoice for Credential Review');
+  }
+
+  const isGenericRequest = deeplinkData instanceof GenericRequest;
+
+  const {signedBy} = state.signatureInfo;
+
+  const {
+    signerFqn,
+    requestedCredentialKeys,
+    missingCredentialKeys,
+    missingCredentialLabels,
+    credentials,
+  } = isGenericRequest
+    ? extractCredentialsReviewDataV2(
+        deeplinkData,
+        signedBy!,
+        userDataCredentials,
+        currentDetailIndex
+      )
+    : extractCredentialsReviewDataV1(deeplinkData, signedBy!, v1Credentials);
 
   const cancel = () => {
     dispatch(setNavigationPath(SELECT_LOGIN_ID));
@@ -62,7 +84,7 @@ const CredentialsReview: React.FC<CredentialsReviewProps> = ({setRequestResult})
     const loginIdentity = activeIdentity.identity.identityaddress;
     const signedResponse = await createAndSignLoginResponse(
       chainId,
-      deeplinkData,
+      deeplinkData as LoginConsentRequest,
       loginIdentity,
       credentials
     );
@@ -159,9 +181,7 @@ const CredentialsReview: React.FC<CredentialsReviewProps> = ({setRequestResult})
       {missingCredentialKeys.length > 0 && (
         <Alert severity="warning" sx={{mt: 2, width: '90%', textAlign: 'left'}}>
           <AlertTitle>The following requested credentials were not found:</AlertTitle>
-          {missingCredentialKeys
-            .map(key => (CREDENTIALS[key] ? CREDENTIALS[key].description : key))
-            .join(', ')}
+          {missingCredentialLabels.join(', ')}
         </Alert>
       )}
     </PageLayout>

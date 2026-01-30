@@ -33,6 +33,7 @@ import {
   LoginConsentRequest,
 } from 'verus-typescript-primitives';
 import {LoginConsentRender} from './LoginConsent.render';
+import store from '#/redux/store';
 
 class LoginConsent extends React.Component {
   constructor(props) {
@@ -123,7 +124,7 @@ class LoginConsent extends React.Component {
             const firstDetail = genericRequest.details[0];
 
             // Run prep function for the first detail (if any)
-            await runDetailPrepFunction(firstDetail, this.props.dispatch);
+            await runDetailPrepFunction(firstDetail, this.props.dispatch, store.getState);
 
             // Navigate to the first screen of the first detail
             const startPath = getStartPathForDetail(firstDetail);

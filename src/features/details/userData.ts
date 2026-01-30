@@ -18,6 +18,7 @@ import {DetailResponseGenerator} from './types';
 // Fetch the data from the identity and put it in the redux store.
 export async function prepareUserDataDetail(
   ordinal: UserDataRequestOrdinalVDXFObject,
+  detailIndex: number,
   dispatch: AppDispatch,
   getState: () => RootState
 ): Promise<void> {
@@ -26,7 +27,7 @@ export async function prepareUserDataDetail(
   const chainId = state.chainMetadata.chainId;
   // TODO: Use AppOrDelegatedId when possible.
   const scopeIdentity = state.signatureInfo.signedBy;
-  const index = state.navigation.currentDetailIndex;
+  const index = detailIndex;
   const currentIdentity = identity.activeIdentity as Identity;
   const currentAddress = currentIdentity.identity.identityaddress;
   const scopeAddress = scopeIdentity.identity.identityaddress;

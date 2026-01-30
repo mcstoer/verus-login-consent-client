@@ -81,6 +81,7 @@ export const getStartPathForDetail = (detail: OrdinalVDXFObject): string => {
  */
 export const runDetailPrepFunction = async (
   detail: OrdinalVDXFObject,
+  detailIndex: number,
   dispatch: AppDispatch,
   getState: () => RootState
 ): Promise<void> => {
@@ -88,7 +89,7 @@ export const runDetailPrepFunction = async (
   const prepFunction = DETAIL_TYPE_PREP_FUNCTIONS[detailType.toNumber()];
 
   if (prepFunction) {
-    await prepFunction(detail, dispatch, getState);
+    await prepFunction(detail, detailIndex, dispatch, getState);
   }
 };
 
@@ -141,20 +142,18 @@ export const validateDetailTransition = (
 };
 
 /**
- * Gets the next detail from the request, validating the index.
+ * Safely gets a detail from the request based on the index.
  * Returns null if there are no more details.
  */
-export const getNextDetail = (
+export const getDetailByIndex = (
   request: GenericRequest,
   currentDetailIndex: number
 ): OrdinalVDXFObject | null => {
-  const nextDetailIndex = currentDetailIndex + 1;
-
-  if (nextDetailIndex >= request.details.length) {
+  if (currentDetailIndex >= request.details.length) {
     return null;
   }
 
-  return request.details[nextDetailIndex];
+  return request.details[currentDetailIndex];
 };
 
 // Checks if based on the `currentDetailIndex` that we are at the last detail.
