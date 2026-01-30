@@ -1,19 +1,22 @@
 import React, {useState} from 'react';
 import {useSelector} from 'react-redux';
 
+import ExpandLess from '@mui/icons-material/ExpandLess';
+import ExpandMore from '@mui/icons-material/ExpandMore';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
+import Collapse from '@mui/material/Collapse';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
-import ListItemText from '@mui/material/ListItemText';
 import ListItemButton from '@mui/material/ListItemButton';
-import Collapse from '@mui/material/Collapse';
-import ExpandLess from '@mui/icons-material/ExpandLess';
-import ExpandMore from '@mui/icons-material/ExpandMore';
+import ListItemText from '@mui/material/ListItemText';
 
 import {GenericRequest, LoginConsentRequest} from 'verus-typescript-primitives';
 
+import IdentityDetails from '#/components/Identity';
+import PageLayout from '#/components/PageLayout';
+import {extractConsentDataV1, extractConsentDataV2} from '#/features/login/consentDataExtractors';
 import {useAppDispatch} from '#/redux/hooks';
 import {checkAndUpdateIdentities} from '#/redux/reducers/identity/identity.actions';
 import {
@@ -21,12 +24,9 @@ import {
   setExternalAction,
   setNavigationPath,
 } from '#/redux/reducers/navigation/navigationSlice';
-import {RootState} from '#/redux/store';
-import PageLayout from '#/components/PageLayout';
-import IdentityDetails from '#/components/Identity';
-import {EXTERNAL_ACTION, EXTERNAL_CHAIN_START, SELECT_LOGIN_ID} from '#/utils/constants';
-import {extractConsentDataV1, extractConsentDataV2} from '#/utils/login/consentDataExtractors';
 import {Identity} from '#/redux/reducers/signatureInfo/signatureInfo.types';
+import {RootState} from '#/redux/store';
+import {EXTERNAL_ACTION, EXTERNAL_CHAIN_START, SELECT_LOGIN_ID} from '#/utils/constants';
 import {unixToDate} from '#/utils/math';
 
 interface ConsentProps {

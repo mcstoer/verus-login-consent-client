@@ -36,7 +36,11 @@ import {
   REDIRECT,
 } from '#/utils/constants';
 import {isLastDetail} from '#/features/details/detailNavigation';
-import {extractLoginDataV1, extractLoginDataV2, LoginData} from '#/utils/login/loginDataExtractors';
+import {
+  extractLoginDataV1,
+  extractLoginDataV2,
+  LoginData,
+} from '#/features/login/loginDataExtractors';
 import {createAndSignLoginResponse} from '#/utils/loginResponse';
 
 interface LoginProps {
