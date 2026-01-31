@@ -1,6 +1,7 @@
 import {RootState} from '#/redux/store';
 import {createEntityAdapter, createSlice} from '@reduxjs/toolkit';
 import {CredentialJson} from 'verus-typescript-primitives';
+import {SET_ACTIVE_IDENTITY} from '../identity/identity.types';
 
 interface UserData {
   index: number;
@@ -17,6 +18,12 @@ const userDataSlice = createSlice({
   reducers: {
     detailAdded: userDataAdapter.addOne,
     detailUpdated: userDataAdapter.updateOne,
+  },
+  extraReducers: builder => {
+    // Clear the stored user data if the user is switched to force fetching.
+    builder.addCase(SET_ACTIVE_IDENTITY, state => {
+      userDataAdapter.removeAll(state);
+    });
   },
 });
 

@@ -1,37 +1,43 @@
-import React, {useState} from 'react';
-import {useDispatch, useSelector} from 'react-redux';
-import {
-  IDENTITY_CREDENTIAL_PLAINLOGIN,
-  Credential,
-  VerusPayInvoice,
-  GenericRequest,
-  LoginConsentRequest,
-} from 'verus-typescript-primitives';
-import Button from '@mui/material/Button';
-import Card from '@mui/material/Card';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemText from '@mui/material/ListItemText';
-import Alert from '@mui/material/Alert';
-import AlertTitle from '@mui/material/AlertTitle';
 import {PlainLoginCredential, UnknownCredential} from '#/components/Credential';
 import PageLayout from '#/components/PageLayout';
-import {createAndSignLoginResponse} from '#/utils/loginResponse';
-import {setNavigationPath} from '#/redux/reducers/navigation/navigationSlice';
-import {RootState} from '#/redux/store';
-import {REDIRECT, SELECT_LOGIN_ID} from '#/utils/constants';
+import {isLastDetail} from '#/features/details/detailNavigation';
 import {
   extractCredentialsReviewDataV1,
   extractCredentialsReviewDataV2,
   selectUserDataCredentials,
 } from '#/features/login/credentialsReviewDataExtractors';
+import {useAppDispatch} from '#/redux/hooks';
+import {
+  navigateBackGenericRequest,
+  navigateGenericRequest,
+  setNavigationPath,
+} from '#/redux/reducers/navigation/navigationSlice';
+import {RootState} from '#/redux/store';
+import {REDIRECT, SELECT_LOGIN_ID} from '#/utils/constants';
+import {createAndSignLoginResponse} from '#/utils/loginResponse';
+import Alert from '@mui/material/Alert';
+import AlertTitle from '@mui/material/AlertTitle';
+import Button from '@mui/material/Button';
+import Card from '@mui/material/Card';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemText from '@mui/material/ListItemText';
+import React, {useState} from 'react';
+import {useSelector} from 'react-redux';
+import {
+  Credential,
+  GenericRequest,
+  IDENTITY_CREDENTIAL_PLAINLOGIN,
+  LoginConsentRequest,
+  VerusPayInvoice,
+} from 'verus-typescript-primitives';
 
 interface CredentialsReviewProps {
   setRequestResult: (response: unknown, callback: () => void) => void;
 }
 
 const CredentialsReview: React.FC<CredentialsReviewProps> = ({setRequestResult}) => {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const state = useSelector((state: RootState) => state);
   const deeplinkData = state.deeplink.data;
   const chainId = state.chainMetadata.chainId;
@@ -76,22 +82,35 @@ const CredentialsReview: React.FC<CredentialsReviewProps> = ({setRequestResult})
     : extractCredentialsReviewDataV1(deeplinkData, signedBy!, v1Credentials);
 
   const cancel = () => {
-    dispatch(setNavigationPath(SELECT_LOGIN_ID));
+    if (isGenericRequest) {
+      dispatch(navigateBackGenericRequest());
+    } else {
+      dispatch(setNavigationPath(SELECT_LOGIN_ID));
+    }
   };
 
-  const continueLogin = async () => {
-    setLoading(true);
-    const loginIdentity = activeIdentity.identity.identityaddress;
-    const signedResponse = await createAndSignLoginResponse(
-      chainId,
-      deeplinkData as LoginConsentRequest,
-      loginIdentity,
-      credentials
-    );
+  const isLastDetailInRequest =
+    isGenericRequest && isLastDetail(deeplinkData as GenericRequest, currentDetailIndex);
+  const continueButtonText = isLastDetailInRequest ? 'Finish' : 'Continue';
+  const continueButtonColor = isLastDetailInRequest ? 'primary' : 'success';
 
-    setRequestResult(signedResponse, () => {
-      dispatch(setNavigationPath(REDIRECT));
-    });
+  const continueLogin = async () => {
+    if (isGenericRequest) {
+      dispatch(navigateGenericRequest());
+    } else {
+      setLoading(true);
+      const loginIdentity = activeIdentity.identity.identityaddress;
+      const signedResponse = await createAndSignLoginResponse(
+        chainId,
+        deeplinkData as LoginConsentRequest,
+        loginIdentity,
+        credentials
+      );
+
+      setRequestResult(signedResponse, () => {
+        dispatch(setNavigationPath(REDIRECT));
+      });
+    }
   };
 
   const renderCredentialComponent = (credential: Credential, index: number): React.JSX.Element => {
@@ -127,7 +146,7 @@ const CredentialsReview: React.FC<CredentialsReviewProps> = ({setRequestResult})
           </Button>
           <Button
             variant="contained"
-            color="primary"
+            color={continueButtonColor}
             disabled={loading}
             onClick={() => continueLogin()}
             style={{
@@ -135,7 +154,7 @@ const CredentialsReview: React.FC<CredentialsReviewProps> = ({setRequestResult})
               padding: 8,
             }}
           >
-            {'Continue'}
+            {continueButtonText}
           </Button>
         </>
       }

@@ -8,7 +8,7 @@ import {
 import {CONSENT_TO_SCOPE, CREDENTIALS_REVIEW} from '#/utils/constants';
 import {generateAuthenticationResponse, prepareAuthenticationDetail} from './authentication';
 import {DetailPrepFunction, DetailResponseGenerator} from './types';
-import {prepareUserDataDetail} from './userData';
+import {generateUserDataResponse, prepareUserDataDetail} from './userData';
 
 /**
  * Maps detail types to their initial navigation paths.
@@ -37,6 +37,7 @@ const DETAIL_TYPE_PREP_FUNCTIONS: Record<string, DetailPrepFunction> = {
  */
 const DETAIL_TYPE_RESPONSE_GENERATORS: Record<string, DetailResponseGenerator> = {
   [VDXF_ORDINAL_AUTHENTICATION_REQUEST.toNumber()]: generateAuthenticationResponse,
+  [VDXF_ORDINAL_USER_DATA_REQUEST.toNumber()]: generateUserDataResponse,
 
   // Example of a more complete response generator:
   // [SOME_DETAIL_TYPE]: (request, detailIndex, getState) => {

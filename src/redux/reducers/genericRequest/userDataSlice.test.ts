@@ -1,6 +1,7 @@
 import userDataReducer, {detailAdded, detailUpdated, selectDetailById} from './userDataSlice';
 import {CredentialJson} from 'verus-typescript-primitives';
 import {RootState} from '#/redux/store';
+import {SET_ACTIVE_IDENTITY} from '../identity/identity.types';
 
 describe('userDataSlice', () => {
   const mockCredentialJson: CredentialJson = {
@@ -127,7 +128,13 @@ describe('userDataSlice', () => {
     });
 
     it('should handle missing genericRequest state', () => {
-      const mockRootState = {} as RootState;
+      const state = userDataReducer(undefined, {type: 'unknown'});
+      const mockRootState = {
+        genericRequest: {
+          userData: state,
+          authDetails: {ids: [], entities: {}},
+        },
+      } as unknown as RootState;
 
       const selected = selectDetailById(mockRootState, 0);
 
@@ -188,6 +195,99 @@ describe('userDataSlice', () => {
       expect(detail0).toBeDefined();
       expect(detail0?.data.length).toBe(1);
       expect(detail1).toBeUndefined();
+    });
+  });
+
+  describe('extraReducers - identity change handling', () => {
+    it('should clear all user data when SET_ACTIVE_IDENTITY is dispatched', () => {
+      let state = userDataReducer(undefined, {type: 'unknown'});
+
+      state = userDataReducer(
+        state,
+        detailAdded({
+          index: 0,
+          data: [mockCredentialJson],
+        })
+      );
+
+      state = userDataReducer(
+        state,
+        detailAdded({
+          index: 1,
+          data: [mockCredentialJson, mockCredentialJson],
+        })
+      );
+
+      expect(state.ids).toEqual([0, 1]);
+
+      const action = {
+        type: SET_ACTIVE_IDENTITY,
+        payload: {
+          id: {identity: {identityaddress: 'iNewAddress123'}},
+        },
+      };
+
+      state = userDataReducer(state, action);
+
+      expect(state.ids).toEqual([]);
+      expect(state.entities).toEqual({});
+    });
+
+    it('should handle SET_ACTIVE_IDENTITY on empty state', () => {
+      const state = userDataReducer(undefined, {type: 'unknown'});
+
+      const action = {
+        type: SET_ACTIVE_IDENTITY,
+        payload: {
+          id: {identity: {identityaddress: 'iNewAddress123'}},
+        },
+      };
+
+      const newState = userDataReducer(state, action);
+
+      expect(newState.ids).toEqual([]);
+      expect(newState.entities).toEqual({});
+    });
+
+    it('should allow adding new data after identity change', () => {
+      let state = userDataReducer(undefined, {type: 'unknown'});
+
+      state = userDataReducer(
+        state,
+        detailAdded({
+          index: 0,
+          data: [mockCredentialJson],
+        })
+      );
+
+      expect(state.ids).toEqual([0]);
+
+      const identityChangeAction = {
+        type: SET_ACTIVE_IDENTITY,
+        payload: {
+          id: {identity: {identityaddress: 'iNewAddress123'}},
+        },
+      };
+
+      state = userDataReducer(state, identityChangeAction);
+
+      expect(state.ids).toEqual([]);
+
+      const newCredential: CredentialJson = {
+        ...mockCredentialJson,
+        credentialkey: 'iNewKey123',
+      };
+
+      state = userDataReducer(
+        state,
+        detailAdded({
+          index: 0,
+          data: [newCredential],
+        })
+      );
+
+      expect(state.ids).toEqual([0]);
+      expect(state.entities[0]?.data[0].credentialkey).toBe('iNewKey123');
     });
   });
 });

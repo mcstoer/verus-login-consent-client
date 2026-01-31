@@ -13,7 +13,6 @@ import {
 } from 'verus-typescript-primitives';
 // The DataPacketResponse isn't exported the same as the other classes.
 import {DataPacketResponse} from 'verus-typescript-primitives/dist/vdxf/classes/datapacket/DataPacketResponse';
-import {DetailResponseGenerator} from './types';
 
 // Fetch the data from the identity and put it in the redux store.
 export async function prepareUserDataDetail(
@@ -24,6 +23,13 @@ export async function prepareUserDataDetail(
 ): Promise<void> {
   const state = getState();
   const identity = state.identity;
+
+  // Check if data already exists for this detail index to prevent refetching since it takes time.
+  const existingDetail = selectDetailById(state, detailIndex);
+  if (existingDetail && existingDetail.data && existingDetail.data.length > 0) {
+    return;
+  }
+
   const chainId = state.chainMetadata.chainId;
   // TODO: Use AppOrDelegatedId when possible.
   const scopeIdentity = state.signatureInfo.signedBy;
@@ -47,23 +53,25 @@ export async function prepareUserDataDetail(
 
   const vdxfkeys = detail.searchDataKey.flatMap(obj => Object.keys(obj));
 
-  // TODO: Figure out what to do for credentials that don't fetch
-  const retrieved = await getCredentialsByScope(chainId, currentAddress, scopeAddress, vdxfkeys);
-  for (const cred of retrieved) {
-    const credential = new Credential(cred);
-    credentialsJSON.push(credential.toJson());
+  try {
+    const retrieved = await getCredentialsByScope(chainId, currentAddress, scopeAddress, vdxfkeys);
+
+    for (const cred of retrieved) {
+      const credential = new Credential(cred);
+      credentialsJSON.push(credential.toJson());
+    }
+
+    dispatch(detailAdded({index, data: credentialsJSON}));
+  } catch (error) {
+    console.error('Error fetching credentials:', error);
   }
-
-  dispatch(detailAdded({index, data: credentialsJSON}));
-
-  return;
 }
 
-export const generateUserDataResponse: DetailResponseGenerator = (
+export function generateUserDataResponse(
   request: GenericRequest,
   detailIndex: number,
   getState: () => RootState
-) => {
+): DataPacketResponseOrdinalVDXFObject | null {
   const state = getState();
   const ordinalWrapper = request.details[detailIndex];
 
@@ -107,4 +115,4 @@ export const generateUserDataResponse: DetailResponseGenerator = (
   });
 
   return responseOrdinal;
-};
+}

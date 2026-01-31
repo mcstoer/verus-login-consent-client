@@ -1,4 +1,4 @@
-import {default as bufferutils, default as varuint} from 'verus-typescript-primitives';
+import {BufferWriter, encodingLength} from 'verus-typescript-primitives';
 
 interface BufferSerializable {
   toBuffer(): Buffer;
@@ -14,7 +14,7 @@ interface BufferSerializable {
  */
 export function serializeToBuffer(items: BufferSerializable[]): Buffer {
   const length = getSerializedLength(items);
-  const writer = new bufferutils.BufferWriter(Buffer.alloc(length));
+  const writer = new BufferWriter(Buffer.alloc(length));
 
   writer.writeCompactSize(items.length);
 
@@ -26,7 +26,7 @@ export function serializeToBuffer(items: BufferSerializable[]): Buffer {
 }
 
 function getSerializedLength(items: BufferSerializable[]): number {
-  let length = varuint.encodingLength(items.length);
+  let length = encodingLength(items.length);
 
   for (const item of items) {
     length += item.getByteLength();
