@@ -3,12 +3,14 @@ import {
   GenericRequest,
   OrdinalVDXFObject,
   VDXF_ORDINAL_AUTHENTICATION_REQUEST,
+  VDXF_ORDINAL_IDENTITY_UPDATE_REQUEST,
   VDXF_ORDINAL_USER_DATA_REQUEST,
 } from 'verus-typescript-primitives';
-import {CONSENT_TO_SCOPE, CREDENTIALS_REVIEW} from '#/utils/constants';
+import {CONSENT_TO_SCOPE, CREDENTIALS_REVIEW, IDENTITY_UPDATE_CORE} from '#/utils/constants';
 import {generateAuthenticationResponse, prepareAuthenticationDetail} from './authentication';
 import {DetailPrepFunction, DetailResponseGenerator} from './types';
 import {generateUserDataResponse, prepareUserDataDetail} from './userData';
+import {generateIdentityUpdateResponse, prepareIdentityUpdateDetail} from './identityUpdate';
 
 /**
  * Maps detail types to their initial navigation paths.
@@ -17,6 +19,7 @@ import {generateUserDataResponse, prepareUserDataDetail} from './userData';
 const DETAIL_TYPE_TO_START_PATH: Record<string, string> = {
   [VDXF_ORDINAL_AUTHENTICATION_REQUEST.toNumber()]: CONSENT_TO_SCOPE,
   [VDXF_ORDINAL_USER_DATA_REQUEST.toNumber()]: CREDENTIALS_REVIEW,
+  [VDXF_ORDINAL_IDENTITY_UPDATE_REQUEST.toNumber()]: IDENTITY_UPDATE_CORE,
 };
 
 /**
@@ -28,6 +31,7 @@ const DETAIL_TYPE_TO_START_PATH: Record<string, string> = {
 const DETAIL_TYPE_PREP_FUNCTIONS: Record<string, DetailPrepFunction> = {
   [VDXF_ORDINAL_AUTHENTICATION_REQUEST.toNumber()]: prepareAuthenticationDetail,
   [VDXF_ORDINAL_USER_DATA_REQUEST.toNumber()]: prepareUserDataDetail,
+  [VDXF_ORDINAL_IDENTITY_UPDATE_REQUEST.toNumber()]: prepareIdentityUpdateDetail,
 };
 
 /**
@@ -38,23 +42,7 @@ const DETAIL_TYPE_PREP_FUNCTIONS: Record<string, DetailPrepFunction> = {
 const DETAIL_TYPE_RESPONSE_GENERATORS: Record<string, DetailResponseGenerator> = {
   [VDXF_ORDINAL_AUTHENTICATION_REQUEST.toNumber()]: generateAuthenticationResponse,
   [VDXF_ORDINAL_USER_DATA_REQUEST.toNumber()]: generateUserDataResponse,
-
-  // Example of a more complete response generator:
-  // [SOME_DETAIL_TYPE]: (request, detailIndex, getState) => {
-  //   const state = getState();
-  //   const detail = request.details[detailIndex];
-  //   const responseData = state.someSlice.responseData;
-  //
-  //   if (!responseData) {
-  //     console.warn('No response data available for detail');
-  //     return null;
-  //   }
-  //
-  //   return new SomeResponseOrdinalVDXFObject({
-  //     ...responseData,
-  //     // Additional response fields
-  //   });
-  // }
+  [VDXF_ORDINAL_IDENTITY_UPDATE_REQUEST.toNumber()]: generateIdentityUpdateResponse,
 };
 
 /**

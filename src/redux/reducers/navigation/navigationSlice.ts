@@ -17,10 +17,8 @@ import BN from '#/utils/bn-polyfill';
 import {
   CONSENT_TO_SCOPE,
   CREDENTIALS_REVIEW,
-  IDENTITY_UPDATE_CONFIRM,
   IDENTITY_UPDATE_CONTENTMULTIMAP,
   IDENTITY_UPDATE_CORE,
-  IDENTITY_UPDATE_RESULT,
   LOADING_DISPLAY,
   PROVISIONING_CONFIRM,
   PROVISIONING_FORM,
@@ -88,19 +86,18 @@ const navigationSlice = createSlice({
 });
 
 const DETAIL_COMPLETION_PATHS: Record<string, boolean> = {
-  [IDENTITY_UPDATE_RESULT]: true,
   [PROVISIONING_RESULT]: true,
   [SELECT_LOGIN_ID]: true,
   [CREDENTIALS_REVIEW]: true,
+  [IDENTITY_UPDATE_CONTENTMULTIMAP]: true,
 };
 
 const WITHIN_DETAIL_NEXT_PATHS: Record<string, string> = {
-  [IDENTITY_UPDATE_CONFIRM]: IDENTITY_UPDATE_CORE,
+  [CONSENT_TO_SCOPE]: SELECT_LOGIN_ID,
   [IDENTITY_UPDATE_CORE]: IDENTITY_UPDATE_CONTENTMULTIMAP,
-  [IDENTITY_UPDATE_CONTENTMULTIMAP]: IDENTITY_UPDATE_RESULT,
+  // TODO: Update the provisioning path
   [PROVISIONING_FORM]: PROVISIONING_CONFIRM,
   [PROVISIONING_CONFIRM]: PROVISIONING_RESULT,
-  [CONSENT_TO_SCOPE]: SELECT_LOGIN_ID,
 };
 
 const getNextPathInDetail = (currentPath: string): string | null => {
@@ -116,121 +113,124 @@ export const navigateGenericRequest =
     const currentDetailIndex = state.navigation.currentDetailIndex || 0;
     const chainId = state.chainMetadata.chainId;
 
-    if (deeplinkId !== GENERIC_REQUEST_DEEPLINK_VDXF_KEY.vdxfid) {
-      throw new Error(
-        `navigateGenericRequest can only be used with generic requests. ` +
-          `Expected deeplink ID: ${GENERIC_REQUEST_DEEPLINK_VDXF_KEY.vdxfid}, ` +
-          `but got: ${deeplinkId}`
-      );
-    }
-
-    console.log('dispatching navigateGenericRequest from path:', currentPath);
-
-    let nextPath: string;
-
-    if (DETAIL_COMPLETION_PATHS[currentPath]) {
-      const responseToAdd = generateDetailResponse(genericRequest, currentDetailIndex, getState);
-      console.log(`Generated response from state for detail ${currentDetailIndex}`);
-
-      if (responseToAdd) {
-        const detailHexBuffer = responseToAdd.toBuffer().toString('hex');
-        dispatch(
-          upsertResponseDetail({
-            index: currentDetailIndex,
-            hexBuffer: detailHexBuffer,
-          })
+    try {
+      if (deeplinkId !== GENERIC_REQUEST_DEEPLINK_VDXF_KEY.vdxfid) {
+        throw new Error(
+          `navigateGenericRequest can only be used with generic requests. ` +
+            `Expected deeplink ID: ${GENERIC_REQUEST_DEEPLINK_VDXF_KEY.vdxfid}, ` +
+            `but got: ${deeplinkId}`
         );
-      } else {
-        // Remove the detail at the location if there is none to add.
-        // This allows for previewing the next detail with previous completing it in cases without
-        // linear navigation, like provisioning. If the user previews provisioning after completing
-        // it, then navigating back out of the detail will not delete the completed provisioning.
-        dispatch(removeResponseDetail(currentDetailIndex));
       }
 
-      const newDetailIndex = currentDetailIndex + 1;
-      const nextDetail = getDetailByIndex(genericRequest, newDetailIndex);
+      console.log('dispatching navigateGenericRequest from path:', currentPath);
 
-      if (nextDetail) {
-        nextPath = getStartPathForDetail(nextDetail);
+      let nextPath: string;
 
-        await runDetailPrepFunction(nextDetail, newDetailIndex, dispatch, getState);
-        dispatch(actions.setCurrentDetailIndex(newDetailIndex));
-      } else {
-        let signedResponse: GenericResponse | null = null;
-        let error: Error | null = null;
+      if (DETAIL_COMPLETION_PATHS[currentPath]) {
+        const responseToAdd = generateDetailResponse(genericRequest, currentDetailIndex, getState);
+        console.log(`Generated response from state for detail ${currentDetailIndex}`);
 
-        try {
-          console.log('All details completed, signing and finalizing request');
-
-          const finalState = getState();
-          const responseDetails = selectAllResponseDetails(finalState);
-          responseDetails.sort((a, b) => a.index - b.index);
-
-          const ordinals = responseDetails.map(
-            detail => OrdinalVDXFObject.createFromBuffer(Buffer.from(detail.hexBuffer, 'hex')).obj
-          );
-
-          const signingIdentity = state.identity.activeIdentity as Identity;
-          const systemAddress = signingIdentity.identity.systemid;
-          const identityAddress = signingIdentity.identity.identityaddress;
-
-          const signature = new VerifiableSignatureData({
-            systemID: CompactAddressObject.fromIAddress(systemAddress),
-            identityID: CompactAddressObject.fromIAddress(identityAddress),
-          });
-
-          const response = new GenericResponse({
-            requestID: genericRequest.requestID,
-            requestHash: genericRequest.getRawDataSha256(),
-            details: ordinals,
-            signature,
-            createdAt: new BN((Date.now() / 1000).toFixed(0)),
-          });
-
-          response.setSigned();
-
-          console.log('Constructed complete GenericResponse:', response);
-
-          signedResponse = await signGenericResponse(chainId, response);
-
-          console.log('Generic request completed successfully');
-
+        if (responseToAdd) {
+          const detailHexBuffer = responseToAdd.toBuffer().toString('hex');
           dispatch(
-            completeRequest({
-              type: 'v2',
-              response: signedResponse,
-              uris: genericRequest.responseURIs || [],
+            upsertResponseDetail({
+              index: currentDetailIndex,
+              hexBuffer: detailHexBuffer,
             })
           );
-        } catch (e) {
-          console.error('Error finalizing generic request:', e);
-          error = e as Error;
-          dispatch(setError(error));
+        } else {
+          // Remove the detail at the location if there is none to add.
+          // This allows for previewing the next detail with previous completing it in cases without
+          // linear navigation, like provisioning. If the user previews provisioning after completing
+          // it, then navigating back out of the detail will not delete the completed provisioning.
+          dispatch(removeResponseDetail(currentDetailIndex));
         }
 
-        return;
-      }
-    } else {
-      const nextPathInDetail = getNextPathInDetail(currentPath);
+        const newDetailIndex = currentDetailIndex + 1;
+        const nextDetail = getDetailByIndex(genericRequest, newDetailIndex);
 
-      if (!nextPathInDetail) {
-        console.warn(`No next path defined for: ${currentPath}`);
-        throw new Error('No next path defined for current path');
+        if (nextDetail) {
+          nextPath = getStartPathForDetail(nextDetail);
+
+          await runDetailPrepFunction(nextDetail, newDetailIndex, dispatch, getState);
+          dispatch(actions.setCurrentDetailIndex(newDetailIndex));
+        } else {
+          let signedResponse: GenericResponse | null = null;
+          let error: Error | null = null;
+
+          try {
+            console.log('All details completed, signing and finalizing request');
+
+            const finalState = getState();
+            const responseDetails = selectAllResponseDetails(finalState);
+            responseDetails.sort((a, b) => a.index - b.index);
+
+            const ordinals = responseDetails.map(
+              detail => OrdinalVDXFObject.createFromBuffer(Buffer.from(detail.hexBuffer, 'hex')).obj
+            );
+
+            const signingIdentity = state.identity.activeIdentity as Identity;
+            const systemAddress = signingIdentity.identity.systemid;
+            const identityAddress = signingIdentity.identity.identityaddress;
+
+            const signature = new VerifiableSignatureData({
+              systemID: CompactAddressObject.fromIAddress(systemAddress),
+              identityID: CompactAddressObject.fromIAddress(identityAddress),
+            });
+
+            const response = new GenericResponse({
+              requestID: genericRequest.requestID,
+              requestHash: genericRequest.getRawDataSha256(),
+              details: ordinals,
+              signature,
+              createdAt: new BN((Date.now() / 1000).toFixed(0)),
+            });
+
+            response.setSigned();
+
+            console.log('Constructed complete GenericResponse:', response);
+
+            signedResponse = await signGenericResponse(chainId, response);
+
+            console.log('Generic request completed successfully');
+
+            dispatch(
+              completeRequest({
+                type: 'v2',
+                response: signedResponse,
+                uris: genericRequest.responseURIs || [],
+              })
+            );
+          } catch (e) {
+            console.error('Error finalizing generic request:', e);
+            error = e as Error;
+            dispatch(setError(error));
+          }
+
+          return;
+        }
       } else {
-        nextPath = nextPathInDetail;
+        const nextPathInDetail = getNextPathInDetail(currentPath);
+
+        if (!nextPathInDetail) {
+          console.warn(`No next path defined for: ${currentPath}`);
+          throw new Error('No next path defined for current path');
+        } else {
+          nextPath = nextPathInDetail;
+        }
       }
+
+      dispatch(actions.pushToNavigationStack(currentPath));
+      dispatch(
+        actions.setNavigationPath({
+          navigationPath: nextPath,
+          navigationPathArray: readNavigationPath(nextPath),
+        })
+      );
+      console.log('navigated to path:', nextPath);
+    } catch (e) {
+      dispatch(setError(e));
     }
-
-    dispatch(actions.pushToNavigationStack(currentPath));
-    dispatch(
-      actions.setNavigationPath({
-        navigationPath: nextPath,
-        navigationPathArray: readNavigationPath(nextPath),
-      })
-    );
-
-    console.log('navigated to path:', nextPath);
   };
 
 export const navigateBackGenericRequest =

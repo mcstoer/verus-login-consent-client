@@ -1,27 +1,30 @@
-import React, {useState, useEffect} from 'react';
-import {useDispatch, useSelector} from 'react-redux';
-import Button from '@mui/material/Button';
+import PageLayout from '#/components/PageLayout';
+import {useAppDispatch} from '#/redux/hooks';
+import {Identity} from '#/redux/reducers/signatureInfo/signatureInfo.types';
+import {RootState} from '#/redux/store';
+import ExpandLess from '@mui/icons-material/ExpandLess';
+import ExpandMore from '@mui/icons-material/ExpandMore';
 import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
-import Typography from '@mui/material/Typography';
+import Collapse from '@mui/material/Collapse';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
-import Collapse from '@mui/material/Collapse';
-import ExpandLess from '@mui/icons-material/ExpandLess';
-import ExpandMore from '@mui/icons-material/ExpandMore';
-import PageLayout from '#/components/PageLayout';
-import {setNavigationPath} from '../../../redux/reducers/navigation/navigationSlice';
-import {IDENTITY_UPDATE_CONFIRM, IDENTITY_UPDATE_CONTENTMULTIMAP} from '../../../utils/constants';
-// @ts-expect-error: the IdentityUpdateRequest was removed and needs to be re-added when the generic request is fully implemented.
-import {IdentityUpdateRequest, IdentityUpdateRequestDetails} from 'verus-typescript-primitives';
-import {getIdentity} from '../../../rpc/calls/getIdentity';
-import {SnackbarAlert} from '../../../components/SnackbarAlert';
-import {convertFqnToDisplayFormat} from '../../../utils/fullyqualifiedname';
-import {createIdentityDescriptor} from '../../../utils/identity';
-import {setActiveVerusId} from '../../../redux/reducers/identity/identity.actions';
+import Typography from '@mui/material/Typography';
+import React, {useEffect, useState} from 'react';
+import {useSelector} from 'react-redux';
+import {GenericRequest, IdentityUpdateRequestOrdinalVDXFObject} from 'verus-typescript-primitives';
+import {SnackbarAlert} from '#/components/SnackbarAlert';
+import {
+  navigateBackGenericRequest,
+  navigateGenericRequest,
+} from '#/redux/reducers/navigation/navigationSlice';
+import {getIdentity} from '#/rpc/calls/getIdentity';
+import {convertFqnToDisplayFormat} from '#/utils/fullyqualifiedname';
+import {createIdentityDescriptor} from '#/utils/identity';
 
 interface IdentityFieldChange {
   field: string;
@@ -30,19 +33,18 @@ interface IdentityFieldChange {
 }
 
 const processIdentityChanges = async (
-  request: IdentityUpdateRequest,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  identity: any,
+  ordinal: IdentityUpdateRequestOrdinalVDXFObject,
+  identity: Identity,
   chainId: string
 ): Promise<IdentityFieldChange[]> => {
   const changes: IdentityFieldChange[] = [];
 
-  if (!request?.details || !identity?.identity) {
+  if (!ordinal.data || !identity.identity) {
     return changes;
   }
 
-  const requestDetails = request.details as IdentityUpdateRequestDetails;
-  const identityChanges = requestDetails.identity;
+  const details = ordinal.data;
+  const identityChanges = details.identity;
   const currentIdentity = identity.identity;
 
   if (!identityChanges) {
@@ -171,6 +173,7 @@ const processIdentityChanges = async (
     const newPrivateAddresses = identityChanges.private_addresses
       .map(addr => addr.toAddressString())
       .join('\n');
+    // @ts-expect-error The IdentityDefintion doesn't exactly match the expected result from the daemon but it is close enough
     const oldPrivateAddresses = currentIdentity.privateaddress || '';
 
     if (newPrivateAddresses !== oldPrivateAddresses) {
@@ -199,7 +202,7 @@ const processIdentityChanges = async (
 };
 
 const IdentityUpdateCore: React.FC = () => {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const [loading, setLoading] = useState<boolean>(false);
   const [changes, setChanges] = useState<IdentityFieldChange[]>([]);
   const [openDropdowns, setOpenDropdowns] = useState<{[key: number]: boolean}>({});
@@ -208,16 +211,22 @@ const IdentityUpdateCore: React.FC = () => {
     description: '',
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const request: IdentityUpdateRequest = useSelector((state: any) => state.deeplink.data);
+  const deeplinkData = useSelector((state: RootState) => state.deeplink.data);
+  const currentDetailIndex = useSelector((state: RootState) => state.navigation.currentDetailIndex);
+  const identity = useSelector((state: RootState) => state.identity.activeIdentity) as Identity;
+  const chainId = useSelector((state: RootState) => state.chainMetadata.chainId);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const deeplinkData: IdentityUpdateRequest = useSelector((state: any) => state.deeplink.data);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const chainId: string = useSelector((state: any) => state.chainMetadata.chainId);
-  // Explicity set the type to IdentityUpdateRequestDetails since otherwise it is IdentityUpdateResponseDetails.
-  const deeplinkDetails = deeplinkData.details as IdentityUpdateRequestDetails;
-  const name = deeplinkDetails.identity.name;
+  if (!(deeplinkData instanceof GenericRequest)) {
+    throw new Error('Unable to handle identity updates outside of generic requests.');
+  }
+
+  const ordinal = deeplinkData.details[currentDetailIndex];
+
+  if (!(ordinal instanceof IdentityUpdateRequestOrdinalVDXFObject)) {
+    throw new Error('Unable to handle non-identity update detail.');
+  }
+
+  const name = identity.identity.name;
 
   const handleDropdownToggle = (index: number) => {
     setOpenDropdowns(prev => ({
@@ -227,17 +236,15 @@ const IdentityUpdateCore: React.FC = () => {
   };
 
   useEffect(() => {
-    const loadIdentityAndComputeChanges = async () => {
-      if (!request) {
+    const computeChanges = async () => {
+      if (!deeplinkData) {
         setChanges([]);
         return;
       }
 
       setLoading(true);
       try {
-        const identityData = await getIdentity(chainId, name);
-        dispatch(setActiveVerusId(identityData));
-        const currentChanges = await processIdentityChanges(request, identityData, chainId);
+        const currentChanges = await processIdentityChanges(ordinal, identity, chainId);
         setChanges(currentChanges);
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Failed to load identity';
@@ -251,13 +258,13 @@ const IdentityUpdateCore: React.FC = () => {
       }
     };
 
-    loadIdentityAndComputeChanges();
-  }, [deeplinkData]);
+    computeChanges();
+  }, [ordinal]);
 
   const handleNext = async (): Promise<void> => {
     setLoading(true);
     try {
-      dispatch(setNavigationPath(IDENTITY_UPDATE_CONTENTMULTIMAP));
+      dispatch(navigateGenericRequest());
     } finally {
       setLoading(false);
     }
@@ -266,7 +273,7 @@ const IdentityUpdateCore: React.FC = () => {
   const cancel = async (): Promise<void> => {
     setLoading(true);
     try {
-      dispatch(setNavigationPath(IDENTITY_UPDATE_CONFIRM));
+      dispatch(navigateBackGenericRequest());
     } finally {
       setLoading(false);
     }
@@ -300,14 +307,14 @@ const IdentityUpdateCore: React.FC = () => {
           <Button
             variant="contained"
             disabled={loading}
-            color="primary"
+            color="success"
             onClick={() => handleNext()}
             style={{
               width: 120,
               padding: 8,
             }}
           >
-            {'Next'}
+            {'Continue'}
           </Button>
         </div>
       }
