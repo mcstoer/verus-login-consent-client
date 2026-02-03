@@ -2,14 +2,15 @@ import {detailAdded, selectDetailById} from '#/redux/reducers/genericRequest/use
 import {Identity} from '#/redux/reducers/signatureInfo/signatureInfo.types';
 import {AppDispatch, RootState} from '#/redux/store';
 import {getCredentialsByScope} from '#/rpc/calls/getCredentials';
-import {serializeToBuffer} from '#/utils/buffer';
 import {
   Credential,
   CredentialJson,
+  DATA_TYPE_OBJECT_CREDENTIAL,
   DataDescriptor,
   DataPacketResponseOrdinalVDXFObject,
   GenericRequest,
   UserDataRequestOrdinalVDXFObject,
+  VdxfUniValue,
 } from 'verus-typescript-primitives';
 // The DataPacketResponse isn't exported the same as the other classes.
 import {DataPacketResponse} from 'verus-typescript-primitives/dist/vdxf/classes/datapacket/DataPacketResponse';
@@ -96,13 +97,19 @@ export async function generateUserDataResponse(
   // Write the array of serializable objects to a single buffer.
   // The keys are comma-separated and should be used to deserialize the data.
   const storedData = userData.data.map(credential => Credential.fromJson(credential));
-  const vdxfkeys = userDataRequestDetail.searchDataKey.flatMap(obj => Object.keys(obj));
-  const commaJoinedKeys = vdxfkeys.join(',');
+  //const vdxfkeys = userDataRequestDetail.searchDataKey.flatMap(obj => Object.keys(obj));
+
+  const values = storedData.map(credential => {
+    return {[DATA_TYPE_OBJECT_CREDENTIAL.vdxfid]: credential};
+  });
+
+  const vdxfUniValue = new VdxfUniValue({
+    values,
+  });
 
   const dataDescriptor = new DataDescriptor({
     version: DataDescriptor.DEFAULT_VERSION,
-    objectdata: serializeToBuffer(storedData),
-    label: commaJoinedKeys,
+    objectdata: vdxfUniValue.toBuffer(),
   });
 
   const dataPacketResponse = new DataPacketResponse({
