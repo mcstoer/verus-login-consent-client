@@ -12,4 +12,4 @@ export type DetailResponseGenerator = (
   request: GenericRequest,
   detailIndex: number,
   getState: () => RootState
-) => OrdinalVDXFObject | null;
+) => Promise<OrdinalVDXFObject | null>;

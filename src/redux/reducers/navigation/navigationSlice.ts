@@ -127,7 +127,11 @@ export const navigateGenericRequest =
       let nextPath: string;
 
       if (DETAIL_COMPLETION_PATHS[currentPath]) {
-        const responseToAdd = generateDetailResponse(genericRequest, currentDetailIndex, getState);
+        const responseToAdd = await generateDetailResponse(
+          genericRequest,
+          currentDetailIndex,
+          getState
+        );
         console.log(`Generated response from state for detail ${currentDetailIndex}`);
 
         if (responseToAdd) {

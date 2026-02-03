@@ -67,11 +67,11 @@ export async function prepareUserDataDetail(
   }
 }
 
-export function generateUserDataResponse(
+export async function generateUserDataResponse(
   request: GenericRequest,
   detailIndex: number,
   getState: () => RootState
-): DataPacketResponseOrdinalVDXFObject | null {
+): Promise<DataPacketResponseOrdinalVDXFObject | null> {
   const state = getState();
   const ordinalWrapper = request.details[detailIndex];
 

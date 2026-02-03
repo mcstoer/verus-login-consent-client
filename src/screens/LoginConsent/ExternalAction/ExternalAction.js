@@ -26,7 +26,7 @@ class ExternalAction extends React.Component {
 
     this.actionTypes = {
       [EXTERNAL_CHAIN_START]: () => ({
-        desc: `You need to launch ${this.props.chainId} in native mode and be fully synced to the blockchain in order to login with VerusID. When you are, press 'continue'.`,
+        desc: `You need to launch ${this.props.chainId} in native mode and be fully synced to the blockchain in order to use VerusID. When you are, press 'continue'.`,
         check: async () => {
           const userActions = await checkAndUpdateAll(this.props.chainId);
           userActions.map(action => props.dispatch(action));
@@ -37,7 +37,7 @@ class ExternalAction extends React.Component {
         },
       }),
       [EXTERNAL_CHAIN_START]: () => ({
-        desc: `Launch ${this.props.chainId} in native mode, and ensure that you have at least one identity that you're able to sign with to login with VerusID. Then press 'continue'.`,
+        desc: `Launch ${this.props.chainId} in native mode, and ensure that you have at least one VerusID. Then press 'continue'.`,
         check: async () => {
           // Process the request again if any of the required daemons were not running when first trying.
           await this.props.handleRequest();

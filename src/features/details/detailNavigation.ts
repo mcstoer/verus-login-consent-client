@@ -86,11 +86,11 @@ export const runDetailPrepFunction = async (
  * Generates a response detail from the current Redux state.
  * Returns null if there should be no response detail.
  */
-export const generateDetailResponse = (
+export async function generateDetailResponse(
   request: GenericRequest,
   detailIndex: number,
   getState: () => RootState
-): OrdinalVDXFObject | null => {
+): Promise<OrdinalVDXFObject | null> {
   if (detailIndex >= request.details.length) {
     console.error(`Invalid detail index: ${detailIndex}`);
     return null;
@@ -106,7 +106,7 @@ export const generateDetailResponse = (
   }
 
   return responseGenerator(request, detailIndex, getState);
-};
+}
 
 /**
  * Validates that we can transition to the next detail.

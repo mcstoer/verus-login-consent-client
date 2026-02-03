@@ -1,13 +1,12 @@
-// @ts-expect-error: the IdentityUpdateRequest was removed and needs to be re-added when the generic request is fully implemented.
-import { IdentityUpdateRequest } from "verus-typescript-primitives";
-import { API_EXECUTE_IDENTITY_UPDATE_REQUEST, NATIVE, POST } from "../../utils/constants";
-import { getApiData } from "../callCreator";
+import {IdentityUpdateRequestDetails} from 'verus-typescript-primitives';
+import {API_EXECUTE_IDENTITY_UPDATE_REQUEST, NATIVE, POST} from '../../utils/constants';
+import {getApiData} from '../callCreator';
 
 // executeIdentityUpdateRequest gets the desktop wallet to run update identity
 // and returns the transaction ID.
 export const executeIdentityUpdateRequest = async (
   chainId: string,
-  request: IdentityUpdateRequest
+  detail: IdentityUpdateRequestDetails
 ): Promise<string> => {
   try {
     const res = await getApiData(
@@ -15,12 +14,12 @@ export const executeIdentityUpdateRequest = async (
       API_EXECUTE_IDENTITY_UPDATE_REQUEST,
       {
         chainTicker: chainId,
-        request: request.toJson(),
+        detailJSON: detail.toJson(),
       },
       POST,
       true
     );
-    if (res.msg !== "success") throw new Error(res.result);
+    if (res.msg !== 'success') throw new Error(res.result);
     else return res.result.txid as string;
   } catch (e) {
     console.error(e.message);

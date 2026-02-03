@@ -2,19 +2,21 @@ import {
   AuthenticationRequestOrdinalVDXFObject,
   AuthenticationResponseDetails,
   AuthenticationResponseOrdinalVDXFObject,
+  GenericRequest,
 } from 'verus-typescript-primitives';
-import {DetailPrepFunction, DetailResponseGenerator} from './types';
+import {DetailPrepFunction} from './types';
+import {RootState} from '#/redux/store';
 
 export const prepareAuthenticationDetail: DetailPrepFunction = async () => {
   console.log('No prep function needed for authentication request detail');
   return;
 };
 
-export const generateAuthenticationResponse: DetailResponseGenerator = (
-  request,
-  detailIndex,
-  getState
-) => {
+export async function generateAuthenticationResponse(
+  request: GenericRequest,
+  detailIndex: number,
+  getState: () => RootState
+): Promise<AuthenticationResponseOrdinalVDXFObject | null> {
   const state = getState();
   const ordinalWrapper = request.details[detailIndex];
 
@@ -36,4 +38,4 @@ export const generateAuthenticationResponse: DetailResponseGenerator = (
   });
 
   return authResponseDetail;
-};
+}

@@ -1,67 +1,63 @@
-import React, {useState} from 'react';
-import {useDispatch, useSelector} from 'react-redux';
+import ContentMultiMapRenderer from '#/components/ContentMultiMapRenderer';
+import PageLayout from '#/components/PageLayout';
+import {isLastDetail} from '#/features/details/detailNavigation';
+import {useAppDispatch} from '#/redux/hooks';
+import {
+  navigateBackGenericRequest,
+  navigateGenericRequest,
+} from '#/redux/reducers/navigation/navigationSlice';
+import {RootState} from '#/redux/store';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
-import PageLayout from '#/components/PageLayout';
-import ContentMultiMapRenderer from '../../../components/ContentMultiMapRenderer';
-import {setNavigationPath} from '../../../redux/reducers/navigation/navigationSlice';
-import {IDENTITY_UPDATE_CORE, IDENTITY_UPDATE_RESULT} from '../../../utils/constants';
-// @ts-expect-error: the IdentityUpdateRequest was removed and needs to be re-added when the generic request is fully implemented.
-import {IdentityUpdateRequest, IdentityUpdateRequestDetails} from 'verus-typescript-primitives';
-import {executeIdentityUpdateRequest} from '../../../rpc/calls/executeIdentityUpdateRequest';
-import {
-  setIdentityUpdateTxid,
-  setIdentityUpdateResponse,
-} from '../../../redux/reducers/identityUpdate/identityUpdate.actions';
-import {createAndSignIdentityUpdateResponse} from '../../../utils/identityUpdateResponse';
+import React, {useState} from 'react';
+import {useSelector} from 'react-redux';
+import {GenericRequest, IdentityUpdateRequestOrdinalVDXFObject} from 'verus-typescript-primitives';
 
 const IdentityUpdateContentMultiMap: React.FC = () => {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const [loading, setLoading] = useState<boolean>(false);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const deeplinkData: IdentityUpdateRequest = useSelector((state: any) => state.deeplink.data);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const chainId: string = useSelector((state: any) => state.chainMetadata.chainId);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const activeIdentity: any = useSelector((state: any) => state.identity.activeIdentity);
-  // Explicity set the type to IdentityUpdateRequestDetails since
-  // otherwise it is IdentityUpdateResponseDetails.
-  const deeplinkDetails = deeplinkData.details as IdentityUpdateRequestDetails;
-  const name = deeplinkDetails.identity.name;
+  const deeplinkData = useSelector((state: RootState) => state.deeplink.data);
+  const currentDetailIndex = useSelector((state: RootState) => state.navigation.currentDetailIndex);
 
-  const contentMultiMapEntries = deeplinkDetails.identity?.content_multimap?.kv_content
+  if (!(deeplinkData instanceof GenericRequest)) {
+    throw new Error('Unable to handle identity updates outside of generic requests.');
+  }
+
+  const ordinal = deeplinkData.details[currentDetailIndex];
+
+  if (!(ordinal instanceof IdentityUpdateRequestOrdinalVDXFObject)) {
+    throw new Error('Unable to handle non-identity update detail.');
+  }
+
+  const deeplinkDetails = ordinal.data;
+  const name = deeplinkDetails?.identity?.name || '';
+
+  const contentMultiMapEntries = deeplinkDetails?.identity?.content_multimap?.kv_content
     ? Array.from(deeplinkDetails.identity.content_multimap.kv_content.entries())
     : [];
 
-  const handleFinish = async (): Promise<void> => {
+  const isLastDetailInRequest = isLastDetail(deeplinkData, currentDetailIndex);
+  const continueButtonText = isLastDetailInRequest ? 'Finish' : 'Continue';
+  const continueButtonColor = isLastDetailInRequest ? 'primary' : 'success';
+
+  const handleNext = async (): Promise<void> => {
     setLoading(true);
     try {
-      const txid = await executeIdentityUpdateRequest(chainId, deeplinkData);
-      dispatch(setIdentityUpdateTxid(txid));
-
-      const response = await createAndSignIdentityUpdateResponse(
-        chainId,
-        deeplinkData,
-        activeIdentity.identity.identityaddress,
-        txid
-      );
-
-      dispatch(setIdentityUpdateResponse(response));
-
-      dispatch(setNavigationPath(IDENTITY_UPDATE_RESULT));
-    } catch (error) {
+      dispatch(navigateGenericRequest());
+    } finally {
       setLoading(false);
-      throw new Error(
-        `Failed to execute identity update: ${error instanceof Error ? error.message : error}`
-      );
     }
   };
 
   const cancel = async (): Promise<void> => {
     setLoading(true);
-    dispatch(setNavigationPath(IDENTITY_UPDATE_CORE));
+    try {
+      dispatch(navigateBackGenericRequest());
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -92,14 +88,14 @@ const IdentityUpdateContentMultiMap: React.FC = () => {
           <Button
             variant="contained"
             disabled={loading}
-            color="primary"
-            onClick={() => handleFinish()}
+            color={continueButtonColor}
+            onClick={() => handleNext()}
             style={{
               width: 120,
               padding: 8,
             }}
           >
-            {'Finish'}
+            {continueButtonText}
           </Button>
         </div>
       }
