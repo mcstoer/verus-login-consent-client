@@ -15,7 +15,6 @@ import {RootState} from '#/redux/store';
 import {signGenericResponse} from '#/rpc/calls/signGenericResponse';
 import BN from '#/utils/bn-polyfill';
 import {
-  CONSENT_TO_SCOPE,
   CREDENTIALS_REVIEW,
   IDENTITY_UPDATE_CONTENTMULTIMAP,
   IDENTITY_UPDATE_CORE,
@@ -93,7 +92,6 @@ const DETAIL_COMPLETION_PATHS: Record<string, boolean> = {
 };
 
 const WITHIN_DETAIL_NEXT_PATHS: Record<string, string> = {
-  [CONSENT_TO_SCOPE]: SELECT_LOGIN_ID,
   [IDENTITY_UPDATE_CORE]: IDENTITY_UPDATE_CONTENTMULTIMAP,
   // TODO: Update the provisioning path
   [PROVISIONING_FORM]: PROVISIONING_CONFIRM,
@@ -126,7 +124,21 @@ export const navigateGenericRequest =
 
       let nextPath: string;
 
-      if (DETAIL_COMPLETION_PATHS[currentPath]) {
+      // Check if this is the initial navigation (coming from CONSENT_TO_SCOPE or other starting point)
+      const isInitialNavigation =
+        !DETAIL_COMPLETION_PATHS[currentPath] && !getNextPathInDetail(currentPath);
+
+      if (isInitialNavigation) {
+        // First time navigating - prepare and navigate to the first detail
+        const firstDetail = getDetailByIndex(genericRequest, currentDetailIndex);
+
+        if (!firstDetail) {
+          throw new Error('GenericRequest contains no details to process');
+        }
+
+        nextPath = getStartPathForDetail(firstDetail);
+        await runDetailPrepFunction(firstDetail, currentDetailIndex, dispatch, getState);
+      } else if (DETAIL_COMPLETION_PATHS[currentPath]) {
         const responseToAdd = await generateDetailResponse(
           genericRequest,
           currentDetailIndex,

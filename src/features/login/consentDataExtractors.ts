@@ -102,15 +102,19 @@ export const extractConsentDataV2 = (
   // The generic request doesn't use permission labels since each detail displays their own info.
   const permissionsLabels = [];
 
+  // If the first detail is an authentication detail, then we can extract information
+  // from it to display with the generic request's overview.
   const ordinalWrapper = request.details[currentDetailIndex];
 
-  if (!(ordinalWrapper instanceof AuthenticationRequestOrdinalVDXFObject)) {
-    throw new Error('Detail is not an AuthenticationRequestOrdinalVDXFObject');
+  let expiryLabel: string;
+  let constraints: RecipientConstraint[] = [];
+
+  if (ordinalWrapper instanceof AuthenticationRequestOrdinalVDXFObject) {
+    const authRequestDetail = ordinalWrapper.data;
+    expiryLabel = getExpiryLabel(authRequestDetail);
+    constraints = authRequestDetail.recipientConstraints ?? [];
   }
 
-  const authRequestDetail = ordinalWrapper.data;
-  const expiryLabel = getExpiryLabel(authRequestDetail);
-  const constraints = authRequestDetail.recipientConstraints ?? [];
   const responseURIs = request.responseURIs ?? [];
 
   const constraintsLabels = constraints.map(getConstraintLabel);

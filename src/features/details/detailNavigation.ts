@@ -6,7 +6,7 @@ import {
   VDXF_ORDINAL_IDENTITY_UPDATE_REQUEST,
   VDXF_ORDINAL_USER_DATA_REQUEST,
 } from 'verus-typescript-primitives';
-import {CONSENT_TO_SCOPE, CREDENTIALS_REVIEW, IDENTITY_UPDATE_CORE} from '#/utils/constants';
+import {CREDENTIALS_REVIEW, IDENTITY_UPDATE_CORE, SELECT_LOGIN_ID} from '#/utils/constants';
 import {generateAuthenticationResponse, prepareAuthenticationDetail} from './authentication';
 import {DetailPrepFunction, DetailResponseGenerator} from './types';
 import {generateUserDataResponse, prepareUserDataDetail} from './userData';
@@ -17,7 +17,7 @@ import {generateIdentityUpdateResponse, prepareIdentityUpdateDetail} from './ide
  * Each detail type should have an entry that specifies where to start the detail flow.
  */
 const DETAIL_TYPE_TO_START_PATH: Record<string, string> = {
-  [VDXF_ORDINAL_AUTHENTICATION_REQUEST.toNumber()]: CONSENT_TO_SCOPE,
+  [VDXF_ORDINAL_AUTHENTICATION_REQUEST.toNumber()]: SELECT_LOGIN_ID,
   [VDXF_ORDINAL_USER_DATA_REQUEST.toNumber()]: CREDENTIALS_REVIEW,
   [VDXF_ORDINAL_IDENTITY_UPDATE_REQUEST.toNumber()]: IDENTITY_UPDATE_CORE,
 };

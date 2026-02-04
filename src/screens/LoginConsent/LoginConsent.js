@@ -20,7 +20,6 @@ import {
   EXTERNAL_ACTION,
   EXTERNAL_CHAIN_START,
 } from '#/utils/constants';
-import {getStartPathForDetail, runDetailPrepFunction} from '#/features/details/detailNavigation';
 import {checkGenericRequest} from '#/utils/genericRequest';
 import {checkLoginConsentRequest} from '#/utils/loginConsentRequest';
 import PropTypes from 'prop-types';
@@ -33,7 +32,6 @@ import {
   LoginConsentRequest,
 } from 'verus-typescript-primitives';
 import {LoginConsentRender} from './LoginConsent.render';
-import store from '#/redux/store';
 
 class LoginConsent extends React.Component {
   constructor(props) {
@@ -121,14 +119,8 @@ class LoginConsent extends React.Component {
 
           // Initialize detail processing - navigate to first detail
           if (genericRequest.details.length > 0) {
-            const firstDetail = genericRequest.details[0];
-
-            // Run prep function for the first detail (if any)
-            await runDetailPrepFunction(firstDetail, this.props.dispatch, store.getState);
-
-            // Navigate to the first screen of the first detail
-            const startPath = getStartPathForDetail(firstDetail);
-            this.props.dispatch(setNavigationPath(startPath));
+            // CONSENT_TO_SCOPE acts as the review for the generic request.
+            this.props.dispatch(setNavigationPath(CONSENT_TO_SCOPE));
           } else {
             throw new Error('GenericRequest contains no details to process');
           }
