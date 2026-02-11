@@ -1,5 +1,6 @@
 export {
   getDetailByIndex,
+  getDetailMapEntry,
   getStartPathForDetail,
   runDetailPrepFunction,
   generateDetailResponse,
@@ -7,4 +8,10 @@ export {
   isLastDetail,
 } from './detailNavigation';
 
-export type {DetailPrepFunction, DetailResponseGenerator} from './types';
+export type {
+  DetailPrepFunction,
+  DetailResponseGenerator,
+  DetailType,
+  DetailMapEntry,
+  NavigationStackEntry,
+} from './types';

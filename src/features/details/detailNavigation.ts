@@ -2,71 +2,117 @@ import {AppDispatch, RootState} from '#/redux/store';
 import {
   GenericRequest,
   OrdinalVDXFObject,
+  VDXF_ORDINAL_APP_ENCRYPTION_REQUEST,
   VDXF_ORDINAL_AUTHENTICATION_REQUEST,
   VDXF_ORDINAL_IDENTITY_UPDATE_REQUEST,
+  VDXF_ORDINAL_PROVISION_IDENTITY_DETAILS,
   VDXF_ORDINAL_USER_DATA_REQUEST,
 } from 'verus-typescript-primitives';
-import {CREDENTIALS_REVIEW, IDENTITY_UPDATE_CORE, SELECT_LOGIN_ID} from '#/utils/constants';
+import {
+  CREDENTIALS_REVIEW,
+  IDENTITY_UPDATE_CONTENTMULTIMAP,
+  IDENTITY_UPDATE_CORE,
+  PROVISIONING_CONFIRM,
+  PROVISIONING_FORM,
+  PROVISIONING_RESULT,
+  SELECT_LOGIN_ID,
+} from '#/utils/constants';
 import {generateAuthenticationResponse, prepareAuthenticationDetail} from './authentication';
-import {DetailPrepFunction, DetailResponseGenerator} from './types';
+import {DetailMapEntry, DetailPrepFunction, DetailResponse, DetailResponseGenerator} from './types';
 import {generateUserDataResponse, prepareUserDataDetail} from './userData';
 import {generateIdentityUpdateResponse, prepareIdentityUpdateDetail} from './identityUpdate';
+import {generateAppEncryptionResponse, prepareAppEncryptionDetail} from './appEncryption';
+
+const noOpPrepFunction: DetailPrepFunction = async () => {};
+
+const noOpResponseGenerator: DetailResponseGenerator = async () => null;
 
 /**
- * Maps detail types to their initial navigation paths.
- * Each detail type should have an entry that specifies where to start the detail flow.
+ * Central map of detail types to their navigation configuration.
+ *
+ * Each entry defines:
+ * - `type`: How the detail participates in the navigation flow
+ *   - `standard` – has one or more UI screens
+ *   - `headless` – no UI; prep + response run automatically
+ *   - `detour` – has UI but interrupts the normal flow (e.g. provisioning)
+ * - `prepFunction`: Runs before the first screen is shown (or before response generation for headless)
+ * - `screens`: Ordered array of screen path constants the user navigates through
+ * - `responseGenerator`: Produces the response detail once the user completes all screens
  */
-const DETAIL_TYPE_TO_START_PATH: Record<string, string> = {
-  [VDXF_ORDINAL_AUTHENTICATION_REQUEST.toNumber()]: SELECT_LOGIN_ID,
-  [VDXF_ORDINAL_USER_DATA_REQUEST.toNumber()]: CREDENTIALS_REVIEW,
-  [VDXF_ORDINAL_IDENTITY_UPDATE_REQUEST.toNumber()]: IDENTITY_UPDATE_CORE,
+const DETAIL_MAP: Record<string, DetailMapEntry> = {
+  [VDXF_ORDINAL_AUTHENTICATION_REQUEST.toNumber()]: {
+    type: 'standard',
+    prepFunction: prepareAuthenticationDetail,
+    screens: [SELECT_LOGIN_ID],
+    responseGenerator: generateAuthenticationResponse,
+  },
+  [VDXF_ORDINAL_USER_DATA_REQUEST.toNumber()]: {
+    type: 'standard',
+    prepFunction: prepareUserDataDetail,
+    screens: [CREDENTIALS_REVIEW],
+    responseGenerator: generateUserDataResponse,
+  },
+  [VDXF_ORDINAL_IDENTITY_UPDATE_REQUEST.toNumber()]: {
+    type: 'standard',
+    prepFunction: prepareIdentityUpdateDetail,
+    screens: [IDENTITY_UPDATE_CORE, IDENTITY_UPDATE_CONTENTMULTIMAP],
+    responseGenerator: generateIdentityUpdateResponse,
+  },
+  [VDXF_ORDINAL_APP_ENCRYPTION_REQUEST.toNumber()]: {
+    type: 'headless',
+    prepFunction: prepareAppEncryptionDetail,
+    screens: [],
+    responseGenerator: generateAppEncryptionResponse,
+  },
+  [VDXF_ORDINAL_PROVISION_IDENTITY_DETAILS.toNumber()]: {
+    type: 'detour',
+    prepFunction: noOpPrepFunction,
+    screens: [PROVISIONING_FORM, PROVISIONING_CONFIRM, PROVISIONING_RESULT],
+    responseGenerator: noOpResponseGenerator,
+  },
 };
 
 /**
- * Maps detail types to their preparation functions.
- * These functions run before navigating to a detail's first screen.
- * Use them to initialize Redux state, fetch data, or perform validation.
- * They receive dispatch and getState to check current state and avoid redundant work.
+ * Finds the detail map entry for a given ordinal.
+ * Throws if the detail type is not registered in the map.
  */
-const DETAIL_TYPE_PREP_FUNCTIONS: Record<string, DetailPrepFunction> = {
-  [VDXF_ORDINAL_AUTHENTICATION_REQUEST.toNumber()]: prepareAuthenticationDetail,
-  [VDXF_ORDINAL_USER_DATA_REQUEST.toNumber()]: prepareUserDataDetail,
-  [VDXF_ORDINAL_IDENTITY_UPDATE_REQUEST.toNumber()]: prepareIdentityUpdateDetail,
-};
+export const getDetailMapEntry = (detail: OrdinalVDXFObject): DetailMapEntry => {
+  const key = detail.type.toNumber();
+  const entry = DETAIL_MAP[key];
 
-/**
- * Maps detail types to their response generator functions.
- * These functions are called when a detail completes to construct the response
- * from the current Redux state.
- */
-const DETAIL_TYPE_RESPONSE_GENERATORS: Record<string, DetailResponseGenerator> = {
-  [VDXF_ORDINAL_AUTHENTICATION_REQUEST.toNumber()]: generateAuthenticationResponse,
-  [VDXF_ORDINAL_USER_DATA_REQUEST.toNumber()]: generateUserDataResponse,
-  [VDXF_ORDINAL_IDENTITY_UPDATE_REQUEST.toNumber()]: generateIdentityUpdateResponse,
-};
-
-/**
- * Determines the starting navigation path for a given detail type.
- * Throws an error if the detail type is not recognized.
- */
-export const getStartPathForDetail = (detail: OrdinalVDXFObject): string => {
-  const detailType = detail.type;
-  const startPath = DETAIL_TYPE_TO_START_PATH[detailType.toNumber()];
-
-  if (!startPath) {
-    throw new Error(
-      `Unknown detail type: ${detailType}. No navigation path defined. ` +
-        `Add an entry to DETAIL_TYPE_TO_START_PATH in detailNavigation.ts`
-    );
+  if (!entry) {
+    throw new Error(`Unknown detail type: ${detail.type}. No entry in DETAIL_MAP.`);
   }
 
-  return startPath;
+  return entry;
 };
 
 /**
- * Runs the preparation function for a detail type, if one exists.
- * Prep functions are used to initialize state before navigating to a detail's screens.
- * The prep function receives getState so it can check if preparation has already been done.
+ * Safely gets a detail from the request based on the index.
+ * Returns null if the index is out of bounds.
+ */
+export const getDetailByIndex = (
+  request: GenericRequest,
+  currentDetailIndex: number
+): OrdinalVDXFObject | null => {
+  if (currentDetailIndex < 0 || currentDetailIndex >= request.details.length) {
+    return null;
+  }
+
+  return request.details[currentDetailIndex];
+};
+
+/**
+ * Determines the starting navigation path for a given detail.
+ * Returns the first screen from the detail map, or null for headless details.
+ */
+export const getStartPathForDetail = (detail: OrdinalVDXFObject): string | null => {
+  const entry = getDetailMapEntry(detail);
+  return entry.screens.length > 0 ? entry.screens[0] : null;
+};
+
+/**
+ * Runs the preparation function for a detail, if one exists.
  */
 export const runDetailPrepFunction = async (
   detail: OrdinalVDXFObject,
@@ -74,46 +120,31 @@ export const runDetailPrepFunction = async (
   dispatch: AppDispatch,
   getState: () => RootState
 ): Promise<void> => {
-  const detailType = detail.type;
-  const prepFunction = DETAIL_TYPE_PREP_FUNCTIONS[detailType.toNumber()];
-
-  if (prepFunction) {
-    await prepFunction(detail, detailIndex, dispatch, getState);
-  }
+  const entry = getDetailMapEntry(detail);
+  await entry.prepFunction(detail, detailIndex, dispatch, getState);
 };
 
 /**
- * Generates a response detail from the current Redux state.
+ * Generates a response detail from the current Redux state using the detail map.
  * Returns null if there should be no response detail.
  */
 export async function generateDetailResponse(
   request: GenericRequest,
   detailIndex: number,
   getState: () => RootState
-): Promise<OrdinalVDXFObject | null> {
-  if (detailIndex >= request.details.length) {
+): Promise<DetailResponse> {
+  const detail = getDetailByIndex(request, detailIndex);
+
+  if (!detail) {
     console.error(`Invalid detail index: ${detailIndex}`);
     return null;
   }
 
-  const detail = request.details[detailIndex];
-  const detailType = detail.type;
-  const responseGenerator = DETAIL_TYPE_RESPONSE_GENERATORS[detailType.toNumber()];
-
-  if (!responseGenerator) {
-    console.log(`No response generator defined for detail type: ${detailType}`);
-    return null;
-  }
-
-  return responseGenerator(request, detailIndex, getState);
+  const entry = getDetailMapEntry(detail);
+  return entry.responseGenerator(request, detailIndex, getState);
 }
 
-/**
- * Validates that we can transition to the next detail.
- * Throws an error if:
- * - The current detail index is invalid
- * - We're trying to advance beyond the last detail
- */
+/** Validates that a detail index is within bounds. */
 export const validateDetailTransition = (
   currentDetailIndex: number,
   totalDetails: number
@@ -130,22 +161,6 @@ export const validateDetailTransition = (
   }
 };
 
-/**
- * Safely gets a detail from the request based on the index.
- * Returns null if there are no more details.
- */
-export const getDetailByIndex = (
-  request: GenericRequest,
-  currentDetailIndex: number
-): OrdinalVDXFObject | null => {
-  if (currentDetailIndex >= request.details.length) {
-    return null;
-  }
-
-  return request.details[currentDetailIndex];
-};
-
-// Checks if based on the `currentDetailIndex` that we are at the last detail.
 export const isLastDetail = (request: GenericRequest, currentDetailIndex: number): boolean => {
   if (!request || !request.details || request.details.length === 0) {
     return false;

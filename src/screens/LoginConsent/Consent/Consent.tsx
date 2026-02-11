@@ -53,8 +53,10 @@ const Consent: React.FC<ConsentProps> = props => {
 
   const isGenericRequest = deeplinkData instanceof GenericRequest;
 
+  // Since the index is -1 when we have not processed any details, the detail index
+  // may be -1 even though we refer to the 0 index detail for authentication info.
   const consentData = isGenericRequest
-    ? extractConsentDataV2(deeplinkData, signedBy as Identity, currentDetailIndex)
+    ? extractConsentDataV2(deeplinkData, signedBy as Identity, Math.max(0, currentDetailIndex))
     : extractConsentDataV1(deeplinkData as LoginConsentRequest, signedBy as Identity);
 
   const {

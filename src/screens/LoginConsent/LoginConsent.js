@@ -4,7 +4,11 @@ import {
   checkAndUpdateAll,
   checkAndUpdateChainInfo,
 } from '#/redux/reducers/identity/identity.actions';
-import {setExternalAction, setNavigationPath} from '#/redux/reducers/navigation/navigationSlice';
+import {
+  setCurrentDetailIndex,
+  setExternalAction,
+  setNavigationPath,
+} from '#/redux/reducers/navigation/navigationSlice';
 import {setOriginApp} from '#/redux/reducers/origin/origin.actions';
 import {completeRequest} from '#/redux/reducers/rpc/rpcSlice';
 import {setSignatureInfo} from '#/redux/reducers/signatureInfo/signatureInfo.actions';
@@ -119,6 +123,8 @@ class LoginConsent extends React.Component {
 
           // Initialize detail processing - navigate to first detail
           if (genericRequest.details.length > 0) {
+            // Initialize detail index to -1 to indicate no details have been processed yet.
+            this.props.dispatch(setCurrentDetailIndex(-1));
             // CONSENT_TO_SCOPE acts as the review for the generic request.
             this.props.dispatch(setNavigationPath(CONSENT_TO_SCOPE));
           } else {

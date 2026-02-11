@@ -40,9 +40,13 @@ export const API_DECRYPT_KEY = 'decryptkey';
 export const API_CHECK_AUTH = 'check_auth';
 export const API_GET_CURRENT_USER = 'users/current';
 export const API_GET_PLUGIN = 'plugin/get';
+export const API_Z_GET_ENCRYPTION_ADDRESS = 'z_get_encryption_address';
 
 export const API_EXECUTE_IDENTITY_UPDATE_REQUEST =
   'verusid/identity/execute_identity_update_request';
+export const API_EXECUTE_APP_ENCRYPTION_REQUEST = 'verusid/generic/execute_app_encryption_request';
+export const API_ENCRYPT_APP_ENCRYPTION_RESPONSE =
+  'verusid/generic/encrypt_app_encryption_response';
 export const API_SIGN_ID_PROVISIONING_REQUEST = 'verusid/provision/sign_id_provisioning_request';
 export const API_SIGN_IDENTITY_UPDATE_RESPONSE = 'verusid/identity/sign_identity_update_response';
 export const API_SIGN_LOGIN_RESPONSE = 'verusid/login/sign_response';
