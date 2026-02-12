@@ -7,9 +7,11 @@ import {
   VDXF_ORDINAL_IDENTITY_UPDATE_REQUEST,
   VDXF_ORDINAL_PROVISION_IDENTITY_DETAILS,
   VDXF_ORDINAL_USER_DATA_REQUEST,
+  VDXF_ORDINAL_USER_SPECIFIC_DATA_PACKET,
 } from 'verus-typescript-primitives';
 import {
   CREDENTIALS_REVIEW,
+  DATA_PACKET_REVIEW,
   IDENTITY_UPDATE_CONTENTMULTIMAP,
   IDENTITY_UPDATE_CORE,
   PROVISIONING_CONFIRM,
@@ -22,6 +24,7 @@ import {DetailMapEntry, DetailPrepFunction, DetailResponse, DetailResponseGenera
 import {generateUserDataResponse, prepareUserDataDetail} from './userData';
 import {generateIdentityUpdateResponse, prepareIdentityUpdateDetail} from './identityUpdate';
 import {generateAppEncryptionResponse, prepareAppEncryptionDetail} from './appEncryption';
+import {generateDataPacketResponse, prepareDataPacketDetail} from './dataPacket';
 
 const noOpPrepFunction: DetailPrepFunction = async () => {};
 
@@ -63,6 +66,12 @@ const DETAIL_MAP: Record<string, DetailMapEntry> = {
     prepFunction: prepareAppEncryptionDetail,
     screens: [],
     responseGenerator: generateAppEncryptionResponse,
+  },
+  [VDXF_ORDINAL_USER_SPECIFIC_DATA_PACKET.toNumber()]: {
+    type: 'standard',
+    prepFunction: prepareDataPacketDetail,
+    screens: [DATA_PACKET_REVIEW],
+    responseGenerator: generateDataPacketResponse,
   },
   [VDXF_ORDINAL_PROVISION_IDENTITY_DETAILS.toNumber()]: {
     type: 'detour',
