@@ -3,6 +3,7 @@ import {setError} from '#/redux/reducers/error/error.actions';
 import {
   CONSENT_TO_SCOPE,
   CREDENTIALS_REVIEW,
+  DATA_PACKET_REVIEW,
   EXTERNAL_ACTION,
   IDENTITY_UPDATE_CONTENTMULTIMAP,
   IDENTITY_UPDATE_CORE,
@@ -16,6 +17,7 @@ import {
 import React from 'react';
 import Consent from './Consent/Consent';
 import CredentialsReview from './CredentialsReview/CredentialsReview';
+import DataPacket from './DataPacket/DataPacket';
 import Error from './Error/Error';
 import ExternalAction from './ExternalAction/ExternalAction';
 import IdentityUpdateContentMultiMap from './IdentityUpdate/ContentMultiMap';
@@ -45,6 +47,7 @@ export const LoginConsentRender = function () {
     [IDENTITY_UPDATE_CORE]: <IdentityUpdateCore {...COMPONENT_PROPS} />,
     [IDENTITY_UPDATE_CONTENTMULTIMAP]: <IdentityUpdateContentMultiMap {...COMPONENT_PROPS} />,
     [CREDENTIALS_REVIEW]: <CredentialsReview {...COMPONENT_PROPS} />,
+    [DATA_PACKET_REVIEW]: <DataPacket {...COMPONENT_PROPS} />,
     [PROVISIONING_FORM]: <ProvisionIdentityForm {...COMPONENT_PROPS} />,
     [PROVISIONING_CONFIRM]: <ProvisionIdentityConfirm {...COMPONENT_PROPS} />,
     [PROVISIONING_RESULT]: <ProvisionIdentityResult {...COMPONENT_PROPS} />,
