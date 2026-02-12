@@ -62,7 +62,7 @@ const IdentityUpdateContentMultiMap: React.FC = () => {
 
   return (
     <PageLayout
-      title={`The following data will be added to the contentmultimap of your identity ${name}`}
+      title={`Review content additions to ${name}`}
       loading={loading}
       contentStyle={{
         display: 'flex',
@@ -101,10 +101,8 @@ const IdentityUpdateContentMultiMap: React.FC = () => {
       }
     >
       <Card
-        square
         sx={{
           width: '100%',
-          maxHeight: '60vh',
           overflowY: 'auto',
         }}
       >

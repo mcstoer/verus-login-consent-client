@@ -29,6 +29,20 @@ import {RootState} from '#/redux/store';
 import {EXTERNAL_ACTION, EXTERNAL_CHAIN_START, SELECT_LOGIN_ID} from '#/utils/constants';
 import {unixToDate} from '#/utils/math';
 
+const LIST_ITEM_SLOTS = {
+  standard: {
+    primary: {variant: 'subtitle1' as const},
+    secondary: {color: 'text.secondary' as const, variant: 'body2' as const},
+  },
+  nested: {
+    primary: {variant: 'body2' as const, sx: {lineHeight: 1.3}},
+  },
+  collapsible: {
+    primary: {variant: 'subtitle1' as const},
+    secondary: {color: 'text.secondary' as const, variant: 'body2' as const},
+  },
+} as const;
+
 interface ConsentProps {
   canProcessRequest: () => boolean;
   completeLoginConsent: () => Promise<void>;
@@ -144,15 +158,13 @@ const Consent: React.FC<ConsentProps> = props => {
       }
     >
       <Card
-        square
         sx={{
           width: '100%',
-          maxHeight: '60vh',
           overflowY: 'auto',
         }}
       >
-        <CardContent>
-          <List>
+        <CardContent sx={{p: 0}}>
+          <List disablePadding>
             <IdentityDetails
               identity={signedBy}
               revocationAuthority={signingRevocationIdentity}
@@ -165,10 +177,7 @@ const Consent: React.FC<ConsentProps> = props => {
               <ListItemText
                 primary={systemDescriptor || '-'}
                 secondary="System name"
-                slotProps={{
-                  primary: {variant: 'subtitle1'},
-                  secondary: {color: 'text.secondary', variant: 'body2'},
-                }}
+                slotProps={LIST_ITEM_SLOTS.standard}
               />
             </ListItem>
 
@@ -176,10 +185,7 @@ const Consent: React.FC<ConsentProps> = props => {
               <ListItemText
                 primary={time ? unixToDate(time) : '-'}
                 secondary="Signed on"
-                slotProps={{
-                  primary: {variant: 'subtitle1'},
-                  secondary: {color: 'text.secondary', variant: 'body2'},
-                }}
+                slotProps={LIST_ITEM_SLOTS.standard}
               />
             </ListItem>
 
@@ -189,10 +195,7 @@ const Consent: React.FC<ConsentProps> = props => {
                   <ListItemText
                     primary="Permissions Requested"
                     secondary={openPermissions ? 'Click to collapse' : 'Click to expand'}
-                    slotProps={{
-                      primary: {variant: 'subtitle1'},
-                      secondary: {color: 'text.secondary', variant: 'body2'},
-                    }}
+                    slotProps={LIST_ITEM_SLOTS.collapsible}
                   />
                   {openPermissions ? <ExpandLess color="action" /> : <ExpandMore color="action" />}
                 </ListItemButton>
@@ -203,9 +206,7 @@ const Consent: React.FC<ConsentProps> = props => {
                       <ListItem key={index} divider sx={{pl: 6, pr: 2, py: 0.5, minHeight: 48}}>
                         <ListItemText
                           primary={`${permission}`}
-                          slotProps={{
-                            primary: {variant: 'body2', sx: {lineHeight: 1.3}},
-                          }}
+                          slotProps={LIST_ITEM_SLOTS.nested}
                         />
                       </ListItem>
                     ))}
@@ -216,14 +217,11 @@ const Consent: React.FC<ConsentProps> = props => {
 
             {constraintsLabels && constraintsLabels.length > 0 && (
               <>
-                <ListItemButton onClick={handleConstraintsClick}>
+                <ListItemButton divider onClick={handleConstraintsClick}>
                   <ListItemText
                     primary="Constraints"
                     secondary={openConstraints ? 'Click to collapse' : 'Click to expand'}
-                    slotProps={{
-                      primary: {variant: 'subtitle1'},
-                      secondary: {color: 'text.secondary', variant: 'body2'},
-                    }}
+                    slotProps={LIST_ITEM_SLOTS.collapsible}
                   />
                   {openConstraints ? <ExpandLess color="action" /> : <ExpandMore color="action" />}
                 </ListItemButton>
@@ -234,9 +232,7 @@ const Consent: React.FC<ConsentProps> = props => {
                       <ListItem key={index} divider sx={{pl: 6, pr: 2, py: 0.5, minHeight: 48}}>
                         <ListItemText
                           primary={`${constraint}`}
-                          slotProps={{
-                            primary: {variant: 'body2', sx: {lineHeight: 1.3}},
-                          }}
+                          slotProps={LIST_ITEM_SLOTS.nested}
                         />
                       </ListItem>
                     ))}
@@ -247,14 +243,11 @@ const Consent: React.FC<ConsentProps> = props => {
 
             {responseURIsLabels.length > 0 && (
               <>
-                <ListItemButton onClick={handleResponseURIsClick}>
+                <ListItemButton divider onClick={handleResponseURIsClick}>
                   <ListItemText
                     primary="Response URIs"
                     secondary={openResponseURIs ? 'Click to collapse' : 'Click to expand'}
-                    slotProps={{
-                      primary: {variant: 'subtitle1'},
-                      secondary: {color: 'text.secondary', variant: 'body2'},
-                    }}
+                    slotProps={LIST_ITEM_SLOTS.collapsible}
                   />
                   {openResponseURIs ? <ExpandLess color="action" /> : <ExpandMore color="action" />}
                 </ListItemButton>
@@ -263,12 +256,7 @@ const Consent: React.FC<ConsentProps> = props => {
                   <List component="div" dense disablePadding>
                     {responseURIsLabels.map((uri, index) => (
                       <ListItem key={index} divider sx={{pl: 6, pr: 2, py: 0.5, minHeight: 48}}>
-                        <ListItemText
-                          primary={`${uri}`}
-                          slotProps={{
-                            primary: {variant: 'body2', sx: {lineHeight: 1.3}},
-                          }}
-                        />
+                        <ListItemText primary={`${uri}`} slotProps={LIST_ITEM_SLOTS.nested} />
                       </ListItem>
                     ))}
                   </List>
@@ -279,10 +267,7 @@ const Consent: React.FC<ConsentProps> = props => {
               <ListItemText
                 primary={expiryLabel || '-'}
                 secondary="Expires at"
-                slotProps={{
-                  primary: {variant: 'subtitle1'},
-                  secondary: {color: 'text.secondary', variant: 'body2'},
-                }}
+                slotProps={LIST_ITEM_SLOTS.standard}
               />
             </ListItem>
           </List>

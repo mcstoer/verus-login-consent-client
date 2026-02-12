@@ -281,7 +281,7 @@ const IdentityUpdateCore: React.FC = () => {
 
   return (
     <PageLayout
-      title={`The following fields other than the contentmultimap, will be updated in your identity ${name}`}
+      title={`Review changes to ${name}`}
       loading={loading}
       contentStyle={{
         display: 'flex',
@@ -320,12 +320,10 @@ const IdentityUpdateCore: React.FC = () => {
       }
     >
       <Card
-        square
         sx={{
           marginTop: 1,
           marginBottom: 1,
           width: '100%',
-          maxHeight: '60vh',
           overflowY: 'auto',
         }}
       >
