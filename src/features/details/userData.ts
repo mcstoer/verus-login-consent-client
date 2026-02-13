@@ -32,7 +32,7 @@ export async function prepareUserDataDetail(
   }
 
   const chainId = state.chainMetadata.chainId;
-  // TODO: Use AppOrDelegatedId when possible.
+  const request = state.deeplink.data as GenericRequest;
   const scopeIdentity = state.signatureInfo.signedBy;
   const index = detailIndex;
   const currentIdentity = identity.activeIdentity as Identity;
@@ -54,8 +54,11 @@ export async function prepareUserDataDetail(
 
   const vdxfkeys = detail.searchDataKey.flatMap(obj => Object.keys(obj));
 
+  // If the request has invalid appOrDelegatedID, then an error should have be already thrown.
+  const scope = request.appOrDelegatedID ? request.appOrDelegatedID.toIAddress() : scopeAddress;
+
   try {
-    const retrieved = await getCredentialsByScope(chainId, currentAddress, scopeAddress, vdxfkeys);
+    const retrieved = await getCredentialsByScope(chainId, currentAddress, scope, vdxfkeys);
 
     for (const cred of retrieved) {
       const credential = new Credential(cred);

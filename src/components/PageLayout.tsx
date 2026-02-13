@@ -60,7 +60,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({
           )}
 
           {title && (
-            <Typography variant="subtitle1" component="div">
+            <Typography variant="subtitle1" color="text.secondary" component="div">
               {title}
             </Typography>
           )}
