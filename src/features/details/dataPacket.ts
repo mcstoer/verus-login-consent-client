@@ -46,6 +46,7 @@ export async function generateDataPacketResponse(
     detailIndex,
   });
 
+  // Create signatures for each data descriptor and store them in a single VdxfUniValue.
   const values = [];
 
   for (const signableObject of dataPacketDetail.signableObjects) {
