@@ -41,6 +41,7 @@ export const API_CHECK_AUTH = 'check_auth';
 export const API_GET_CURRENT_USER = 'users/current';
 export const API_GET_PLUGIN = 'plugin/get';
 export const API_Z_GET_ENCRYPTION_ADDRESS = 'z_get_encryption_address';
+export const API_SIGN_DATA = 'sign_data';
 
 export const API_EXECUTE_IDENTITY_UPDATE_REQUEST =
   'verusid/identity/execute_identity_update_request';
