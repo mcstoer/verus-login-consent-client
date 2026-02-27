@@ -7,7 +7,6 @@ import ExpandMore from '@mui/icons-material/ExpandMore';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
 import Collapse from '@mui/material/Collapse';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
@@ -331,89 +330,91 @@ const IdentityUpdateCore: React.FC = () => {
           scrollbarGutter: 'stable',
         }}
       >
-        <CardContent>
-          {changes.length === 0 ? (
-            <Box
-              sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: 4,
-                textAlign: 'center',
-              }}
-            >
-              <Typography variant="h6" color="text.secondary" gutterBottom>
-                No fields to update
-              </Typography>
-            </Box>
-          ) : (
-            <List>
-              {changes.map((change, index) => (
-                <React.Fragment key={index}>
-                  <ListItem dense sx={{pb: 0}}>
-                    <Box sx={{display: 'flex', alignItems: 'center'}}>
-                      <Typography variant="subtitle1" fontWeight="bold">
-                        {change.field}
-                      </Typography>
-                    </Box>
-                  </ListItem>
+        {changes.length === 0 ? (
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: 4,
+              textAlign: 'center',
+            }}
+          >
+            <Typography variant="h6" color="text.secondary" gutterBottom>
+              No fields to update
+            </Typography>
+          </Box>
+        ) : (
+          <List disablePadding sx={{'& > *:last-child': {borderBottom: 'none'}}}>
+            {changes.map((change, index) => (
+              <React.Fragment key={index}>
+                <ListItem dense sx={{pb: 0}}>
+                  <Box sx={{display: 'flex', alignItems: 'center'}}>
+                    <Typography variant="subtitle1" fontWeight="bold">
+                      {change.field}
+                    </Typography>
+                  </Box>
+                </ListItem>
 
-                  <ListItemButton divider dense onClick={() => handleDropdownToggle(index)}>
-                    <ListItemText
-                      primary="New value"
-                      secondary={change.newValue}
-                      slotProps={{
-                        primary: {variant: 'body2', color: 'text.secondary'},
-                        secondary: {
-                          variant: 'body1',
-                          color: 'text.primary',
-                          sx: {
-                            wordBreak: 'break-all',
-                            userSelect: 'text',
-                            cursor: 'text',
-                            whiteSpace: 'pre-line',
-                          },
-                          // Allows the user to select the text without opening the dropdown.
-                          onMouseDown: e => e.stopPropagation(),
-                          onMouseUp: e => e.stopPropagation(),
-                          onClick: e => e.stopPropagation(),
+                <ListItemButton
+                  divider={index < changes.length - 1}
+                  dense
+                  onClick={() => handleDropdownToggle(index)}
+                >
+                  <ListItemText
+                    primary="New value"
+                    secondary={change.newValue}
+                    slotProps={{
+                      primary: {variant: 'body2', color: 'text.secondary'},
+                      secondary: {
+                        variant: 'body1',
+                        color: 'text.primary',
+                        sx: {
+                          wordBreak: 'break-all',
+                          userSelect: 'text',
+                          cursor: 'text',
+                          whiteSpace: 'pre-line',
                         },
-                      }}
-                    />
-                    {openDropdowns[index] ? (
-                      <ExpandLess color="action" />
-                    ) : (
-                      <ExpandMore color="action" />
-                    )}
-                  </ListItemButton>
+                        // Allows the user to select the text without opening the dropdown.
+                        onMouseDown: e => e.stopPropagation(),
+                        onMouseUp: e => e.stopPropagation(),
+                        onClick: e => e.stopPropagation(),
+                      },
+                    }}
+                  />
+                  {openDropdowns[index] ? (
+                    <ExpandLess color="action" />
+                  ) : (
+                    <ExpandMore color="action" />
+                  )}
+                </ListItemButton>
 
-                  <Collapse in={openDropdowns[index]} timeout="auto" unmountOnExit>
-                    <List component="div" dense disablePadding>
-                      <ListItem divider dense sx={{pr: 2}}>
-                        <ListItemText
-                          primary="Previous value"
-                          secondary={change.oldValue}
-                          slotProps={{
-                            primary: {variant: 'body2', color: 'text.secondary'},
-                            secondary: {
-                              variant: 'body1',
-                              color: 'text.primary',
-                              sx: {
-                                wordBreak: 'break-all',
-                                whiteSpace: 'pre-line',
-                              },
+                <Collapse in={openDropdowns[index]} timeout="auto" unmountOnExit>
+                  <List component="div" dense disablePadding>
+                    <ListItem dense sx={{pr: 2}}>
+                      <ListItemText
+                        primary="Previous value"
+                        secondary={change.oldValue}
+                        slotProps={{
+                          primary: {variant: 'body2', color: 'text.secondary'},
+                          secondary: {
+                            variant: 'body1',
+                            color: 'text.primary',
+                            sx: {
+                              wordBreak: 'break-all',
+                              whiteSpace: 'pre-line',
                             },
-                          }}
-                        />
-                      </ListItem>
-                    </List>
-                  </Collapse>
-                </React.Fragment>
-              ))}
-            </List>
-          )}
-        </CardContent>
+                          },
+                        }}
+                      />
+                    </ListItem>
+                  </List>
+                </Collapse>
+              </React.Fragment>
+            ))}
+          </List>
+        )}
       </Card>
       <SnackbarAlert
         open={fetchError.showError}

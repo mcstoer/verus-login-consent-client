@@ -8,8 +8,8 @@ import {
 } from '#/redux/reducers/navigation/navigationSlice';
 import {RootState} from '#/redux/store';
 import Button from '@mui/material/Button';
+import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
 import React, {useState} from 'react';
 import {useSelector} from 'react-redux';
 import {GenericRequest, IdentityUpdateRequestOrdinalVDXFObject} from 'verus-typescript-primitives';
@@ -110,9 +110,14 @@ const IdentityUpdateContentMultiMap: React.FC = () => {
           scrollbarGutter: 'stable',
         }}
       >
-        <CardContent>
+        <Box
+          sx={{
+            '& > ul:last-child, & > div:last-child': {borderBottom: 'none'},
+            '& ul > div:last-child li': {borderBottom: 'none'},
+          }}
+        >
           <ContentMultiMapRenderer contentMultiMapEntries={contentMultiMapEntries} />
-        </CardContent>
+        </Box>
       </Card>
     </PageLayout>
   );

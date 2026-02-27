@@ -169,7 +169,7 @@ const CredentialsReview: React.FC<CredentialsReviewProps> = ({setRequestResult})
           scrollbarGutter: 'stable',
         }}
       >
-        <List>
+        <List disablePadding sx={{'& > *:last-child': {borderBottom: 'none'}}}>
           {credentials.length > 0 && (
             <>
               <List component="div">

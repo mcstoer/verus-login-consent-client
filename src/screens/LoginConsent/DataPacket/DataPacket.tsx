@@ -5,7 +5,6 @@ import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
 import Collapse from '@mui/material/Collapse';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
@@ -95,7 +94,7 @@ const DataPacket: React.FC = () => {
 
   return (
     <PageLayout
-      title="Review Data Packet"
+      title="Review the data to be signed"
       loading={loading}
       contentStyle={{
         display: 'flex',
@@ -143,88 +142,95 @@ const DataPacket: React.FC = () => {
           scrollbarGutter: 'stable',
         }}
       >
-        <CardContent sx={{p: 0}}>
-          <List disablePadding>
-            {dataPacketDetails.hasStatements() &&
-              dataPacketDetails.statements &&
-              dataPacketDetails.statements.length > 0 && (
-                <>
-                  <ListItem divider>
-                    <ListItemText
-                      primary="Statements"
-                      slotProps={{
-                        primary: {variant: 'subtitle1' as const},
-                      }}
-                    />
-                  </ListItem>
+        <List disablePadding sx={{'& > *:last-child': {borderBottom: 'none'}}}>
+          {dataPacketDetails.hasStatements() &&
+            dataPacketDetails.statements &&
+            dataPacketDetails.statements.length > 0 && (
+              <>
+                <ListItem divider>
+                  <ListItemText
+                    primary="Statements"
+                    slotProps={{
+                      primary: {variant: 'subtitle1' as const},
+                    }}
+                  />
+                </ListItem>
 
-                  <List component="div" dense disablePadding>
-                    {dataPacketDetails.statements.map((statement, index) => (
-                      <ListItem key={index} divider sx={{pl: 6, pr: 2, py: 0.5, minHeight: 48}}>
-                        <ListItemText primary={statement} slotProps={LIST_ITEM_SLOTS.nested} />
+                <List component="div" dense disablePadding>
+                  {dataPacketDetails.statements.map((statement, index) => (
+                    <ListItem
+                      key={index}
+                      divider={index < dataPacketDetails.statements!.length - 1}
+                      sx={{pl: 6, pr: 2, py: 0.5, minHeight: 48}}
+                    >
+                      <ListItemText primary={statement} slotProps={LIST_ITEM_SLOTS.nested} />
+                    </ListItem>
+                  ))}
+                </List>
+              </>
+            )}
+
+          {dataPacketDetails.signableObjects &&
+            dataPacketDetails.signableObjects.length > 0 &&
+            dataPacketDetails.signableObjects.map((dataDescriptor, index) => (
+              <React.Fragment key={index}>
+                <ListItemButton divider onClick={() => handleObjectClick(index)}>
+                  <ListItemText
+                    primary={
+                      `Object #${index + 1}` +
+                      (dataDescriptor.label ? `: ${dataDescriptor.label}` : '')
+                    }
+                    slotProps={LIST_ITEM_SLOTS.collapsible}
+                  />
+                  {openObjects[index] ? (
+                    <ExpandLess color="action" />
+                  ) : (
+                    <ExpandMore color="action" />
+                  )}
+                </ListItemButton>
+
+                <Collapse in={openObjects[index]} timeout="auto" unmountOnExit>
+                  <List
+                    component="div"
+                    dense
+                    disablePadding
+                    sx={{'& > *:last-child': {borderBottom: 'none'}}}
+                  >
+                    {dataDescriptor.label && (
+                      <ListItem divider sx={{pl: 6, pr: 2, py: 0.5, minHeight: 48}}>
+                        <ListItemText
+                          primary={dataDescriptor.label}
+                          secondary="Label"
+                          slotProps={LIST_ITEM_SLOTS.standard}
+                        />
                       </ListItem>
-                    ))}
-                  </List>
-                </>
-              )}
-
-            {dataPacketDetails.signableObjects &&
-              dataPacketDetails.signableObjects.length > 0 &&
-              dataPacketDetails.signableObjects.map((dataDescriptor, index) => (
-                <React.Fragment key={index}>
-                  <ListItemButton divider onClick={() => handleObjectClick(index)}>
-                    <ListItemText
-                      primary={
-                        `Object #${index + 1}` +
-                        (dataDescriptor.label ? `: ${dataDescriptor.label}` : '')
-                      }
-                      slotProps={LIST_ITEM_SLOTS.collapsible}
-                    />
-                    {openObjects[index] ? (
-                      <ExpandLess color="action" />
-                    ) : (
-                      <ExpandMore color="action" />
                     )}
-                  </ListItemButton>
-
-                  <Collapse in={openObjects[index]} timeout="auto" unmountOnExit>
-                    <List component="div" dense disablePadding>
-                      {dataDescriptor.label && (
-                        <ListItem divider sx={{pl: 6, pr: 2, py: 0.5, minHeight: 48}}>
-                          <ListItemText
-                            primary={dataDescriptor.label}
-                            secondary="Label"
-                            slotProps={LIST_ITEM_SLOTS.standard}
-                          />
-                        </ListItem>
-                      )}
-                      {dataDescriptor.mimeType && (
-                        <ListItem divider sx={{pl: 6, pr: 2, py: 0.5, minHeight: 48}}>
-                          <ListItemText
-                            primary={dataDescriptor.mimeType}
-                            secondary="MIME Type"
-                            slotProps={LIST_ITEM_SLOTS.standard}
-                          />
-                        </ListItem>
-                      )}
-                      {dataDescriptor.objectdata && (
-                        <ListItem divider sx={{pl: 6, pr: 2, py: 0.5, minHeight: 48}}>
-                          <ListItemText
-                            primary={getDisplayData(
-                              dataDescriptor.objectdata,
-                              dataDescriptor.mimeType
-                            )}
-                            secondary="Data"
-                            slotProps={LIST_ITEM_SLOTS.standard}
-                          />
-                        </ListItem>
-                      )}
-                    </List>
-                  </Collapse>
-                </React.Fragment>
-              ))}
-          </List>
-        </CardContent>
+                    {dataDescriptor.mimeType && (
+                      <ListItem divider sx={{pl: 6, pr: 2, py: 0.5, minHeight: 48}}>
+                        <ListItemText
+                          primary={dataDescriptor.mimeType}
+                          secondary="MIME Type"
+                          slotProps={LIST_ITEM_SLOTS.standard}
+                        />
+                      </ListItem>
+                    )}
+                    {dataDescriptor.objectdata && (
+                      <ListItem divider sx={{pl: 6, pr: 2, py: 0.5, minHeight: 48}}>
+                        <ListItemText
+                          primary={getDisplayData(
+                            dataDescriptor.objectdata,
+                            dataDescriptor.mimeType
+                          )}
+                          secondary="Data"
+                          slotProps={LIST_ITEM_SLOTS.standard}
+                        />
+                      </ListItem>
+                    )}
+                  </List>
+                </Collapse>
+              </React.Fragment>
+            ))}
+        </List>
       </Card>
     </PageLayout>
   );
