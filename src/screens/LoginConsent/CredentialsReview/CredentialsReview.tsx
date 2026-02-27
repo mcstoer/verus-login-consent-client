@@ -158,6 +158,7 @@ const CredentialsReview: React.FC<CredentialsReviewProps> = ({setRequestResult})
       }
     >
       <Card
+        square
         sx={{
           marginTop: 1,
           marginBottom: 1,

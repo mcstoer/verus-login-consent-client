@@ -1,16 +1,6 @@
-import {VerusIdLogo} from '#/images';
-import {
-  AppBar,
-  Box,
-  CircularProgress,
-  Container,
-  Divider,
-  SxProps,
-  Theme,
-  Toolbar,
-  Typography,
-} from '@mui/material';
 import React from 'react';
+import {Box, Container, SxProps, Theme, Typography, CircularProgress} from '@mui/material';
+import {VerusIdLogo} from '#/images';
 
 interface PageLayoutProps {
   children?: React.ReactNode;
@@ -28,6 +18,8 @@ const PageLayout: React.FC<PageLayoutProps> = ({
   children,
   title,
   showLogo = true,
+  logoWidth = '55%',
+  logoHeight = '10%',
   footerContent,
   contentStyle = {},
   containerStyle = {},
@@ -43,31 +35,6 @@ const PageLayout: React.FC<PageLayoutProps> = ({
         ...containerStyle,
       }}
     >
-      <AppBar position="static" color="transparent" elevation={0}>
-        <Toolbar>
-          {showLogo && (
-            <Box
-              component="img"
-              src={VerusIdLogo}
-              alt="Verus ID Logo"
-              sx={{
-                height: 40,
-                width: 'auto',
-                marginRight: 2,
-                objectFit: 'contain',
-              }}
-            />
-          )}
-
-          {title && (
-            <Typography variant="subtitle1" color="text.secondary" component="div">
-              {title}
-            </Typography>
-          )}
-        </Toolbar>
-      </AppBar>
-      <Divider />
-
       <Container
         maxWidth={false}
         sx={{
@@ -77,16 +44,43 @@ const PageLayout: React.FC<PageLayoutProps> = ({
           flexDirection: 'column',
           alignItems: 'center',
           flex: 1,
-          backgroundColor: 'grey.100',
         }}
       >
+        {showLogo && (
+          <Box
+            component="img"
+            src={VerusIdLogo}
+            alt="Verus ID Logo"
+            sx={{
+              width: logoWidth,
+              height: logoHeight,
+              objectFit: 'contain',
+            }}
+          />
+        )}
+
+        {title && (
+          <Box
+            sx={{
+              width: '100%',
+              display: 'flex',
+              justifyContent: 'center',
+              padding: 1,
+            }}
+          >
+            <Typography color="text.secondary" gutterBottom>
+              {title}
+            </Typography>
+          </Box>
+        )}
+
         {/* Main content area */}
         <Box
           sx={{
             width: '100%',
             display: 'flex',
             flexDirection: 'column',
-            height: '64vh',
+            height: '60vh',
             ...contentStyle,
           }}
         >

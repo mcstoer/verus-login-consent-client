@@ -320,6 +320,7 @@ const IdentityUpdateCore: React.FC = () => {
       }
     >
       <Card
+        square
         sx={{
           marginTop: 1,
           marginBottom: 1,

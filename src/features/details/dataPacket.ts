@@ -4,13 +4,13 @@ import {signData} from '#/rpc/calls/signData';
 import {
   DataDescriptor,
   DataPacketRequestOrdinalVDXFObject,
+  DataResponseDetails,
   DataResponseOrdinalVDXFObject,
   GenericRequest,
   SignatureData,
   SignatureDataKey,
   VdxfUniValue,
 } from 'verus-typescript-primitives';
-import {DataResponseDetails} from 'verus-typescript-primitives/dist/vdxf/classes/data/DataResponseDetails';
 import {DetailPrepFunction} from './types';
 
 export const prepareDataPacketDetail: DetailPrepFunction = async ordinal => {

@@ -158,13 +158,14 @@ const Consent: React.FC<ConsentProps> = props => {
       }
     >
       <Card
+        square
         sx={{
           width: '100%',
           overflowY: 'auto',
         }}
       >
         <CardContent sx={{p: 0}}>
-          <List disablePadding>
+          <List disablePadding sx={{'& > *:last-child': {borderBottom: 'none'}}}>
             <IdentityDetails
               identity={signedBy}
               revocationAuthority={signingRevocationIdentity}
@@ -263,13 +264,17 @@ const Consent: React.FC<ConsentProps> = props => {
                 </Collapse>
               </>
             )}
-            <ListItem divider>
-              <ListItemText
-                primary={expiryLabel || '-'}
-                secondary="Expires at"
-                slotProps={LIST_ITEM_SLOTS.standard}
-              />
-            </ListItem>
+            {expiryLabel && (
+              <>
+                <ListItem divider>
+                  <ListItemText
+                    primary={expiryLabel || '-'}
+                    secondary="Expires at"
+                    slotProps={LIST_ITEM_SLOTS.standard}
+                  />
+                </ListItem>
+              </>
+            )}
           </List>
         </CardContent>
       </Card>

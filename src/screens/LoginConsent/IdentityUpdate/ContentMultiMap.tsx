@@ -101,6 +101,7 @@ const IdentityUpdateContentMultiMap: React.FC = () => {
       }
     >
       <Card
+        square
         sx={{
           width: '100%',
           overflowY: 'auto',

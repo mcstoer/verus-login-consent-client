@@ -56,7 +56,7 @@ export async function generateIdentityUpdateResponse(
 
   const detail = ordinalWrapper.data;
 
-  // This will throw an error on failure
+  // This will throw an error on failure.
   const txid = await executeIdentityUpdateRequest(chainId, detail);
 
   const responseDetail = new IdentityUpdateResponseDetails({

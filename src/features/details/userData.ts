@@ -94,7 +94,6 @@ export async function generateUserDataResponse(
   // Write the array of serializable objects to a single buffer.
   // The keys are comma-separated and should be used to deserialize the data.
   const storedData = userData.data.map(credential => Credential.fromJson(credential));
-  //const vdxfkeys = userDataRequestDetail.searchDataKey.flatMap(obj => Object.keys(obj));
 
   const values = storedData.map(credential => {
     return {[DATA_TYPE_OBJECT_CREDENTIAL.vdxfid]: credential};
