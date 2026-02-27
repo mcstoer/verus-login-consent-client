@@ -1,6 +1,14 @@
-import {extractConsentDataV1, extractConsentDataV2} from './consentDataExtractors';
-import {GenericRequest, LoginConsentRequest, AuthenticationRequestOrdinalVDXFObject} from 'verus-typescript-primitives';
+import BN from 'bn.js';
+import {
+  AuthenticationRequestDetails,
+  AuthenticationRequestOrdinalVDXFObject,
+  CompactIAddressObject,
+  GenericRequest,
+  LoginConsentRequest,
+  RecipientConstraint,
+} from 'verus-typescript-primitives';
 import {Identity} from '../../redux/reducers/signatureInfo/signatureInfo.types';
+import {extractConsentDataV1, extractConsentDataV2} from './consentDataExtractors';
 
 describe('consentDataExtractors', () => {
   describe('extractConsentDataV1', () => {
@@ -8,12 +16,8 @@ describe('consentDataExtractors', () => {
       const mockRequest = {
         system_id: 'iJhCezBExJHvtyH3fSUwhzybVMVcCL9Gjf',
         challenge: {
-          requested_access: [
-            {vdxfkey: 'iCVH2MqhgvFiGu3NqcRK9FgDjfRtpQQkCy'},
-          ],
-          redirect_uris: [
-            {uri: 'https://example.com/callback'},
-          ],
+          requested_access: [{vdxfkey: 'iCVH2MqhgvFiGu3NqcRK9FgDjfRtpQQkCy'}],
+          redirect_uris: [{uri: 'https://example.com/callback'}],
         },
       } as unknown as LoginConsentRequest;
 
@@ -35,16 +39,25 @@ describe('consentDataExtractors', () => {
   });
 
   describe('extractConsentDataV2', () => {
-    it('should extract consent data from GenericRequest', () => {
+    it('should extract consent data from GenericRequest with authentication detail', () => {
       const mockAuthRequestDetail = {
-        hasExpiryTime: () => false,
-        recipientConstraints: [],
+        expiryTime: new BN(0),
+        hasExpiryTime: () => true,
+        recipientConstraints: [
+          new RecipientConstraint({
+            type: RecipientConstraint.REQUIRED_ID,
+            identity: new CompactIAddressObject({
+              type: CompactIAddressObject.TYPE_I_ADDRESS,
+              address: 'iNtjYwzzo1NLjdjtn1KrnXnKJoK9cbhYPd',
+            }),
+          }),
+        ],
         responseURIs: [],
-      };
+      } as unknown as AuthenticationRequestDetails;
 
-      const mockOrdinalWrapper = new AuthenticationRequestOrdinalVDXFObject();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (mockOrdinalWrapper as any).data = mockAuthRequestDetail;
+      const mockOrdinalWrapper = new AuthenticationRequestOrdinalVDXFObject({
+        data: mockAuthRequestDetail,
+      });
 
       const mockRequest = {
         signature: {
@@ -64,9 +77,13 @@ describe('consentDataExtractors', () => {
       expect(result.signerFqn).toBe('testuser@');
       expect(result.permissionsLabels).toEqual([]);
       expect(result.systemId).toBe('iJhCezBExJHvtyH3fSUwhzybVMVcCL9Gjf');
-      expect(result.constraintsLabels).toEqual([]);
+      expect(result.constraintsLabels).toEqual([
+        'Required identity: iNtjYwzzo1NLjdjtn1KrnXnKJoK9cbhYPd',
+      ]);
+
+      // Make sure it has an auth detail and calculate these fields based on it
       expect(result.responseURIsLabels).toEqual([]);
-      expect(result.expiryLabel).toBeNull();
+      expect(result.expiryLabel).toEqual('Wed, Dec 31, 1969, 16:00:00');
     });
   });
 });

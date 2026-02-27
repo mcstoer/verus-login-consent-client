@@ -1,15 +1,5 @@
 import {AppDispatch, RootState} from '#/redux/store';
 import {
-  GenericRequest,
-  OrdinalVDXFObject,
-  VDXF_ORDINAL_APP_ENCRYPTION_REQUEST,
-  VDXF_ORDINAL_AUTHENTICATION_REQUEST,
-  VDXF_ORDINAL_IDENTITY_UPDATE_REQUEST,
-  VDXF_ORDINAL_PROVISION_IDENTITY_DETAILS,
-  VDXF_ORDINAL_USER_DATA_REQUEST,
-  VDXF_ORDINAL_USER_SPECIFIC_DATA_PACKET,
-} from 'verus-typescript-primitives';
-import {
   CREDENTIALS_REVIEW,
   DATA_PACKET_REVIEW,
   IDENTITY_UPDATE_CONTENTMULTIMAP,
@@ -19,12 +9,22 @@ import {
   PROVISIONING_RESULT,
   SELECT_LOGIN_ID,
 } from '#/utils/constants';
-import {generateAuthenticationResponse, prepareAuthenticationDetail} from './authentication';
+import {
+  APP_ENCRYPTION_REQUEST_VDXF_ORDINAL,
+  AUTHENTICATION_REQUEST_VDXF_ORDINAL,
+  DATA_PACKET_REQUEST_VDXF_ORDINAL,
+  GenericRequest,
+  IDENTITY_UPDATE_REQUEST_VDXF_ORDINAL,
+  OrdinalVDXFObject,
+  PROVISION_IDENTITY_DETAILS_VDXF_ORDINAL,
+  USER_DATA_REQUEST_VDXF_ORDINAL,
+} from 'verus-typescript-primitives';
+import {generateAppEncryptionResponse, prepareAppEncryptionDetail} from './appEncryption';
+import {generateAuthenticationResponse} from './authentication';
+import {generateDataPacketResponse, prepareDataPacketDetail} from './dataPacket';
+import {generateIdentityUpdateResponse, prepareIdentityUpdateDetail} from './identityUpdate';
 import {DetailMapEntry, DetailPrepFunction, DetailResponse, DetailResponseGenerator} from './types';
 import {generateUserDataResponse, prepareUserDataDetail} from './userData';
-import {generateIdentityUpdateResponse, prepareIdentityUpdateDetail} from './identityUpdate';
-import {generateAppEncryptionResponse, prepareAppEncryptionDetail} from './appEncryption';
-import {generateDataPacketResponse, prepareDataPacketDetail} from './dataPacket';
 
 const noOpPrepFunction: DetailPrepFunction = async () => {};
 
@@ -43,37 +43,37 @@ const noOpResponseGenerator: DetailResponseGenerator = async () => null;
  * - `responseGenerator`: Produces the response detail once the user completes all screens
  */
 const DETAIL_MAP: Record<string, DetailMapEntry> = {
-  [VDXF_ORDINAL_AUTHENTICATION_REQUEST.toNumber()]: {
+  [AUTHENTICATION_REQUEST_VDXF_ORDINAL.toNumber()]: {
     type: 'standard',
-    prepFunction: prepareAuthenticationDetail,
+    prepFunction: noOpPrepFunction,
     screens: [SELECT_LOGIN_ID],
     responseGenerator: generateAuthenticationResponse,
   },
-  [VDXF_ORDINAL_USER_DATA_REQUEST.toNumber()]: {
+  [USER_DATA_REQUEST_VDXF_ORDINAL.toNumber()]: {
     type: 'standard',
     prepFunction: prepareUserDataDetail,
     screens: [CREDENTIALS_REVIEW],
     responseGenerator: generateUserDataResponse,
   },
-  [VDXF_ORDINAL_IDENTITY_UPDATE_REQUEST.toNumber()]: {
+  [IDENTITY_UPDATE_REQUEST_VDXF_ORDINAL.toNumber()]: {
     type: 'standard',
     prepFunction: prepareIdentityUpdateDetail,
     screens: [IDENTITY_UPDATE_CORE, IDENTITY_UPDATE_CONTENTMULTIMAP],
     responseGenerator: generateIdentityUpdateResponse,
   },
-  [VDXF_ORDINAL_APP_ENCRYPTION_REQUEST.toNumber()]: {
+  [APP_ENCRYPTION_REQUEST_VDXF_ORDINAL.toNumber()]: {
     type: 'headless',
     prepFunction: prepareAppEncryptionDetail,
     screens: [],
     responseGenerator: generateAppEncryptionResponse,
   },
-  [VDXF_ORDINAL_USER_SPECIFIC_DATA_PACKET.toNumber()]: {
+  [DATA_PACKET_REQUEST_VDXF_ORDINAL.toNumber()]: {
     type: 'standard',
     prepFunction: prepareDataPacketDetail,
     screens: [DATA_PACKET_REVIEW],
     responseGenerator: generateDataPacketResponse,
   },
-  [VDXF_ORDINAL_PROVISION_IDENTITY_DETAILS.toNumber()]: {
+  [PROVISION_IDENTITY_DETAILS_VDXF_ORDINAL.toNumber()]: {
     type: 'detour',
     prepFunction: noOpPrepFunction,
     screens: [PROVISIONING_FORM, PROVISIONING_CONFIRM, PROVISIONING_RESULT],

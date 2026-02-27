@@ -12,10 +12,7 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 
-import {
-  GenericRequest,
-  UserSpecificDataPacketDetailsOrdinalVDXFObject,
-} from 'verus-typescript-primitives';
+import {GenericRequest, DataPacketRequestOrdinalVDXFObject} from 'verus-typescript-primitives';
 
 import PageLayout from '#/components/PageLayout';
 import {isLastDetail} from '#/features/details/detailNavigation';
@@ -54,8 +51,8 @@ const DataPacket: React.FC = () => {
 
   const ordinal = deeplinkData.details[currentDetailIndex];
 
-  if (!(ordinal instanceof UserSpecificDataPacketDetailsOrdinalVDXFObject)) {
-    throw new Error('Unable to handle non-data packet detail.');
+  if (!(ordinal instanceof DataPacketRequestOrdinalVDXFObject)) {
+    throw new Error('Unable to handle non-data packet ordinal.');
   }
 
   const dataPacketDetails = ordinal.data;

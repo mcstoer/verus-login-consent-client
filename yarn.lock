@@ -8353,9 +8353,9 @@ vary@^1, vary@~1.1.2:
   resolved "https://registry.yarnpkg.com/vary/-/vary-1.1.2.tgz#2299f02c6ded30d4a5961b0b9f74524a18f634fc"
   integrity sha512-BNGbWLfd0eUPabhkXUVm0j8uuvREyTh5ovRa/dyow/BqAbZJyC+5fU+IzQOzmAKzYqYRAISoRhdQr3eIZ/PXqg==
 
-"verus-typescript-primitives@git+https://github.com/mcstoer/verus-typescript-primitives.git#generic-request-credential-keys":
+"verus-typescript-primitives@git+https://github.com/VerusCoin/verus-typescript-primitives.git":
   version "1.0.0"
-  resolved "git+https://github.com/mcstoer/verus-typescript-primitives.git#10e8bb13c5ec788dd75ac120deef78841d127650"
+  resolved "git+https://github.com/VerusCoin/verus-typescript-primitives.git#ac2f81222d5eba0c718cc18658e88ecaf85d6eef"
   dependencies:
     base64url "3.0.1"
     bech32 "2.0.0"

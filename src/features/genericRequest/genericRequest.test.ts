@@ -1,31 +1,21 @@
-import {GENERIC_REQUEST_DEEPLINK_VDXF_KEY, GenericRequest, VDXF_ORDINAL_VERUSPAY_INVOICE} from 'verus-typescript-primitives';
-import {checkGenericRequest, isGenericRequest} from './genericRequest';
-import {verifyGenericRequest} from '../rpc/calls/verifyGenericRequest';
-import {loadIdentities} from '../rpc/calls/identities';
-import {Identity} from '../redux/reducers/signatureInfo/signatureInfo.types';
+import {GenericRequest, VERUSPAY_INVOICE_DETAILS_VDXF_ORDINAL} from 'verus-typescript-primitives';
+import {Identity} from '#/redux/reducers/signatureInfo/signatureInfo.types';
+import {loadIdentities} from '#/rpc/calls/identities';
+import {verifyGenericRequest} from '#/rpc/calls/verifyGenericRequest';
+import {checkGenericRequest} from './genericRequest';
 
 // Mock the external API calls
-jest.mock('../rpc/calls/verifyGenericRequest');
-jest.mock('../rpc/calls/identities');
+jest.mock('#/rpc/calls/verifyGenericRequest');
+jest.mock('#/rpc/calls/identities');
 
-const mockedVerifyGenericRequest = verifyGenericRequest as jest.MockedFunction<typeof verifyGenericRequest>;
+const mockedVerifyGenericRequest = verifyGenericRequest as jest.MockedFunction<
+  typeof verifyGenericRequest
+>;
 const mockedLoadIdentities = loadIdentities as jest.MockedFunction<typeof loadIdentities>;
 
 describe('genericRequest', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-  });
-
-  describe('isGenericRequest', () => {
-    it('should return true for generic request VDXF ID', () => {
-      const result = isGenericRequest(GENERIC_REQUEST_DEEPLINK_VDXF_KEY.vdxfid);
-      expect(result).toBe(true);
-    });
-
-    it('should return false for non-generic request ID', () => {
-      const result = isGenericRequest('iNP8ja6aDsG3dDgQcFpGwqfLhj5kPAiQF5');
-      expect(result).toBe(false);
-    });
   });
 
   describe('checkGenericRequest', () => {
@@ -48,26 +38,26 @@ describe('genericRequest', () => {
       mockRequest.isValidVersion = false;
       mockRequest.version = 999;
 
-      await expect(
-        checkGenericRequest(chainId, mockRequest as GenericRequest)
-      ).rejects.toThrow('The request version 999 is unsupported.');
+      await expect(checkGenericRequest(chainId, mockRequest as GenericRequest)).rejects.toThrow(
+        'The request version 999 is unsupported.'
+      );
     });
 
     it('should throw error for request with no details', async () => {
       mockRequest.details = [];
 
-      await expect(
-        checkGenericRequest(chainId, mockRequest as GenericRequest)
-      ).rejects.toThrow('The request contains no details.');
+      await expect(checkGenericRequest(chainId, mockRequest as GenericRequest)).rejects.toThrow(
+        'The request contains no details.'
+      );
     });
 
     it('should throw error for unsigned multi-detail request', async () => {
       (mockRequest.isSigned as jest.Mock).mockReturnValue(false);
       (mockRequest.hasMultiDetails as jest.Mock).mockReturnValue(true);
 
-      await expect(
-        checkGenericRequest(chainId, mockRequest as GenericRequest)
-      ).rejects.toThrow('The request is not signed.');
+      await expect(checkGenericRequest(chainId, mockRequest as GenericRequest)).rejects.toThrow(
+        'The request is not signed.'
+      );
     });
 
     it('should throw error for unsigned request that is not a VerusPay invoice', async () => {
@@ -75,15 +65,15 @@ describe('genericRequest', () => {
       (mockRequest.hasMultiDetails as jest.Mock).mockReturnValue(false);
       mockRequest.details = [{type: 'not-veruspay-invoice'}];
 
-      await expect(
-        checkGenericRequest(chainId, mockRequest as GenericRequest)
-      ).rejects.toThrow('The request is not signed.');
+      await expect(checkGenericRequest(chainId, mockRequest as GenericRequest)).rejects.toThrow(
+        'The request is not signed.'
+      );
     });
 
     it('should allow unsigned VerusPay invoice', async () => {
       (mockRequest.isSigned as jest.Mock).mockReturnValue(false);
       (mockRequest.hasMultiDetails as jest.Mock).mockReturnValue(false);
-      mockRequest.details = [{type: VDXF_ORDINAL_VERUSPAY_INVOICE}];
+      mockRequest.details = [{type: VERUSPAY_INVOICE_DETAILS_VDXF_ORDINAL}];
 
       await expect(
         checkGenericRequest(chainId, mockRequest as GenericRequest)
@@ -109,9 +99,9 @@ describe('genericRequest', () => {
         message: 'Invalid signature',
       });
 
-      await expect(
-        checkGenericRequest(chainId, mockRequest as GenericRequest)
-      ).rejects.toThrow('Invalid signature');
+      await expect(checkGenericRequest(chainId, mockRequest as GenericRequest)).rejects.toThrow(
+        'Invalid signature'
+      );
     });
 
     it('should verify signing identity exists for request with appOrDelegatedID', async () => {
@@ -166,9 +156,9 @@ describe('genericRequest', () => {
 
       mockedLoadIdentities.mockResolvedValue([mockIdentity] as Identity[]);
 
-      await expect(
-        checkGenericRequest(chainId, mockRequest as GenericRequest)
-      ).rejects.toThrow('The signing identity is not in the wallet, so having an app or delegated ID is not allowed.');
+      await expect(checkGenericRequest(chainId, mockRequest as GenericRequest)).rejects.toThrow(
+        'The signing identity is not in the wallet, so having an app or delegated ID is not allowed.'
+      );
     });
 
     it('should pass for signed request without appOrDelegatedID', async () => {

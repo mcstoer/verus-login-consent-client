@@ -42,7 +42,7 @@ import {
   PROVISIONING_FORM,
   REDIRECT,
 } from '#/utils/constants';
-import {createAndSignLoginResponse} from '#/utils/loginResponse';
+import {createAndSignLoginResponse} from '#/features/login/loginResponse';
 
 interface LoginProps {
   canProcessRequest: () => boolean;

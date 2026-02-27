@@ -30,7 +30,7 @@
     "react-router-dom": "6.30.1",
     "stream-browserify": "3.0.0",
     "util": "0.12.5",
-    "verus-typescript-primitives": "git+https://github.com/mcstoer/verus-typescript-primitives.git#generic-request-credential-keys",
+    "verus-typescript-primitives": "git+https://github.com/VerusCoin/verus-typescript-primitives.git",
     "vm-browserify": "1.1.2"
   },
   "scripts": {

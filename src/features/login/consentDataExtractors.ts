@@ -73,17 +73,17 @@ const getConstraintLabel = (constraint: RecipientConstraint) => {
     constraintLabel = identityLabel;
   }
 
-  if (constraint.type === AuthenticationRequestDetails.REQUIRED_SYSTEM) {
+  if (constraint.type === RecipientConstraint.REQUIRED_SYSTEM) {
     const systemName = getSystemNameFromSystemId(constraintLabel);
     if (systemName) constraintLabel = systemName;
   }
 
   switch (constraint.type) {
-    case AuthenticationRequestDetails.REQUIRED_ID:
+    case RecipientConstraint.REQUIRED_ID:
       return `Required identity: ${constraintLabel}`;
-    case AuthenticationRequestDetails.REQUIRED_SYSTEM:
+    case RecipientConstraint.REQUIRED_SYSTEM:
       return `Required system: ${constraintLabel}`;
-    case AuthenticationRequestDetails.REQUIRED_PARENT:
+    case RecipientConstraint.REQUIRED_PARENT:
       return `Required parent: ${constraintLabel}`;
     default:
       return `Constraint: ${constraintLabel}`;

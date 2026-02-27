@@ -24,8 +24,8 @@ import {
   EXTERNAL_ACTION,
   EXTERNAL_CHAIN_START,
 } from '#/utils/constants';
-import {checkGenericRequest} from '#/utils/genericRequest';
-import {checkLoginConsentRequest} from '#/utils/loginConsentRequest';
+import {checkGenericRequest} from '#/features/genericRequest/genericRequest';
+import {checkLoginConsentRequest} from '#/features/login/loginConsentRequest';
 import PropTypes from 'prop-types';
 import React from 'react';
 import {connect} from 'react-redux';

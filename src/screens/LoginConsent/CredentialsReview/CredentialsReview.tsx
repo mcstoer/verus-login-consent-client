@@ -14,7 +14,7 @@ import {
 } from '#/redux/reducers/navigation/navigationSlice';
 import {RootState} from '#/redux/store';
 import {REDIRECT, SELECT_LOGIN_ID} from '#/utils/constants';
-import {createAndSignLoginResponse} from '#/utils/loginResponse';
+import {createAndSignLoginResponse} from '#/features/login/loginResponse';
 import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
 import Button from '@mui/material/Button';
@@ -55,8 +55,6 @@ const CredentialsReview: React.FC<CredentialsReviewProps> = ({setRequestResult})
   const userDataCredentials = useSelector((state: RootState) =>
     selectUserDataCredentials(state, currentDetailIndex)
   );
-
-  console.log('userDataCredentials', userDataCredentials);
 
   if (deeplinkData instanceof VerusPayInvoice) {
     throw new Error('Unable to handle a VerusPayInvoice for Credential Review');

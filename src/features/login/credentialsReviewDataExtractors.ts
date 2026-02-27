@@ -76,7 +76,14 @@ export const extractCredentialsReviewDataV2 = (
   credentials: Credential[],
   currentDetailIndex: number
 ): CredentialsReviewData => {
-  const signerFqn = convertFqnToDisplayFormat(signedBy.fullyqualifiedname);
+  let signerFqn: string;
+
+  if (request.hasAppOrDelegatedID()) {
+    // TODO: Prefetch the appOrDelegatedID identity.
+    signerFqn = request.appOrDelegatedID.toString();
+  } else {
+    signerFqn = convertFqnToDisplayFormat(signedBy.fullyqualifiedname);
+  }
 
   const ordinalWrapper = request.details[currentDetailIndex];
 
@@ -85,8 +92,6 @@ export const extractCredentialsReviewDataV2 = (
   }
 
   const userDataDetail = ordinalWrapper.data;
-
-  console.log(userDataDetail);
 
   const requestedCredentialKeys: string[] = userDataDetail.searchDataKey.flatMap(obj =>
     Object.keys(obj)

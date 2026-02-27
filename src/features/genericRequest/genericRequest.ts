@@ -1,13 +1,12 @@
-import {GENERIC_REQUEST_DEEPLINK_VDXF_KEY, GenericRequest, VDXF_ORDINAL_VERUSPAY_INVOICE} from 'verus-typescript-primitives';
-import {loadIdentities} from '../rpc/calls/identities';
-import {verifyGenericRequest} from '../rpc/calls/verifyGenericRequest';
-import {Identity} from '../redux/reducers/signatureInfo/signatureInfo.types';
+import {GenericRequest, VERUSPAY_INVOICE_DETAILS_VDXF_ORDINAL} from 'verus-typescript-primitives';
+import {Identity} from '../../redux/reducers/signatureInfo/signatureInfo.types';
+import {loadIdentities} from '../../rpc/calls/identities';
+import {verifyGenericRequest} from '../../rpc/calls/verifyGenericRequest';
 
-// Checks the validity of a generic request and throws errors for any issues found
-export const checkGenericRequest = async (
-  chainId: string,
-  request: GenericRequest
-) => {
+/*
+ * Checks the validity of a generic request and throws errors for any issues found.
+ */
+export const checkGenericRequest = async (chainId: string, request: GenericRequest) => {
   if (!request.isValidVersion) {
     throw new Error(`The request version ${request.version} is unsupported.`);
   }
@@ -18,7 +17,10 @@ export const checkGenericRequest = async (
 
   if (!request.isSigned()) {
     // Only generic requests with VerusPay invoices are allowed to be unsigned.
-    if (request.hasMultiDetails() || request.details[0].type !== VDXF_ORDINAL_VERUSPAY_INVOICE) {
+    if (
+      request.hasMultiDetails() ||
+      request.details[0].type !== VERUSPAY_INVOICE_DETAILS_VDXF_ORDINAL
+    ) {
       throw new Error('The request is not signed.');
     }
     // Possibly throw error for appOrDelegatedId
@@ -32,18 +34,16 @@ export const checkGenericRequest = async (
     if (request.hasAppOrDelegatedID()) {
       // Check the signing identity is in the wallet, so that the appOrDelegatedId is allowed
       const signingId = request.signature.identityID.toIAddress();
-      const identities = await loadIdentities(chainId) as Array<Identity>;
+      const identities = (await loadIdentities(chainId)) as Array<Identity>;
       const found = identities.find(id => {
         return id.identity.identityaddress === signingId;
       });
 
       if (!found) {
-        throw new Error(`The signing identity is not in the wallet, so having an app or delegated ID is not allowed.`);
+        throw new Error(
+          `The signing identity is not in the wallet, so having an app or delegated ID is not allowed.`
+        );
       }
     }
   }
-};
-
-export const isGenericRequest = (id: string): boolean => {
-  return id === GENERIC_REQUEST_DEEPLINK_VDXF_KEY.vdxfid;
 };

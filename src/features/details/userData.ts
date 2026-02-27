@@ -7,13 +7,12 @@ import {
   CredentialJson,
   DATA_TYPE_OBJECT_CREDENTIAL,
   DataDescriptor,
-  DataPacketResponseOrdinalVDXFObject,
+  DataResponseDetails,
+  DataResponseOrdinalVDXFObject,
   GenericRequest,
   UserDataRequestOrdinalVDXFObject,
   VdxfUniValue,
 } from 'verus-typescript-primitives';
-// The DataPacketResponse isn't exported the same as the other classes.
-import {DataPacketResponse} from 'verus-typescript-primitives/dist/vdxf/classes/datapacket/DataPacketResponse';
 
 // Fetch the data from the identity and put it in the redux store.
 export async function prepareUserDataDetail(
@@ -75,7 +74,7 @@ export async function generateUserDataResponse(
   request: GenericRequest,
   detailIndex: number,
   getState: () => RootState
-): Promise<DataPacketResponseOrdinalVDXFObject | null> {
+): Promise<DataResponseOrdinalVDXFObject | null> {
   const state = getState();
   const ordinalWrapper = request.details[detailIndex];
 
@@ -91,11 +90,6 @@ export async function generateUserDataResponse(
     console.warn('No user data available for detail index:', detailIndex);
     return null;
   }
-
-  console.log('Generating user data response from state:', {
-    detailIndex,
-    credentialCount: userData.data.length,
-  });
 
   // Write the array of serializable objects to a single buffer.
   // The keys are comma-separated and should be used to deserialize the data.
@@ -115,12 +109,12 @@ export async function generateUserDataResponse(
     objectdata: vdxfUniValue.toBuffer(),
   });
 
-  const dataPacketResponse = new DataPacketResponse({
+  const dataPacketResponse = new DataResponseDetails({
     requestID: userDataRequestDetail.requestID,
     data: dataDescriptor,
   });
 
-  const responseOrdinal = new DataPacketResponseOrdinalVDXFObject({
+  const responseOrdinal = new DataResponseOrdinalVDXFObject({
     data: dataPacketResponse,
   });
 

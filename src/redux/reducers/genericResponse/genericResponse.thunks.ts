@@ -1,17 +1,17 @@
+import {AppThunk} from '#/redux/hooks';
+import {setError} from '#/redux/reducers/error/error.actions';
+import {completeRequest} from '#/redux/reducers/rpc/rpcSlice';
+import {Identity} from '#/redux/reducers/signatureInfo/signatureInfo.types';
+import {signGenericResponse} from '#/rpc/calls/signGenericResponse';
+import BN from '#/utils/bn-polyfill';
 import {
+  CompactIAddressObject,
   GenericRequest,
   GenericResponse,
   OrdinalVDXFObject,
   VerifiableSignatureData,
-  CompactAddressObject,
 } from 'verus-typescript-primitives';
-import {AppThunk} from '#/redux/hooks';
-import {setError} from '#/redux/reducers/error/error.actions';
 import {selectAllResponseDetails} from './genericResponseSlice';
-import {Identity} from '#/redux/reducers/signatureInfo/signatureInfo.types';
-import {completeRequest} from '#/redux/reducers/rpc/rpcSlice';
-import {signGenericResponse} from '#/rpc/calls/signGenericResponse';
-import BN from '#/utils/bn-polyfill';
 
 export function finalizeGenericRequest(genericRequest: GenericRequest, chainId: string): AppThunk {
   return async function (dispatch, getState) {
@@ -29,8 +29,14 @@ export function finalizeGenericRequest(genericRequest: GenericRequest, chainId: 
       const identityAddress = signingIdentity.identity.identityaddress;
 
       const signature = new VerifiableSignatureData({
-        systemID: CompactAddressObject.fromIAddress(systemAddress),
-        identityID: CompactAddressObject.fromIAddress(identityAddress),
+        systemID: new CompactIAddressObject({
+          type: CompactIAddressObject.TYPE_I_ADDRESS,
+          address: systemAddress,
+        }),
+        identityID: new CompactIAddressObject({
+          type: CompactIAddressObject.TYPE_I_ADDRESS,
+          address: identityAddress,
+        }),
       });
 
       const response = new GenericResponse({

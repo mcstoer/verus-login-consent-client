@@ -1,21 +1,21 @@
+import {Identity} from '#/redux/reducers/signatureInfo/signatureInfo.types';
+import {RootState} from '#/redux/store';
+import {signData} from '#/rpc/calls/signData';
 import {
   DataDescriptor,
-  DataPacketResponseOrdinalVDXFObject,
+  DataPacketRequestOrdinalVDXFObject,
+  DataResponseOrdinalVDXFObject,
   GenericRequest,
-  UserSpecificDataPacketDetailsOrdinalVDXFObject,
-  VdxfUniValue,
   SignatureData,
   SignatureDataKey,
+  VdxfUniValue,
 } from 'verus-typescript-primitives';
-import {DataPacketResponse} from 'verus-typescript-primitives/dist/vdxf/classes/datapacket/DataPacketResponse';
+import {DataResponseDetails} from 'verus-typescript-primitives/dist/vdxf/classes/data/DataResponseDetails';
 import {DetailPrepFunction} from './types';
-import {signData} from '#/rpc/calls/signData';
-import {RootState} from '#/redux/store';
-import {Identity} from '#/redux/reducers/signatureInfo/signatureInfo.types';
 
 export const prepareDataPacketDetail: DetailPrepFunction = async ordinal => {
-  if (!(ordinal instanceof UserSpecificDataPacketDetailsOrdinalVDXFObject)) {
-    throw new Error('Detail is not a UserSpecificDataPacketDetailsOrdinalVDXFObject');
+  if (!(ordinal instanceof DataPacketRequestOrdinalVDXFObject)) {
+    throw new Error('Ordinal is not a DataPacketRequestOrdinalVDXFObject');
   }
 
   const dataPacketDetail = ordinal.data;
@@ -29,11 +29,11 @@ export async function generateDataPacketResponse(
   request: GenericRequest,
   detailIndex: number,
   getState: () => RootState
-): Promise<DataPacketResponseOrdinalVDXFObject | null> {
+): Promise<DataResponseOrdinalVDXFObject | null> {
   const ordinalWrapper = request.details[detailIndex];
 
-  if (!(ordinalWrapper instanceof UserSpecificDataPacketDetailsOrdinalVDXFObject)) {
-    throw new Error('Detail is not a UserSpecificDataPacketDetailsOrdinalVDXFObject');
+  if (!(ordinalWrapper instanceof DataPacketRequestOrdinalVDXFObject)) {
+    throw new Error('Ordinal is not a DataPacketRequestOrdinalVDXFObject');
   }
 
   const state = getState();
@@ -41,10 +41,6 @@ export async function generateDataPacketResponse(
   const signingIdentity = state.identity.activeIdentity as Identity;
 
   const dataPacketDetail = ordinalWrapper.data;
-
-  console.log('Generating data packet response from state:', {
-    detailIndex,
-  });
 
   // Create signatures for each data descriptor and store them in a single VdxfUniValue.
   const values = [];
@@ -80,9 +76,9 @@ export async function generateDataPacketResponse(
     objectdata: vdxfUniValue.toBuffer(),
   });
 
-  const dataPacketResponse = new DataPacketResponseOrdinalVDXFObject({
-    data: new DataPacketResponse({
-      requestID: dataPacketDetail.detailsID,
+  const dataPacketResponse = new DataResponseOrdinalVDXFObject({
+    data: new DataResponseDetails({
+      requestID: dataPacketDetail.requestID,
       data: dataDescriptor,
     }),
   });

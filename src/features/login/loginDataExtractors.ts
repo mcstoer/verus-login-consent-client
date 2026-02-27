@@ -1,15 +1,14 @@
+import {Identity} from '#/redux/reducers/signatureInfo/signatureInfo.types';
+import {SUPPORTED_CREDENTIALS} from '#/utils/constants';
+import {getSystemNameFromSystemId} from '#/utils/systems';
 import {
+  AuthenticationRequestOrdinalVDXFObject,
   GenericRequest,
-  LoginConsentRequest,
   ID_ADDRESS_VDXF_KEY,
   LOGIN_CONSENT_ID_PROVISIONING_WEBHOOK_VDXF_KEY,
-  AuthenticationRequestOrdinalVDXFObject,
+  LoginConsentRequest,
   RecipientConstraint,
-  AuthenticationRequestDetails,
 } from 'verus-typescript-primitives';
-import {SUPPORTED_CREDENTIALS} from '#/utils/constants';
-import {Identity} from '#/redux/reducers/signatureInfo/signatureInfo.types';
-import {getSystemNameFromSystemId} from '#/utils/systems';
 
 // The data for displaying the identity selection UI for login.
 export interface LoginData {
@@ -20,10 +19,12 @@ export interface LoginData {
   filterIdentities: (identities: Identity[]) => Identity[];
 }
 
-// extractLoginDataV1 gets the data from the LoginConsentRequest.
+/*
+ * extractLoginDataV1 gets the data from the LoginConsentRequest.
+ */
 export const extractLoginDataV1 = (
   request: LoginConsentRequest,
-  identities: Identity[],
+  identities: Identity[]
 ): LoginData => {
   const requestedDataKeys: string[] = (request.challenge.requested_access || [])
     .filter((item: {vdxfkey: string}) => SUPPORTED_CREDENTIALS.includes(item.vdxfkey))
@@ -31,16 +32,15 @@ export const extractLoginDataV1 = (
 
   const hasRequestedCredentials: boolean = requestedDataKeys.length > 0;
 
-  let canProvision: boolean = !!request.challenge.provisioning_info && request.challenge.provisioning_info.some((x: {vdxfkey: string}) => {
-    return (
-      x.vdxfkey === LOGIN_CONSENT_ID_PROVISIONING_WEBHOOK_VDXF_KEY.vdxfid
-    );
-  });
+  let canProvision: boolean =
+    !!request.challenge.provisioning_info &&
+    request.challenge.provisioning_info.some((x: {vdxfkey: string}) => {
+      return x.vdxfkey === LOGIN_CONSENT_ID_PROVISIONING_WEBHOOK_VDXF_KEY.vdxfid;
+    });
 
-  const identitySubjects: string[] =
-    (request.challenge.subject || [])
-      .filter((item: {vdxfkey: string}) => item.vdxfkey === ID_ADDRESS_VDXF_KEY.vdxfid)
-      .map((id: {data: string}) => id.data);
+  const identitySubjects: string[] = (request.challenge.subject || [])
+    .filter((item: {vdxfkey: string}) => item.vdxfkey === ID_ADDRESS_VDXF_KEY.vdxfid)
+    .map((id: {data: string}) => id.data);
 
   const identitySubjectMatches = identities.filter((id: Identity) =>
     identitySubjects.includes(id.identity.identityaddress)
@@ -68,7 +68,7 @@ export const extractLoginDataV1 = (
 
 const getAllowedSystems = (recipientConstraints: RecipientConstraint[]) => {
   return recipientConstraints.reduce((acc, constraint) => {
-    if (constraint.type === AuthenticationRequestDetails.REQUIRED_SYSTEM) {
+    if (constraint.type === RecipientConstraint.REQUIRED_SYSTEM) {
       try {
         acc.add(getSystemNameFromSystemId(constraint.identity.toIAddress()));
       } catch {
@@ -81,7 +81,7 @@ const getAllowedSystems = (recipientConstraints: RecipientConstraint[]) => {
 
 const getRequiredIDs = (recipientConstraints: RecipientConstraint[]) => {
   return recipientConstraints.reduce((acc, constraint) => {
-    if (constraint.type === AuthenticationRequestDetails.REQUIRED_ID) {
+    if (constraint.type === RecipientConstraint.REQUIRED_ID) {
       try {
         acc.add(constraint.identity.toIAddress());
       } catch {
@@ -92,11 +92,13 @@ const getRequiredIDs = (recipientConstraints: RecipientConstraint[]) => {
   }, new Set<string>());
 };
 
-// extractLoginDataV2 gets the data from the authentication request detail in a generic request.
+/*
+ * extractLoginDataV2 gets the data from the authentication request detail in a generic request.
+ */
 export const extractLoginDataV2 = (
   request: GenericRequest,
   identities: Identity[],
-  currentDetailIndex: number,
+  currentDetailIndex: number
 ): LoginData => {
   const ordinalWrapper = request.details[currentDetailIndex];
 

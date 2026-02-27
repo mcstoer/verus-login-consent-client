@@ -5,12 +5,13 @@ import {
   AppEncryptionRequestDetails,
   AppEncryptionRequestOrdinalVDXFObject,
   AppEncryptionResponseDetails,
+  AppEncryptionResponseOrdinalVDXFObject,
   DataDescriptor,
-  DataPacketResponseOrdinalVDXFObject,
+  DataResponseOrdinalVDXFObject,
   GenericRequest,
   OrdinalVDXFObject,
 } from 'verus-typescript-primitives';
-import {DataPacketResponse} from 'verus-typescript-primitives/dist/vdxf/classes/datapacket/DataPacketResponse';
+import {DataResponseDetails} from 'verus-typescript-primitives/dist/vdxf/classes/data/DataResponseDetails';
 import {DetailPrepFunction, DetailResponse} from './types';
 
 export const prepareAppEncryptionDetail: DetailPrepFunction = async (
@@ -60,35 +61,46 @@ export async function generateAppEncryptionResponse(
     toID
   );
 
+  let responseOrdinal: DataResponseOrdinalVDXFObject | AppEncryptionResponseOrdinalVDXFObject;
+
   // Use fromJson since the main app returns the keys as strings and we store them as strings.
   const responseData = AppEncryptionResponseDetails.fromJson({
     version: 1,
-    requestid: requestDetail.requestID,
     incomingviewingkey: appEncryptionResult.incomingViewingKey,
     extendedviewingkey: appEncryptionResult.extendedViewingKey,
     address: appEncryptionResult.address,
     extendedspendingkey: appEncryptionResult.extendedSpendingKey,
   });
 
-  // Store the AppEncryptionResponse detail within the DataPacketResponse so that
-  // the keys can be encrypted for secure transit.
-  const encryptedDataDescriptorJson = await encryptAppEncryptionResponse(
-    chainId,
-    responseData,
-    fromID,
-    requestDetail.encryptToZAddress
-  );
+  // toJson doesn't work with the CompactIAddressObject, so just add it in after we
+  // create the response data.
+  responseData.requestID = requestDetail.requestID;
 
-  const encryptedDataDescriptor = DataDescriptor.fromJson(encryptedDataDescriptorJson);
+  if (requestDetail.hasEncryptResponseToAddress()) {
+    // Store the AppEncryptionResponse detail within the DataPacketResponse so that
+    // the keys can be encrypted for secure transit.
+    const encryptedDataDescriptorJson = await encryptAppEncryptionResponse(
+      chainId,
+      responseData,
+      fromID,
+      requestDetail.encryptResponseToAddress.toAddressString()
+    );
 
-  const encryptedResponseDetail = new DataPacketResponse({
-    requestID: requestDetail.requestID,
-    data: encryptedDataDescriptor,
-  });
+    const encryptedDataDescriptor = DataDescriptor.fromJson(encryptedDataDescriptorJson);
 
-  const responseOrdinal = new DataPacketResponseOrdinalVDXFObject({
-    data: encryptedResponseDetail,
-  });
+    const encryptedResponseDetail = new DataResponseDetails({
+      requestID: requestDetail.requestID,
+      data: encryptedDataDescriptor,
+    });
+
+    responseOrdinal = new DataResponseOrdinalVDXFObject({
+      data: encryptedResponseDetail,
+    });
+  } else {
+    responseOrdinal = new AppEncryptionResponseOrdinalVDXFObject({
+      data: responseData,
+    });
+  }
 
   return responseOrdinal;
 }
