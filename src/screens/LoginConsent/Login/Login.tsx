@@ -1,6 +1,4 @@
 import Button from '@mui/material/Button';
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
 import Checkbox from '@mui/material/Checkbox';
 import FormControl from '@mui/material/FormControl';
 import FormControlLabel from '@mui/material/FormControlLabel';
@@ -18,6 +16,7 @@ import {
   extractLoginDataV2,
   LoginData,
 } from '#/features/login/loginDataExtractors';
+import {createAndSignLoginResponse} from '#/features/login/loginResponse';
 import {useAppDispatch} from '#/redux/hooks';
 import {setCredentials} from '#/redux/reducers/credentials/credentials.actions';
 import {setError} from '#/redux/reducers/error/error.actions';
@@ -42,7 +41,6 @@ import {
   PROVISIONING_FORM,
   REDIRECT,
 } from '#/utils/constants';
-import {createAndSignLoginResponse} from '#/features/login/loginResponse';
 
 interface LoginProps {
   canProcessRequest: () => boolean;
@@ -164,6 +162,9 @@ const Login = (props: LoginProps) => {
     );
   };
 
+  // TODO: Refactor the dropdown into a cleaner scrollable list with the provisioning button
+  // reserved. Once this is done, then all the pages will have central cards and the
+  // PageLayout can be refactored.
   return (
     <PageLayout
       title={`Select an Identity` + (canProvision ? ' or Request an Identity' : '')}
@@ -204,71 +205,62 @@ const Login = (props: LoginProps) => {
         </>
       }
     >
-      <Card
-        sx={{
-          width: '100%',
-          overflowY: 'auto',
-        }}
-      >
-        <CardContent>
-          <FormControl style={{maxWidth: 560, width: '100%'}}>
-            <Select
-              value={activeIdentity == null ? '' : activeIdentity.identity.identityaddress}
-              displayEmpty
-              inputProps={{'aria-label': 'Select a VerusID'}}
-              style={{
-                textAlign: 'start',
-                paddingTop: 2,
-              }}
-              onChange={(e: SelectChangeEvent<string>) => {
-                return selectId(e.target.value);
-              }}
-            >
-              <MenuItem value="">
-                <em>Select a VerusID</em>
-              </MenuItem>
-              {filteredIdentities.map((id: Identity, index: number) => {
-                return (
-                  <MenuItem
-                    key={index}
-                    value={id.identity.identityaddress}
-                  >{`${id.identity.name}@`}</MenuItem>
-                );
-              })}
-            </Select>
-            <div style={{display: 'flex', justifyContent: 'center'}}>
-              {hasRequestedCredentials && (
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={includeCredentials}
-                      onChange={e => setIncludeCredentials(e.target.checked)}
-                      color="primary"
-                    />
-                  }
-                  label="Include Credentials"
-                  style={{marginTop: 8}}
+      <FormControl style={{maxWidth: 560, width: '100%'}}>
+        <Select
+          value={activeIdentity == null ? '' : activeIdentity.identity.identityaddress}
+          displayEmpty
+          inputProps={{'aria-label': 'Select a VerusID'}}
+          style={{
+            textAlign: 'start',
+            paddingTop: 2,
+          }}
+          onChange={(e: SelectChangeEvent<string>) => {
+            return selectId(e.target.value);
+          }}
+        >
+          <MenuItem value="">
+            <em>Select a VerusID</em>
+          </MenuItem>
+          {filteredIdentities.map((id: Identity, index: number) => {
+            return (
+              <MenuItem
+                key={index}
+                value={id.identity.identityaddress}
+              >{`${id.identity.name}@`}</MenuItem>
+            );
+          })}
+        </Select>
+        <div style={{display: 'flex', justifyContent: 'center'}}>
+          {hasRequestedCredentials && (
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={includeCredentials}
+                  onChange={e => setIncludeCredentials(e.target.checked)}
+                  color="primary"
                 />
-              )}
-            </div>
-          </FormControl>
-          {canProvision && (
-            <Button
-              variant="contained"
-              color="primary"
-              disabled={loading}
-              onClick={() => tryProvision()}
-              style={{
-                width: 240,
-                padding: 8,
-                marginTop: 'auto',
-              }}
-            >
-              {'Request a new VerusID'}
-            </Button>
+              }
+              label="Include Credentials"
+              style={{marginTop: 8}}
+            />
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </FormControl>
+      {canProvision && (
+        <Button
+          variant="contained"
+          color="primary"
+          disabled={loading}
+          onClick={() => tryProvision()}
+          style={{
+            width: 240,
+            padding: 8,
+            marginTop: 'auto',
+          }}
+        >
+          {'Request a new VerusID'}
+        </Button>
+      )}
     </PageLayout>
   );
 };

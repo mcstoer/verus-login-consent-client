@@ -80,7 +80,8 @@ const PageLayout: React.FC<PageLayoutProps> = ({
             width: '100%',
             display: 'flex',
             flexDirection: 'column',
-            height: '60vh',
+            flex: 1,
+            minHeight: 0,
             ...contentStyle,
           }}
         >

@@ -163,7 +163,10 @@ const CredentialsReview: React.FC<CredentialsReviewProps> = ({setRequestResult})
           marginTop: 1,
           marginBottom: 1,
           width: '100%',
-          overflowY: 'scroll',
+          maxHeight: '100%',
+          minHeight: 0,
+          overflowY: 'auto',
+          scrollbarGutter: 'stable',
         }}
       >
         <List>

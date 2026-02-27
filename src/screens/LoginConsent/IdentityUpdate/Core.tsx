@@ -325,7 +325,10 @@ const IdentityUpdateCore: React.FC = () => {
           marginTop: 1,
           marginBottom: 1,
           width: '100%',
+          maxHeight: '100%',
+          minHeight: 0,
           overflowY: 'auto',
+          scrollbarGutter: 'stable',
         }}
       >
         <CardContent>

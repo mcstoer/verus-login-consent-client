@@ -137,7 +137,10 @@ const DataPacket: React.FC = () => {
         square
         sx={{
           width: '100%',
+          maxHeight: '100%',
+          minHeight: 0,
           overflowY: 'auto',
+          scrollbarGutter: 'stable',
         }}
       >
         <CardContent sx={{p: 0}}>

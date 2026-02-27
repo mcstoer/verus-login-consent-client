@@ -161,7 +161,10 @@ const Consent: React.FC<ConsentProps> = props => {
         square
         sx={{
           width: '100%',
+          maxHeight: '100%',
+          minHeight: 0,
           overflowY: 'auto',
+          scrollbarGutter: 'stable',
         }}
       >
         <CardContent sx={{p: 0}}>
