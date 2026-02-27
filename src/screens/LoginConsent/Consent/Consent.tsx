@@ -5,7 +5,6 @@ import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
 import Collapse from '@mui/material/Collapse';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
@@ -167,119 +166,109 @@ const Consent: React.FC<ConsentProps> = props => {
           scrollbarGutter: 'stable',
         }}
       >
-        <CardContent sx={{p: 0}}>
-          <List disablePadding sx={{'& > *:last-child': {borderBottom: 'none'}}}>
-            <IdentityDetails
-              identity={signedBy}
-              revocationAuthority={signingRevocationIdentity}
-              recoveryAuthority={signingRecoveryIdentity}
-              systemDescriptor={systemDescriptor}
-              headerLabel="Requested by"
+        <List disablePadding sx={{'& > *:last-child': {borderBottom: 'none'}}}>
+          <IdentityDetails
+            identity={signedBy}
+            revocationAuthority={signingRevocationIdentity}
+            recoveryAuthority={signingRecoveryIdentity}
+            systemDescriptor={systemDescriptor}
+            headerLabel="Requested by"
+          />
+
+          <ListItem divider>
+            <ListItemText
+              primary={systemDescriptor || '-'}
+              secondary="System name"
+              slotProps={LIST_ITEM_SLOTS.standard}
             />
+          </ListItem>
 
-            <ListItem divider>
+          <ListItem divider>
+            <ListItemText
+              primary={time ? unixToDate(time) : '-'}
+              secondary="Signed on"
+              slotProps={LIST_ITEM_SLOTS.standard}
+            />
+          </ListItem>
+
+          {permissionsLabels && permissionsLabels.length > 0 && (
+            <>
+              <ListItemButton onClick={handlePermissionsClick}>
+                <ListItemText
+                  primary="Permissions Requested"
+                  secondary={openPermissions ? 'Click to collapse' : 'Click to expand'}
+                  slotProps={LIST_ITEM_SLOTS.collapsible}
+                />
+                {openPermissions ? <ExpandLess color="action" /> : <ExpandMore color="action" />}
+              </ListItemButton>
+
+              <Collapse in={openPermissions} timeout="auto" unmountOnExit>
+                <List component="div" dense disablePadding>
+                  {permissionsLabels.map((permission, index) => (
+                    <ListItem key={index} divider sx={{pl: 6, pr: 2, py: 0.5, minHeight: 48}}>
+                      <ListItemText primary={`${permission}`} slotProps={LIST_ITEM_SLOTS.nested} />
+                    </ListItem>
+                  ))}
+                </List>
+              </Collapse>
+            </>
+          )}
+
+          {constraintsLabels && constraintsLabels.length > 0 && (
+            <>
+              <ListItemButton divider onClick={handleConstraintsClick}>
+                <ListItemText
+                  primary="Constraints"
+                  secondary={openConstraints ? 'Click to collapse' : 'Click to expand'}
+                  slotProps={LIST_ITEM_SLOTS.collapsible}
+                />
+                {openConstraints ? <ExpandLess color="action" /> : <ExpandMore color="action" />}
+              </ListItemButton>
+
+              <Collapse in={openConstraints} timeout="auto" unmountOnExit>
+                <List component="div" dense disablePadding>
+                  {constraintsLabels.map((constraint, index) => (
+                    <ListItem key={index} divider sx={{pl: 6, pr: 2, py: 0.5, minHeight: 48}}>
+                      <ListItemText primary={`${constraint}`} slotProps={LIST_ITEM_SLOTS.nested} />
+                    </ListItem>
+                  ))}
+                </List>
+              </Collapse>
+            </>
+          )}
+
+          {responseURIsLabels.length > 0 && (
+            <>
+              <ListItemButton divider onClick={handleResponseURIsClick}>
+                <ListItemText
+                  primary="Response URIs"
+                  secondary={openResponseURIs ? 'Click to collapse' : 'Click to expand'}
+                  slotProps={LIST_ITEM_SLOTS.collapsible}
+                />
+                {openResponseURIs ? <ExpandLess color="action" /> : <ExpandMore color="action" />}
+              </ListItemButton>
+
+              <Collapse in={openResponseURIs} timeout="auto" unmountOnExit>
+                <List component="div" dense disablePadding>
+                  {responseURIsLabels.map((uri, index) => (
+                    <ListItem key={index} divider sx={{pl: 6, pr: 2, py: 0.5, minHeight: 48}}>
+                      <ListItemText primary={`${uri}`} slotProps={LIST_ITEM_SLOTS.nested} />
+                    </ListItem>
+                  ))}
+                </List>
+              </Collapse>
+            </>
+          )}
+          {expiryLabel && (
+            <ListItem>
               <ListItemText
-                primary={systemDescriptor || '-'}
-                secondary="System name"
+                primary={expiryLabel || '-'}
+                secondary="Expires at"
                 slotProps={LIST_ITEM_SLOTS.standard}
               />
             </ListItem>
-
-            <ListItem divider>
-              <ListItemText
-                primary={time ? unixToDate(time) : '-'}
-                secondary="Signed on"
-                slotProps={LIST_ITEM_SLOTS.standard}
-              />
-            </ListItem>
-
-            {permissionsLabels && permissionsLabels.length > 0 && (
-              <>
-                <ListItemButton onClick={handlePermissionsClick}>
-                  <ListItemText
-                    primary="Permissions Requested"
-                    secondary={openPermissions ? 'Click to collapse' : 'Click to expand'}
-                    slotProps={LIST_ITEM_SLOTS.collapsible}
-                  />
-                  {openPermissions ? <ExpandLess color="action" /> : <ExpandMore color="action" />}
-                </ListItemButton>
-
-                <Collapse in={openPermissions} timeout="auto" unmountOnExit>
-                  <List component="div" dense disablePadding>
-                    {permissionsLabels.map((permission, index) => (
-                      <ListItem key={index} divider sx={{pl: 6, pr: 2, py: 0.5, minHeight: 48}}>
-                        <ListItemText
-                          primary={`${permission}`}
-                          slotProps={LIST_ITEM_SLOTS.nested}
-                        />
-                      </ListItem>
-                    ))}
-                  </List>
-                </Collapse>
-              </>
-            )}
-
-            {constraintsLabels && constraintsLabels.length > 0 && (
-              <>
-                <ListItemButton divider onClick={handleConstraintsClick}>
-                  <ListItemText
-                    primary="Constraints"
-                    secondary={openConstraints ? 'Click to collapse' : 'Click to expand'}
-                    slotProps={LIST_ITEM_SLOTS.collapsible}
-                  />
-                  {openConstraints ? <ExpandLess color="action" /> : <ExpandMore color="action" />}
-                </ListItemButton>
-
-                <Collapse in={openConstraints} timeout="auto" unmountOnExit>
-                  <List component="div" dense disablePadding>
-                    {constraintsLabels.map((constraint, index) => (
-                      <ListItem key={index} divider sx={{pl: 6, pr: 2, py: 0.5, minHeight: 48}}>
-                        <ListItemText
-                          primary={`${constraint}`}
-                          slotProps={LIST_ITEM_SLOTS.nested}
-                        />
-                      </ListItem>
-                    ))}
-                  </List>
-                </Collapse>
-              </>
-            )}
-
-            {responseURIsLabels.length > 0 && (
-              <>
-                <ListItemButton divider onClick={handleResponseURIsClick}>
-                  <ListItemText
-                    primary="Response URIs"
-                    secondary={openResponseURIs ? 'Click to collapse' : 'Click to expand'}
-                    slotProps={LIST_ITEM_SLOTS.collapsible}
-                  />
-                  {openResponseURIs ? <ExpandLess color="action" /> : <ExpandMore color="action" />}
-                </ListItemButton>
-
-                <Collapse in={openResponseURIs} timeout="auto" unmountOnExit>
-                  <List component="div" dense disablePadding>
-                    {responseURIsLabels.map((uri, index) => (
-                      <ListItem key={index} divider sx={{pl: 6, pr: 2, py: 0.5, minHeight: 48}}>
-                        <ListItemText primary={`${uri}`} slotProps={LIST_ITEM_SLOTS.nested} />
-                      </ListItem>
-                    ))}
-                  </List>
-                </Collapse>
-              </>
-            )}
-            {expiryLabel && (
-              <>
-                <ListItem divider>
-                  <ListItemText
-                    primary={expiryLabel || '-'}
-                    secondary="Expires at"
-                    slotProps={LIST_ITEM_SLOTS.standard}
-                  />
-                </ListItem>
-              </>
-            )}
-          </List>
-        </CardContent>
+          )}
+        </List>
       </Card>
     </PageLayout>
   );
