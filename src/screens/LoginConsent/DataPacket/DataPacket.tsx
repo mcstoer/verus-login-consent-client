@@ -158,11 +158,7 @@ const DataPacket: React.FC = () => {
 
                 <List component="div" dense disablePadding>
                   {dataPacketDetails.statements.map((statement, index) => (
-                    <ListItem
-                      key={index}
-                      divider={index < dataPacketDetails.statements!.length - 1}
-                      sx={{pl: 6, pr: 2, py: 0.5, minHeight: 48}}
-                    >
+                    <ListItem key={index} divider sx={{pl: 6, pr: 2, py: 0.5, minHeight: 48}}>
                       <ListItemText primary={statement} slotProps={LIST_ITEM_SLOTS.nested} />
                     </ListItem>
                   ))}
