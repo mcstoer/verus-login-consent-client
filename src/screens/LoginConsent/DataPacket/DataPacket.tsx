@@ -1,18 +1,16 @@
 import React, {useState} from 'react';
 import {useSelector} from 'react-redux';
 
-import ExpandLess from '@mui/icons-material/ExpandLess';
-import ExpandMore from '@mui/icons-material/ExpandMore';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
-import Collapse from '@mui/material/Collapse';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 
 import {GenericRequest, DataPacketRequestOrdinalVDXFObject} from 'verus-typescript-primitives';
 
+import CollapsibleListSection from '#/components/CollapsibleListSection';
+import NestedListItem from '#/components/NestedListItem';
 import PageLayout from '#/components/PageLayout';
 import {isLastDetail} from '#/features/details/detailNavigation';
 import {useAppDispatch} from '#/redux/hooks';
@@ -22,24 +20,9 @@ import {
 } from '#/redux/reducers/navigation/navigationSlice';
 import {RootState} from '#/redux/store';
 
-const LIST_ITEM_SLOTS = {
-  standard: {
-    primary: {variant: 'subtitle1' as const},
-    secondary: {color: 'text.secondary' as const, variant: 'body2' as const},
-  },
-  nested: {
-    primary: {variant: 'body2' as const, sx: {lineHeight: 1.3}},
-  },
-  collapsible: {
-    primary: {variant: 'subtitle1' as const},
-    secondary: {color: 'text.secondary' as const, variant: 'body2' as const},
-  },
-} as const;
-
 const DataPacket: React.FC = () => {
   const dispatch = useAppDispatch();
   const [loading, setLoading] = useState<boolean>(false);
-  const [openObjects, setOpenObjects] = useState<{[key: number]: boolean}>({});
 
   const deeplinkData = useSelector((state: RootState) => state.deeplink.data);
   const currentDetailIndex = useSelector((state: RootState) => state.navigation.currentDetailIndex);
@@ -66,13 +49,6 @@ const DataPacket: React.FC = () => {
   const isLastDetailInRequest = isLastDetail(deeplinkData, currentDetailIndex);
   const continueButtonText = isLastDetailInRequest ? 'Finish' : 'Continue';
   const continueButtonColor = isLastDetailInRequest ? 'primary' : 'success';
-
-  const handleObjectClick = (index: number) => {
-    setOpenObjects(prev => ({
-      ...prev,
-      [index]: !prev[index],
-    }));
-  };
 
   const handleNext = async (): Promise<void> => {
     setLoading(true);
@@ -158,9 +134,7 @@ const DataPacket: React.FC = () => {
 
                 <List component="div" dense disablePadding>
                   {dataPacketDetails.statements.map((statement, index) => (
-                    <ListItem key={index} divider sx={{pl: 6, pr: 2, py: 0.5, minHeight: 48}}>
-                      <ListItemText primary={statement} slotProps={LIST_ITEM_SLOTS.nested} />
-                    </ListItem>
+                    <NestedListItem key={index} primary={statement} />
                   ))}
                 </List>
               </>
@@ -169,62 +143,36 @@ const DataPacket: React.FC = () => {
           {dataPacketDetails.signableObjects &&
             dataPacketDetails.signableObjects.length > 0 &&
             dataPacketDetails.signableObjects.map((dataDescriptor, index) => (
-              <React.Fragment key={index}>
-                <ListItemButton divider onClick={() => handleObjectClick(index)}>
-                  <ListItemText
-                    primary={
-                      `Object #${index + 1}` +
-                      (dataDescriptor.label ? `: ${dataDescriptor.label}` : '')
-                    }
-                    slotProps={LIST_ITEM_SLOTS.collapsible}
+              <CollapsibleListSection
+                key={index}
+                title={
+                  `Object #${index + 1}` + (dataDescriptor.label ? `: ${dataDescriptor.label}` : '')
+                }
+                divider
+                collapseHint={false}
+              >
+                {dataDescriptor.label && (
+                  <NestedListItem
+                    primary={dataDescriptor.label}
+                    secondary="Label"
+                    variant="standard"
                   />
-                  {openObjects[index] ? (
-                    <ExpandLess color="action" />
-                  ) : (
-                    <ExpandMore color="action" />
-                  )}
-                </ListItemButton>
-
-                <Collapse in={openObjects[index]} timeout="auto" unmountOnExit>
-                  <List
-                    component="div"
-                    dense
-                    disablePadding
-                    sx={{'& > *:last-child': {borderBottom: 'none'}}}
-                  >
-                    {dataDescriptor.label && (
-                      <ListItem divider sx={{pl: 6, pr: 2, py: 0.5, minHeight: 48}}>
-                        <ListItemText
-                          primary={dataDescriptor.label}
-                          secondary="Label"
-                          slotProps={LIST_ITEM_SLOTS.standard}
-                        />
-                      </ListItem>
-                    )}
-                    {dataDescriptor.mimeType && (
-                      <ListItem divider sx={{pl: 6, pr: 2, py: 0.5, minHeight: 48}}>
-                        <ListItemText
-                          primary={dataDescriptor.mimeType}
-                          secondary="MIME Type"
-                          slotProps={LIST_ITEM_SLOTS.standard}
-                        />
-                      </ListItem>
-                    )}
-                    {dataDescriptor.objectdata && (
-                      <ListItem divider sx={{pl: 6, pr: 2, py: 0.5, minHeight: 48}}>
-                        <ListItemText
-                          primary={getDisplayData(
-                            dataDescriptor.objectdata,
-                            dataDescriptor.mimeType
-                          )}
-                          secondary="Data"
-                          slotProps={LIST_ITEM_SLOTS.standard}
-                        />
-                      </ListItem>
-                    )}
-                  </List>
-                </Collapse>
-              </React.Fragment>
+                )}
+                {dataDescriptor.mimeType && (
+                  <NestedListItem
+                    primary={dataDescriptor.mimeType}
+                    secondary="MIME Type"
+                    variant="standard"
+                  />
+                )}
+                {dataDescriptor.objectdata && (
+                  <NestedListItem
+                    primary={getDisplayData(dataDescriptor.objectdata, dataDescriptor.mimeType)}
+                    secondary="Data"
+                    variant="standard"
+                  />
+                )}
+              </CollapsibleListSection>
             ))}
         </List>
       </Card>
