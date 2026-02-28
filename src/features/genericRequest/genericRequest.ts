@@ -1,13 +1,17 @@
 import {GenericRequest, VERUSPAY_INVOICE_DETAILS_VDXF_ORDINAL} from 'verus-typescript-primitives';
 import {Identity} from '../../redux/reducers/signatureInfo/signatureInfo.types';
-import {loadIdentities} from '../../rpc/calls/identities';
+import {RootState} from '../../redux/store';
 import {verifyGenericRequest} from '../../rpc/calls/verifyGenericRequest';
 
 /*
  * Checks the validity of a generic request and throws errors for any issues found.
  */
-export const checkGenericRequest = async (chainId: string, request: GenericRequest) => {
-  if (!request.isValidVersion) {
+export const checkGenericRequest = async (
+  chainId: string,
+  request: GenericRequest,
+  getState: () => RootState
+) => {
+  if (!request.isValidVersion()) {
     throw new Error(`The request version ${request.version} is unsupported.`);
   }
 
@@ -19,7 +23,7 @@ export const checkGenericRequest = async (chainId: string, request: GenericReque
     // Only generic requests with VerusPay invoices are allowed to be unsigned.
     if (
       request.hasMultiDetails() ||
-      request.details[0].type !== VERUSPAY_INVOICE_DETAILS_VDXF_ORDINAL
+      !request.details[0].type.eq(VERUSPAY_INVOICE_DETAILS_VDXF_ORDINAL)
     ) {
       throw new Error('The request is not signed.');
     }
@@ -34,7 +38,7 @@ export const checkGenericRequest = async (chainId: string, request: GenericReque
     if (request.hasAppOrDelegatedID()) {
       // Check the signing identity is in the wallet, so that the appOrDelegatedId is allowed
       const signingId = request.signature.identityID.toIAddress();
-      const identities = (await loadIdentities(chainId)) as Array<Identity>;
+      const identities = getState().identity.identities as Identity[];
       const found = identities.find(id => {
         return id.identity.identityaddress === signingId;
       });

@@ -24,6 +24,8 @@ export function finalizeGenericRequest(genericRequest: GenericRequest, chainId: 
         detail => OrdinalVDXFObject.createFromBuffer(Buffer.from(detail.hexBuffer, 'hex')).obj
       );
 
+      // For requests that are for identity updates with no authentication details,
+      // there is no active identity. Instead use the identity that was updated.
       const signingIdentity = state.identity.activeIdentity as Identity;
       const systemAddress = signingIdentity.identity.systemid;
       const identityAddress = signingIdentity.identity.identityaddress;

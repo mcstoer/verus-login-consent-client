@@ -25,6 +25,7 @@ import {
   EXTERNAL_CHAIN_START,
 } from '#/utils/constants';
 import {checkGenericRequest} from '#/features/genericRequest/genericRequest';
+import store from '#/redux/store';
 import {checkLoginConsentRequest} from '#/features/login/loginConsentRequest';
 import PropTypes from 'prop-types';
 import React from 'react';
@@ -195,7 +196,8 @@ class LoginConsent extends React.Component {
 
         case GENERIC_REQUEST_DEEPLINK_VDXF_KEY.vdxfid:
           request = new GenericRequest(req);
-          await checkGenericRequest(chainId, request);
+
+          await checkGenericRequest(chainId, request, store.getState);
           if (request.isSigned) {
             signingId = request.signature.identityID.toIAddress();
             signatureString = request.signature.signatureAsVch.toString('base64');

@@ -15,7 +15,11 @@ import ListItemText from '@mui/material/ListItemText';
 import Typography from '@mui/material/Typography';
 import React, {useEffect, useState} from 'react';
 import {useSelector} from 'react-redux';
-import {GenericRequest, IdentityUpdateRequestOrdinalVDXFObject} from 'verus-typescript-primitives';
+import {
+  GenericRequest,
+  IdentityUpdateRequestDetails,
+  IdentityUpdateRequestOrdinalVDXFObject,
+} from 'verus-typescript-primitives';
 import {SnackbarAlert} from '#/components/SnackbarAlert';
 import {
   navigateBackGenericRequest,
@@ -32,17 +36,16 @@ interface IdentityFieldChange {
 }
 
 const processIdentityChanges = async (
-  ordinal: IdentityUpdateRequestOrdinalVDXFObject,
+  details: IdentityUpdateRequestDetails,
   identity: Identity,
   chainId: string
 ): Promise<IdentityFieldChange[]> => {
   const changes: IdentityFieldChange[] = [];
 
-  if (!ordinal.data || !identity.identity) {
+  if (!identity.identity) {
     return changes;
   }
 
-  const details = ordinal.data;
   const identityChanges = details.identity;
   const currentIdentity = identity.identity;
 
@@ -212,7 +215,7 @@ const IdentityUpdateCore: React.FC = () => {
 
   const deeplinkData = useSelector((state: RootState) => state.deeplink.data);
   const currentDetailIndex = useSelector((state: RootState) => state.navigation.currentDetailIndex);
-  const identity = useSelector((state: RootState) => state.identity.activeIdentity) as Identity;
+  const identities = useSelector((state: RootState) => state.identity.identities) as Identity[];
   const chainId = useSelector((state: RootState) => state.chainMetadata.chainId);
 
   if (!(deeplinkData instanceof GenericRequest)) {
@@ -225,7 +228,12 @@ const IdentityUpdateCore: React.FC = () => {
     throw new Error('Unable to handle non-identity update detail.');
   }
 
-  const name = identity.identity.name;
+  const details = ordinal.data;
+
+  const identityToUpdate = identities.find(id => {
+    return id.identity.name === details.identity.name;
+  });
+  const name = identityToUpdate?.identity.name;
 
   const handleDropdownToggle = (index: number) => {
     setOpenDropdowns(prev => ({
@@ -243,7 +251,7 @@ const IdentityUpdateCore: React.FC = () => {
 
       setLoading(true);
       try {
-        const currentChanges = await processIdentityChanges(ordinal, identity, chainId);
+        const currentChanges = await processIdentityChanges(details, identityToUpdate, chainId);
         setChanges(currentChanges);
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Failed to load identity';
@@ -258,7 +266,7 @@ const IdentityUpdateCore: React.FC = () => {
     };
 
     computeChanges();
-  }, [ordinal]);
+  }, [details, identityToUpdate]);
 
   const handleNext = async (): Promise<void> => {
     setLoading(true);

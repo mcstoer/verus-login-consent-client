@@ -2,6 +2,7 @@ import {
   AuthenticationRequestDetails,
   AuthenticationRequestOrdinalVDXFObject,
   GenericRequest,
+  IdentityUpdateRequestOrdinalVDXFObject,
   LoginConsentRequest,
   RecipientConstraint,
   RedirectUri,
@@ -14,6 +15,7 @@ import {unixToDate} from '#/utils/math';
 import {getSystemNameFromSystemId} from '#/utils/systems';
 
 export interface ConsentData {
+  title: string;
   signerFqn: string;
   permissionsLabels: string[];
   systemId: string;
@@ -51,6 +53,7 @@ export const extractConsentDataV1 = (
   const responseURIsLabels = request.challenge.redirect_uris.map((uri: RedirectUri) => uri.uri);
 
   return {
+    title: `${signerFqn} is requesting login with VerusID`,
     signerFqn,
     permissionsLabels: permissionsDescriptions,
     systemId,
@@ -109,10 +112,14 @@ export const extractConsentDataV2 = (
   let expiryLabel: string;
   let constraints: RecipientConstraint[] = [];
 
+  let title = `${signerFqn} is requesting login with VerusID`;
+
   if (ordinalWrapper instanceof AuthenticationRequestOrdinalVDXFObject) {
     const authRequestDetail = ordinalWrapper.data;
     expiryLabel = getExpiryLabel(authRequestDetail);
     constraints = authRequestDetail.recipientConstraints ?? [];
+  } else if (ordinalWrapper instanceof IdentityUpdateRequestOrdinalVDXFObject) {
+    title = `${signerFqn} is requesting to update ${ordinalWrapper.data.identity?.name}@`;
   }
 
   const responseURIs = request.responseURIs ?? [];
@@ -121,6 +128,7 @@ export const extractConsentDataV2 = (
   const responseURIsLabels = responseURIs.map((uri: ResponseURI) => uri.getUriString());
 
   return {
+    title,
     signerFqn,
     permissionsLabels,
     systemId,

@@ -52,14 +52,8 @@ const Consent: React.FC<ConsentProps> = props => {
     ? extractConsentDataV2(deeplinkData, signedBy as Identity, Math.max(0, currentDetailIndex))
     : extractConsentDataV1(deeplinkData as LoginConsentRequest, signedBy as Identity);
 
-  const {
-    signerFqn,
-    permissionsLabels,
-    systemId,
-    constraintsLabels,
-    expiryLabel,
-    responseURIsLabels,
-  } = consentData;
+  const {title, permissionsLabels, systemId, constraintsLabels, expiryLabel, responseURIsLabels} =
+    consentData;
   const systemDescriptor = `${chainName} (${systemId})`;
 
   const tryLogin = async (): Promise<void> => {
@@ -87,7 +81,7 @@ const Consent: React.FC<ConsentProps> = props => {
 
   return (
     <PageLayout
-      title={`${signerFqn} is requesting login with VerusID`}
+      title={title}
       contentStyle={{
         display: 'flex',
         flexDirection: 'column',

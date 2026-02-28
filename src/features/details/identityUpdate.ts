@@ -1,3 +1,4 @@
+import {setActiveVerusId} from '#/redux/reducers/identity/identity.actions';
 import {Identity} from '#/redux/reducers/signatureInfo/signatureInfo.types';
 import {AppDispatch, RootState} from '#/redux/store';
 import {executeIdentityUpdateRequest} from '#/rpc/calls/executeIdentityUpdateRequest';
@@ -11,7 +12,7 @@ import {
 export async function prepareIdentityUpdateDetail(
   ordinal: IdentityUpdateRequestOrdinalVDXFObject,
   _detailIndex: number,
-  _dispatch: AppDispatch,
+  dispatch: AppDispatch,
   getState: () => RootState
 ): Promise<void> {
   if (!(ordinal instanceof IdentityUpdateRequestOrdinalVDXFObject)) {
@@ -25,19 +26,20 @@ export async function prepareIdentityUpdateDetail(
   }
 
   const state = getState();
-  const activeIdentity = state.identity.activeIdentity as Identity;
-
-  if (!activeIdentity) {
-    throw new Error('No active identity in state');
-  }
-
-  const stateIdentityName = activeIdentity.identity.name;
+  const identities = state.identity.identities as Identity[];
   const detailIdentityName = detail.identity.name;
 
-  if (stateIdentityName !== detailIdentityName) {
-    throw new Error(
-      `The selected identity is "${stateIdentityName}", but the identity update is for "${detailIdentityName}"`
-    );
+  const matchingIdentity = identities.find(id => id.identity.name === detailIdentityName);
+
+  if (!matchingIdentity) {
+    throw new Error(`No identity found for "${detailIdentityName}" in the available identities`);
+  }
+
+  // We need an active identity to sign the response with.
+  // If there is no authentication detail to set the active identity, then use the
+  // identity being updated.
+  if (!state.identity.activeIdentity) {
+    dispatch(setActiveVerusId(matchingIdentity));
   }
 }
 
