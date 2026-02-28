@@ -1,4 +1,5 @@
-import {RootState} from '#/redux/store';
+import {Identity} from '#/redux/reducers/signatureInfo/signatureInfo.types';
+import {AppDispatch, RootState} from '#/redux/store';
 import {encryptAppEncryptionResponse} from '#/rpc/calls/encryptAppEncryptionResponse';
 import {executeAppEncryptionRequest} from '#/rpc/calls/executeAppEncryptionRequest';
 import {
@@ -7,18 +8,20 @@ import {
   AppEncryptionResponseDetails,
   AppEncryptionResponseOrdinalVDXFObject,
   DataDescriptor,
+  DataResponseDetails,
   DataResponseOrdinalVDXFObject,
   GenericRequest,
   OrdinalVDXFObject,
 } from 'verus-typescript-primitives';
-import {DataResponseDetails} from 'verus-typescript-primitives/dist/vdxf/classes/data/DataResponseDetails';
-import {DetailPrepFunction, DetailResponse} from './types';
 
-export const prepareAppEncryptionDetail: DetailPrepFunction = async (
-  ordinal: OrdinalVDXFObject
-) => {
+export async function prepareAppEncryptionDetail(
+  ordinal: OrdinalVDXFObject,
+  _detailIndex: number,
+  _dispatch: AppDispatch,
+  getState: () => RootState
+): Promise<void> {
   if (!(ordinal instanceof AppEncryptionRequestOrdinalVDXFObject)) {
-    throw new Error('Detail is not an AppEncryptionRequestOrdinalVDXFObject');
+    throw new Error('Detail is not an AppEncryptionRequestOrdinalVDXFObject.');
   }
 
   const detail: AppEncryptionRequestDetails = ordinal.data;
@@ -27,14 +30,19 @@ export const prepareAppEncryptionDetail: DetailPrepFunction = async (
     throw new Error('Invalid app encryption request detail.');
   }
 
-  // TODO: See if we need to check the active identity here.
-};
+  const state = getState();
+  const activeIdentity = state.identity.activeIdentity as Identity | null;
+
+  if (!activeIdentity) {
+    throw new Error('No active identity available for app encryption.');
+  }
+}
 
 export async function generateAppEncryptionResponse(
   request: GenericRequest,
   detailIndex: number,
   getState: () => RootState
-): Promise<DetailResponse> {
+): Promise<DataResponseOrdinalVDXFObject | AppEncryptionResponseOrdinalVDXFObject> {
   const ordinalWrapper = request.details[detailIndex];
 
   if (!(ordinalWrapper instanceof AppEncryptionRequestOrdinalVDXFObject)) {
@@ -45,14 +53,17 @@ export async function generateAppEncryptionResponse(
 
   const state = getState();
   const chainId = state.chainMetadata.chainId;
-  const signingIdentity = state.identity.activeIdentity;
-
-  if (!signingIdentity) {
-    throw new Error('No active identity available for app encryption.');
-  }
+  const signingIdentity = state.signatureInfo.signedBy;
 
   const fromID = signingIdentity.identity.identityaddress;
-  const toID = signingIdentity.identity.identityaddress;
+
+  let toID: string;
+
+  if (request.appOrDelegatedID) {
+    toID = request.appOrDelegatedID.toIAddress();
+  } else {
+    toID = signingIdentity.identity.identityaddress;
+  }
 
   const appEncryptionResult = await executeAppEncryptionRequest(
     chainId,
@@ -61,9 +72,7 @@ export async function generateAppEncryptionResponse(
     toID
   );
 
-  let responseOrdinal: DataResponseOrdinalVDXFObject | AppEncryptionResponseOrdinalVDXFObject;
-
-  // Use fromJson since the main app returns the keys as strings and we store them as strings.
+  // Use fromJson since we can use the string forms of the keys that we get from the main app.
   const responseData = AppEncryptionResponseDetails.fromJson({
     version: 1,
     incomingviewingkey: appEncryptionResult.incomingViewingKey,
@@ -93,14 +102,12 @@ export async function generateAppEncryptionResponse(
       data: encryptedDataDescriptor,
     });
 
-    responseOrdinal = new DataResponseOrdinalVDXFObject({
+    return new DataResponseOrdinalVDXFObject({
       data: encryptedResponseDetail,
-    });
-  } else {
-    responseOrdinal = new AppEncryptionResponseOrdinalVDXFObject({
-      data: responseData,
     });
   }
 
-  return responseOrdinal;
+  return new AppEncryptionResponseOrdinalVDXFObject({
+    data: responseData,
+  });
 }

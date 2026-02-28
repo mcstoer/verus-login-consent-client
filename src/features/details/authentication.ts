@@ -12,7 +12,7 @@ export async function generateAuthenticationResponse(
   const ordinalWrapper = request.details[detailIndex];
 
   if (!(ordinalWrapper instanceof AuthenticationRequestOrdinalVDXFObject)) {
-    throw new Error('Detail is not an AuthenticationRequestOrdinalVDXFObject');
+    throw new Error('Detail is not an AuthenticationRequestOrdinalVDXFObject.');
   }
 
   const authRequestDetail = ordinalWrapper.data;

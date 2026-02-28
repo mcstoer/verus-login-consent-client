@@ -32,7 +32,7 @@ export async function prepareIdentityUpdateDetail(
   const matchingIdentity = identities.find(id => id.identity.name === detailIdentityName);
 
   if (!matchingIdentity) {
-    throw new Error(`No identity found for "${detailIdentityName}" in the available identities`);
+    throw new Error(`No identity found for "${detailIdentityName}" in the available identities.`);
   }
 
   // We need an active identity to sign the response with.

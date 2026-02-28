@@ -39,13 +39,13 @@ export async function prepareUserDataDetail(
   const scopeAddress = scopeIdentity.identity.identityaddress;
 
   if (!(ordinal instanceof UserDataRequestOrdinalVDXFObject)) {
-    throw new Error('Unable to handle non-user data detail');
+    throw new Error('Unable to handle non-user data detail.');
   }
 
   const detail = ordinal.data;
 
   if (!detail.isValid()) {
-    throw new Error('Invalid user data detail');
+    throw new Error('Invalid user data detail.');
   }
 
   // Only handle credentials for now, since there is no guidelines for other types.
@@ -79,7 +79,7 @@ export async function generateUserDataResponse(
   const ordinalWrapper = request.details[detailIndex];
 
   if (!(ordinalWrapper instanceof UserDataRequestOrdinalVDXFObject)) {
-    throw new Error('Detail is not a UserDataRequestOrdinalVDXFObject');
+    throw new Error('Detail is not a UserDataRequestOrdinalVDXFObject.');
   }
 
   const userDataRequestDetail = ordinalWrapper.data;

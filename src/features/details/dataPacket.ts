@@ -15,13 +15,13 @@ import {DetailPrepFunction} from './types';
 
 export const prepareDataPacketDetail: DetailPrepFunction = async ordinal => {
   if (!(ordinal instanceof DataPacketRequestOrdinalVDXFObject)) {
-    throw new Error('Ordinal is not a DataPacketRequestOrdinalVDXFObject');
+    throw new Error('Ordinal is not a DataPacketRequestOrdinalVDXFObject.');
   }
 
   const dataPacketDetail = ordinal.data;
 
   if (!dataPacketDetail.isValid()) {
-    throw new Error('UserSpecificDataPacketDetails is not valid');
+    throw new Error('UserSpecificDataPacketDetails is not valid.');
   }
 };
 
@@ -33,7 +33,7 @@ export async function generateDataPacketResponse(
   const ordinalWrapper = request.details[detailIndex];
 
   if (!(ordinalWrapper instanceof DataPacketRequestOrdinalVDXFObject)) {
-    throw new Error('Ordinal is not a DataPacketRequestOrdinalVDXFObject');
+    throw new Error('Ordinal is not a DataPacketRequestOrdinalVDXFObject.');
   }
 
   const state = getState();
