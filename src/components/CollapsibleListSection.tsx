@@ -27,14 +27,15 @@ const CollapsibleListSection: React.FC<CollapsibleListSectionProps> = ({
 }) => {
   const [open, setOpen] = useState<boolean>(initiallyExpanded);
 
-  const resolvedSubtitle = subtitle ?? (collapseHint ? (open ? 'Click to collapse' : 'Click to expand') : undefined);
+  const resolvedSubtitle =
+    subtitle ?? (collapseHint ? (open ? 'Click to collapse' : 'Click to expand') : undefined);
 
   return (
     <>
       <ListItemButton divider={divider} onClick={() => setOpen(prev => !prev)}>
         <ListItemText
-          primary={title}
-          secondary={resolvedSubtitle}
+          primary={resolvedSubtitle}
+          secondary={title}
           slotProps={LIST_ITEM_SLOTS.collapsible}
         />
         {open ? <ExpandLess color="action" /> : <ExpandMore color="action" />}

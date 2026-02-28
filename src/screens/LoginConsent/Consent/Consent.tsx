@@ -145,22 +145,22 @@ const Consent: React.FC<ConsentProps> = props => {
 
           <ListItem divider>
             <ListItemText
-              primary={systemDescriptor || '-'}
-              secondary="System name"
+              primary="System name"
+              secondary={systemDescriptor || '-'}
               slotProps={LIST_ITEM_SLOTS.standard}
             />
           </ListItem>
 
           <ListItem divider>
             <ListItemText
-              primary={time ? unixToDate(time) : '-'}
-              secondary="Signed on"
+              primary="Signed on"
+              secondary={time ? unixToDate(time) : '-'}
               slotProps={LIST_ITEM_SLOTS.standard}
             />
           </ListItem>
 
           {permissionsLabels && permissionsLabels.length > 0 && (
-            <CollapsibleListSection title="Permissions Requested">
+            <CollapsibleListSection title="Permissions Requested" collapseHint={false}>
               {permissionsLabels.map((permission, index) => (
                 <NestedListItem key={index} primary={`${permission}`} />
               ))}
@@ -168,7 +168,7 @@ const Consent: React.FC<ConsentProps> = props => {
           )}
 
           {constraintsLabels && constraintsLabels.length > 0 && (
-            <CollapsibleListSection title="Constraints" divider>
+            <CollapsibleListSection title="Constraints" divider collapseHint={false}>
               {constraintsLabels.map((constraint, index) => (
                 <NestedListItem key={index} primary={`${constraint}`} />
               ))}
@@ -176,7 +176,7 @@ const Consent: React.FC<ConsentProps> = props => {
           )}
 
           {responseURIsLabels.length > 0 && (
-            <CollapsibleListSection title="Response URIs" divider>
+            <CollapsibleListSection title="Response URIs" divider collapseHint={false}>
               {responseURIsLabels.map((uri, index) => (
                 <NestedListItem key={index} primary={`${uri}`} />
               ))}
@@ -186,8 +186,8 @@ const Consent: React.FC<ConsentProps> = props => {
           {expiryLabel && (
             <ListItem>
               <ListItemText
-                primary={expiryLabel || '-'}
-                secondary="Expires at"
+                primary="Expires at"
+                secondary={expiryLabel || '-'}
                 slotProps={LIST_ITEM_SLOTS.standard}
               />
             </ListItem>

@@ -153,22 +153,22 @@ const DataPacket: React.FC = () => {
               >
                 {dataDescriptor.label && (
                   <NestedListItem
-                    primary={dataDescriptor.label}
-                    secondary="Label"
+                    primary="Label"
+                    secondary={dataDescriptor.label}
                     variant="standard"
                   />
                 )}
                 {dataDescriptor.mimeType && (
                   <NestedListItem
-                    primary={dataDescriptor.mimeType}
-                    secondary="MIME Type"
+                    primary="MIME Type"
+                    secondary={dataDescriptor.mimeType}
                     variant="standard"
                   />
                 )}
                 {dataDescriptor.objectdata && (
                   <NestedListItem
-                    primary={getDisplayData(dataDescriptor.objectdata, dataDescriptor.mimeType)}
-                    secondary="Data"
+                    primary="Data"
+                    secondary={getDisplayData(dataDescriptor.objectdata, dataDescriptor.mimeType)}
                     variant="standard"
                   />
                 )}

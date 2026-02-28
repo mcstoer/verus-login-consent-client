@@ -87,8 +87,8 @@ const IdentityDetails: React.FC<IdentityDetailsProps> = ({
         .map(field => (
           <NestedListItem
             key={field.label}
-            primary={field.value}
-            secondary={field.label}
+            primary={field.label}
+            secondary={field.value}
             variant="detail"
           />
         ))}

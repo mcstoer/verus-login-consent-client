@@ -1,21 +1,21 @@
 export const LIST_ITEM_SLOTS = {
   standard: {
-    primary: {variant: 'subtitle1' as const},
-    secondary: {color: 'text.secondary' as const, variant: 'body2' as const},
+    primary: {color: 'text.secondary' as const, variant: 'body2' as const},
+    secondary: {variant: 'subtitle1' as const, color: 'text.primary' as const},
   },
   nested: {
     primary: {variant: 'body2' as const, sx: {lineHeight: 1.3}},
   },
   detail: {
-    primary: {variant: 'body2' as const, sx: {lineHeight: 1.3}},
-    secondary: {
+    primary: {
       color: 'text.secondary' as const,
       variant: 'caption' as const,
       sx: {lineHeight: 1.2},
     },
+    secondary: {variant: 'body2' as const, color: 'text.primary' as const, sx: {lineHeight: 1.3}},
   },
   collapsible: {
-    primary: {variant: 'subtitle1' as const},
-    secondary: {color: 'text.secondary' as const, variant: 'body2' as const},
+    primary: {color: 'text.secondary' as const, variant: 'body2' as const},
+    secondary: {variant: 'subtitle1' as const, color: 'text.primary' as const},
   },
 } as const;
