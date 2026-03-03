@@ -83,7 +83,10 @@ export async function generateAppEncryptionResponse(
 
   // toJson doesn't work with the CompactIAddressObject, so just add it in after we
   // create the response data.
-  responseData.requestID = requestDetail.requestID;
+  if (requestDetail.requestID) {
+    responseData.requestID = requestDetail.requestID;
+    responseData.toggleContainsRequestID();
+  }
 
   if (requestDetail.hasEncryptResponseToAddress()) {
     // Store the AppEncryptionResponse detail within the DataPacketResponse so that
