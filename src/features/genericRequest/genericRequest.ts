@@ -1,5 +1,5 @@
+import {Identity} from '#/types/identity';
 import {GenericRequest, VERUSPAY_INVOICE_DETAILS_VDXF_ORDINAL} from 'verus-typescript-primitives';
-import {Identity} from '../../redux/reducers/signatureInfo/signatureInfo.types';
 import {RootState} from '../../redux/store';
 import {verifyGenericRequest} from '../../rpc/calls/verifyGenericRequest';
 

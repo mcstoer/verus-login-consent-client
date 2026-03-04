@@ -1,14 +1,14 @@
+import {selectDetailById} from '#/redux/reducers/genericRequest/userDataSlice';
+import {RootState} from '#/redux/store';
+import {Identity} from '#/types/identity';
+import {CREDENTIALS, SUPPORTED_CREDENTIALS} from '#/utils/constants';
+import {convertFqnToDisplayFormat} from '#/utils/fullyqualifiedname';
 import {
   Credential,
   GenericRequest,
   LoginConsentRequest,
   UserDataRequestOrdinalVDXFObject,
 } from 'verus-typescript-primitives';
-import {CREDENTIALS, SUPPORTED_CREDENTIALS} from '#/utils/constants';
-import {Identity} from '#/redux/reducers/signatureInfo/signatureInfo.types';
-import {convertFqnToDisplayFormat} from '#/utils/fullyqualifiedname';
-import {RootState} from '#/redux/store';
-import {selectDetailById} from '#/redux/reducers/genericRequest/userDataSlice';
 
 export interface CredentialsReviewData {
   signerFqn: string;
@@ -74,13 +74,13 @@ export const extractCredentialsReviewDataV2 = (
   request: GenericRequest,
   signedBy: Identity,
   credentials: Credential[],
-  currentDetailIndex: number
+  currentDetailIndex: number,
+  appOrDelegatedId?: Identity | null
 ): CredentialsReviewData => {
   let signerFqn: string;
 
-  if (request.hasAppOrDelegatedID()) {
-    // TODO: Prefetch the appOrDelegatedID identity.
-    signerFqn = request.appOrDelegatedID.toString();
+  if (request.hasAppOrDelegatedID() && appOrDelegatedId) {
+    signerFqn = convertFqnToDisplayFormat(appOrDelegatedId.fullyqualifiedname);
   } else {
     signerFqn = convertFqnToDisplayFormat(signedBy.fullyqualifiedname);
   }

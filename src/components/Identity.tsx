@@ -2,8 +2,8 @@ import React from 'react';
 
 import CollapsibleListSection from '#/components/CollapsibleListSection';
 import NestedListItem from '#/components/NestedListItem';
+import {Identity} from '#/types/identity';
 import {createIdentityDescriptor} from '#/utils/identity';
-import {Identity} from '#/redux/reducers/signatureInfo/signatureInfo.types';
 
 interface IdentityField {
   label: string;

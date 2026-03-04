@@ -22,7 +22,7 @@ import {
   setExternalAction,
   setNavigationPath,
 } from '#/redux/reducers/navigation/navigationSlice';
-import {Identity} from '#/redux/reducers/signatureInfo/signatureInfo.types';
+import {Identity} from '#/types/identity';
 import {RootState} from '#/redux/store';
 import {EXTERNAL_ACTION, EXTERNAL_CHAIN_START, SELECT_LOGIN_ID} from '#/utils/constants';
 import {unixToDate} from '#/utils/math';
@@ -41,6 +41,9 @@ const Consent: React.FC<ConsentProps> = props => {
   const chainId = useSelector((state: RootState) => state.chainMetadata.chainId);
   const chainName = useSelector((state: RootState) => state.chainMetadata.chainName);
   const signatureInfo = useSelector((state: RootState) => state.signatureInfo);
+  const appOrDelegatedIdentity = useSelector(
+    (state: RootState) => state.genericRequest.appOrDelegatedId.identity
+  );
 
   const {sigBlockInfo, signedBy, signingRevocationIdentity, signingRecoveryIdentity} =
     signatureInfo;
@@ -49,7 +52,15 @@ const Consent: React.FC<ConsentProps> = props => {
   const isGenericRequest = deeplinkData instanceof GenericRequest;
 
   const consentData = isGenericRequest
-    ? extractConsentDataV2(deeplinkData, signedBy as Identity, Math.max(0, currentDetailIndex))
+    ? extractConsentDataV2(
+        deeplinkData,
+        signedBy as Identity,
+        // Since the detail index for showing the general generic request info is -1,
+        // we need to clamp this to 0 in order to get the first detail's info like
+        // constraints.
+        Math.max(0, currentDetailIndex),
+        appOrDelegatedIdentity
+      )
     : extractConsentDataV1(deeplinkData as LoginConsentRequest, signedBy as Identity);
 
   const {title, permissionsLabels, systemId, constraintsLabels, expiryLabel, responseURIsLabels} =

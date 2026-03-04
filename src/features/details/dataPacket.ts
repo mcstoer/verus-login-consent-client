@@ -1,6 +1,6 @@
-import {Identity} from '#/redux/reducers/signatureInfo/signatureInfo.types';
 import {RootState} from '#/redux/store';
 import {signData} from '#/rpc/calls/signData';
+import {Identity} from '#/types/identity';
 import {
   DataDescriptor,
   DataPacketRequestOrdinalVDXFObject,

@@ -1,23 +1,11 @@
-import {IdentityDefinition} from "verus-typescript-primitives";
+import {BlockInfo, Identity} from '#/types/identity';
+
+export type {BlockInfo, Identity};
 
 export const SET_SIGNATURE_INFO = 'SET_SIGNATURE_INFO' as const;
 
 export type SignatureInfoActionTypes = typeof SET_SIGNATURE_INFO;
 
-// Temporary type definitions based on the what is needed for the signature information.
-export interface Identity {
-  fullyqualifiedname: string;
-  identity: IdentityDefinition;
-  [key: string]: unknown;
-}
-
-export interface BlockInfo {
-  time: number;
-  height: number;
-  [key: string]: unknown;
-}
-
-// Action interfaces
 export interface SetSignatureInfoAction {
   type: typeof SET_SIGNATURE_INFO;
   payload: {
@@ -30,7 +18,6 @@ export interface SetSignatureInfoAction {
 
 export type SignatureInfoAction = SetSignatureInfoAction;
 
-// State interface
 export interface SignatureInfoState {
   signedBy: Identity | null;
   sigBlockInfo: BlockInfo | null;

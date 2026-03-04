@@ -1,8 +1,8 @@
 import {AppThunk} from '#/redux/hooks';
 import {setError} from '#/redux/reducers/error/error.actions';
 import {completeRequest} from '#/redux/reducers/rpc/rpcSlice';
-import {Identity} from '#/redux/reducers/signatureInfo/signatureInfo.types';
 import {signGenericResponse} from '#/rpc/calls/signGenericResponse';
+import {Identity} from '#/types/identity';
 import BN from '#/utils/bn-polyfill';
 import {
   CompactIAddressObject,

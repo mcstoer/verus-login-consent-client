@@ -1,3 +1,8 @@
+import {Identity} from '#/types/identity';
+import {CREDENTIALS, SCOPES, SUPPORTED_CREDENTIALS} from '#/utils/constants';
+import {convertFqnToDisplayFormat} from '#/utils/fullyqualifiedname';
+import {unixToDate} from '#/utils/math';
+import {getSystemNameFromSystemId} from '#/utils/systems';
 import {
   AuthenticationRequestDetails,
   AuthenticationRequestOrdinalVDXFObject,
@@ -8,11 +13,6 @@ import {
   RedirectUri,
   ResponseURI,
 } from 'verus-typescript-primitives';
-import {CREDENTIALS, SCOPES, SUPPORTED_CREDENTIALS} from '#/utils/constants';
-import {convertFqnToDisplayFormat} from '#/utils/fullyqualifiedname';
-import {Identity} from '#/redux/reducers/signatureInfo/signatureInfo.types';
-import {unixToDate} from '#/utils/math';
-import {getSystemNameFromSystemId} from '#/utils/systems';
 
 export interface ConsentData {
   title: string;
@@ -97,7 +97,8 @@ const getConstraintLabel = (constraint: RecipientConstraint) => {
 export const extractConsentDataV2 = (
   request: GenericRequest,
   signedBy: Identity,
-  currentDetailIndex: number
+  currentDetailIndex: number,
+  appOrDelegatedId?: Identity | null
 ): ConsentData => {
   const signerFqn = convertFqnToDisplayFormat(signedBy.fullyqualifiedname);
   const systemId = request.signature?.systemID.toIAddress() || '';
@@ -126,6 +127,10 @@ export const extractConsentDataV2 = (
 
   const constraintsLabels = constraints.map(getConstraintLabel);
   const responseURIsLabels = responseURIs.map((uri: ResponseURI) => uri.getUriString());
+
+  if (request.hasAppOrDelegatedID() && appOrDelegatedId) {
+    title += ` on behalf of ${convertFqnToDisplayFormat(appOrDelegatedId.fullyqualifiedname)}`;
+  }
 
   return {
     title,

@@ -37,6 +37,7 @@ interface CredentialsReviewProps {
 }
 
 const CredentialsReview: React.FC<CredentialsReviewProps> = ({setRequestResult}) => {
+  // TODO: The state isn't used consistently here to other UI. Figure out if that make sense.
   const dispatch = useAppDispatch();
   const state = useSelector((state: RootState) => state);
   const deeplinkData = state.deeplink.data;
@@ -44,6 +45,7 @@ const CredentialsReview: React.FC<CredentialsReviewProps> = ({setRequestResult})
   const [loading, setLoading] = useState(false);
   const activeIdentity = state.identity.activeIdentity;
   const currentDetailIndex = state.navigation.currentDetailIndex || 0;
+  const appOrDelegatedIdentity = state.genericRequest.appOrDelegatedId.identity;
 
   // V1 for getting credentials
   let v1Credentials: Credential[] = [];
@@ -75,7 +77,8 @@ const CredentialsReview: React.FC<CredentialsReviewProps> = ({setRequestResult})
         deeplinkData,
         signedBy!,
         userDataCredentials,
-        currentDetailIndex
+        currentDetailIndex,
+        appOrDelegatedIdentity
       )
     : extractCredentialsReviewDataV1(deeplinkData, signedBy!, v1Credentials);
 

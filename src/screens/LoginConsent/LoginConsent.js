@@ -12,6 +12,7 @@ import {
 import {setOriginApp} from '#/redux/reducers/origin/origin.actions';
 import {completeRequest} from '#/redux/reducers/rpc/rpcSlice';
 import {setSignatureInfo} from '#/redux/reducers/signatureInfo/signatureInfo.actions';
+import {setAppOrDelegatedId} from '#/redux/reducers/genericRequest/appOrDelegatedIdSlice';
 import {getBlock} from '#/rpc/calls/getBlock';
 import {getCurrency} from '#/rpc/calls/getCurrency';
 import {getIdentity} from '#/rpc/calls/getIdentity';
@@ -198,7 +199,7 @@ class LoginConsent extends React.Component {
           request = new GenericRequest(req);
 
           await checkGenericRequest(chainId, request, store.getState);
-          if (request.isSigned) {
+          if (request.isSigned()) {
             signingId = request.signature.identityID.toIAddress();
             signatureString = request.signature.signatureAsVch.toString('base64');
             // TODO: Reduce duplication with the other requests
@@ -224,6 +225,14 @@ class LoginConsent extends React.Component {
                 signingRecoveryIdentity: signingRecoveryIdentity,
               })
             );
+
+            if (request.hasAppOrDelegatedID()) {
+              const appOrDelegatedIdentity = await getIdentity(
+                chainId,
+                request.appOrDelegatedID.toIAddress()
+              );
+              this.props.dispatch(setAppOrDelegatedId(appOrDelegatedIdentity));
+            }
           }
           break;
 

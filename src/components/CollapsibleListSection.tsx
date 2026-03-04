@@ -1,10 +1,10 @@
-import React, {useState} from 'react';
+import ExpandLess from '@mui/icons-material/ExpandLess';
+import ExpandMore from '@mui/icons-material/ExpandMore';
 import Collapse from '@mui/material/Collapse';
 import List from '@mui/material/List';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
-import ExpandLess from '@mui/icons-material/ExpandLess';
-import ExpandMore from '@mui/icons-material/ExpandMore';
+import React, {useState} from 'react';
 
 import {LIST_ITEM_SLOTS} from '#/components/listItemSlots';
 
@@ -46,7 +46,7 @@ const CollapsibleListSection: React.FC<CollapsibleListSectionProps> = ({
           component="div"
           dense
           disablePadding
-          sx={{'& > *:last-child': {borderBottom: 'none'}}}
+          sx={!divider ? {'& > *:last-child': {borderBottom: 'none'}} : undefined}
         >
           {children}
         </List>

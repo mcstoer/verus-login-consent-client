@@ -30,7 +30,7 @@ import {
   setExternalAction,
   setNavigationPath,
 } from '#/redux/reducers/navigation/navigationSlice';
-import {Identity} from '#/redux/reducers/signatureInfo/signatureInfo.types';
+import {Identity} from '#/types/identity';
 import {RootState} from '#/redux/store';
 import {getCredentialsByScope} from '#/rpc/calls/getCredentials';
 import {

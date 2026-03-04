@@ -1,4 +1,4 @@
-import {Identity} from '#/redux/reducers/signatureInfo/signatureInfo.types';
+import {Identity} from '#/types/identity';
 import {SUPPORTED_CREDENTIALS} from '#/utils/constants';
 import {getSystemNameFromSystemId} from '#/utils/systems';
 import {
@@ -97,7 +97,7 @@ const getRequiredIDs = (recipientConstraints: RecipientConstraint[]) => {
  */
 export const extractLoginDataV2 = (
   request: GenericRequest,
-  identities: Identity[],
+  identities: Identity[], // TODO: Figure out why this is unused.
   currentDetailIndex: number
 ): LoginData => {
   const ordinalWrapper = request.details[currentDetailIndex];

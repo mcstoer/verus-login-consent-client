@@ -1,3 +1,4 @@
+import {Identity} from '#/types/identity';
 import BN from 'bn.js';
 import {
   AuthenticationRequestDetails,
@@ -7,7 +8,6 @@ import {
   LoginConsentRequest,
   RecipientConstraint,
 } from 'verus-typescript-primitives';
-import {Identity} from '../../redux/reducers/signatureInfo/signatureInfo.types';
 import {extractConsentDataV1, extractConsentDataV2} from './consentDataExtractors';
 
 describe('consentDataExtractors', () => {

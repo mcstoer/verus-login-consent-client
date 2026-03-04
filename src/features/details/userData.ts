@@ -1,7 +1,7 @@
 import {detailAdded, selectDetailById} from '#/redux/reducers/genericRequest/userDataSlice';
-import {Identity} from '#/redux/reducers/signatureInfo/signatureInfo.types';
 import {AppDispatch, RootState} from '#/redux/store';
 import {getCredentialsByScope} from '#/rpc/calls/getCredentials';
+import {Identity} from '#/types/identity';
 import {
   Credential,
   CredentialJson,
