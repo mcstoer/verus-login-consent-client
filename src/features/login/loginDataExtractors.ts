@@ -97,7 +97,6 @@ const getRequiredIDs = (recipientConstraints: RecipientConstraint[]) => {
  */
 export const extractLoginDataV2 = (
   request: GenericRequest,
-  identities: Identity[], // TODO: Figure out why this is unused.
   currentDetailIndex: number
 ): LoginData => {
   const ordinalWrapper = request.details[currentDetailIndex];

@@ -27,61 +27,13 @@ import {
   IPC_ORIGIN_PRODUCTION,
   IPC_PUSH_MESSAGE,
 } from '../utils/constants';
+import type {IpcInitMessage, IpcMessage, IpcPushMessage} from './types';
 import {RPC_PASSWORD, RPC_PORT} from '#/utils/mocks';
-
-// TODO: Move these types to a dedicated file
-// Create the type that desktop uses
-declare global {
-  interface Window {
-    bridge: {
-      getSecretSync: () => {
-        BuiltinSecret: string;
-      };
-    };
-  }
-}
-
-// Temporary IPC related types until a type file is created
-interface DeeplinkPayload {
-  id: string;
-  data: object;
-}
-
-interface OriginAppInfo {
-  main_chain_ticker: string;
-  search_builtin: boolean;
-  id: string;
-}
-
-interface IpcInitData {
-  expiry_margin: number;
-  rpc_port: number;
-  post_encryption: boolean;
-  window_id: number;
-}
-
-interface IpcPushData {
-  origin_app_info: OriginAppInfo;
-  deeplink: DeeplinkPayload;
-}
-
-interface IpcInitMessage {
-  type: typeof IPC_INIT_MESSAGE;
-  data: IpcInitData;
-}
-
-interface IpcPushMessage {
-  type: typeof IPC_PUSH_MESSAGE;
-  method: string;
-  data: IpcPushData;
-}
-
-type IpcMessage = IpcInitMessage | IpcPushMessage;
 
 const parseDeeplinkByType = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   deeplinkRawData: any,
-  deeplinkId: string,
+  deeplinkId: string
 ): LoginConsentRequest | VerusPayInvoice | GenericRequest => {
   // Always use fromJson or other similar methods when possible as some of the deeplink data has a
   // different representation between JSON and the class definition.
@@ -115,7 +67,7 @@ const updateReduxStore = (data: IpcPushMessage): void => {
     setDeeplinkData({
       id: data.data.deeplink.id,
       data: deeplinkData,
-    }),
+    })
   );
 
   store.dispatch(setOriginAppBuiltin(data.data.origin_app_info.search_builtin));

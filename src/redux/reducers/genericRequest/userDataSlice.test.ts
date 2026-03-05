@@ -102,7 +102,6 @@ describe('userDataSlice', () => {
       const mockRootState: RootState = {
         genericRequest: {
           userData: state,
-          authDetails: {ids: [], entities: {}},
         },
       } as unknown as RootState;
 
@@ -118,7 +117,6 @@ describe('userDataSlice', () => {
       const mockRootState: RootState = {
         genericRequest: {
           userData: state,
-          authDetails: {ids: [], entities: {}},
         },
       } as unknown as RootState;
 
@@ -132,7 +130,6 @@ describe('userDataSlice', () => {
       const mockRootState = {
         genericRequest: {
           userData: state,
-          authDetails: {ids: [], entities: {}},
         },
       } as unknown as RootState;
 
@@ -161,7 +158,6 @@ describe('userDataSlice', () => {
       const mockRootState: RootState = {
         genericRequest: {
           userData: state,
-          authDetails: {ids: [], entities: {}},
         },
       } as unknown as RootState;
 
@@ -185,7 +181,6 @@ describe('userDataSlice', () => {
       const mockRootState: RootState = {
         genericRequest: {
           userData: state,
-          authDetails: {ids: [], entities: {}},
         },
       } as unknown as RootState;
 

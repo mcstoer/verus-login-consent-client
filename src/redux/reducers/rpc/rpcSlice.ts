@@ -62,8 +62,6 @@ const rpcSlice = createSlice({
       const maxTime = time + state.expiryMargin;
 
       // Remove all non-recent times.
-      // TODO: Confirm that future times should be considered at all.
-      // If the times only increase, then we don't need to check maxTime.
       state.calledTimes = state.calledTimes.filter(
         existingTime => existingTime > minTime && existingTime < maxTime
       );

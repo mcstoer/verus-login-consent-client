@@ -64,7 +64,7 @@ const Login = (props: LoginProps) => {
   const isGenericRequest = deeplinkData instanceof GenericRequest;
 
   const loginData: LoginData = isGenericRequest
-    ? extractLoginDataV2(deeplinkData, identities, currentDetailIndex)
+    ? extractLoginDataV2(deeplinkData, currentDetailIndex)
     : extractLoginDataV1(deeplinkData as LoginConsentRequest, identities);
 
   const {

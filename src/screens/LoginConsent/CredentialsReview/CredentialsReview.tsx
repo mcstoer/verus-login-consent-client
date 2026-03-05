@@ -37,24 +37,22 @@ interface CredentialsReviewProps {
 }
 
 const CredentialsReview: React.FC<CredentialsReviewProps> = ({setRequestResult}) => {
-  // TODO: The state isn't used consistently here to other UI. Figure out if that make sense.
   const dispatch = useAppDispatch();
-  const state = useSelector((state: RootState) => state);
-  const deeplinkData = state.deeplink.data;
-  const chainId = state.chainMetadata.chainId;
   const [loading, setLoading] = useState(false);
-  const activeIdentity = state.identity.activeIdentity;
-  const currentDetailIndex = state.navigation.currentDetailIndex || 0;
-  const appOrDelegatedIdentity = state.genericRequest.appOrDelegatedId.identity;
 
-  // V1 for getting credentials
-  let v1Credentials: Credential[] = [];
-  if (state.credentials && state.credentials.credentials) {
-    v1Credentials = state.credentials.credentials as Credential[];
-  }
-
-  // V2 for getting credentials
-  const userDataCredentials = useSelector((state: RootState) =>
+  const deeplinkData = useSelector((state: RootState) => state.deeplink.data);
+  const chainId = useSelector((state: RootState) => state.chainMetadata.chainId);
+  const activeIdentity = useSelector((state: RootState) => state.identity.activeIdentity);
+  const currentDetailIndex = useSelector(
+    (state: RootState) => state.navigation.currentDetailIndex || 0
+  );
+  const appOrDelegatedIdentity = useSelector(
+    (state: RootState) => state.genericRequest.appOrDelegatedId.identity
+  );
+  const signedBy = useSelector((state: RootState) => state.signatureInfo.signedBy);
+  const rawV1Credentials = useSelector((state: RootState) => state.credentials?.credentials);
+  const v1Credentials: Credential[] = rawV1Credentials ? (rawV1Credentials as Credential[]) : [];
+  const v2Credentials = useSelector((state: RootState) =>
     selectUserDataCredentials(state, currentDetailIndex)
   );
 
@@ -63,8 +61,6 @@ const CredentialsReview: React.FC<CredentialsReviewProps> = ({setRequestResult})
   }
 
   const isGenericRequest = deeplinkData instanceof GenericRequest;
-
-  const {signedBy} = state.signatureInfo;
 
   const {
     signerFqn,
@@ -76,7 +72,7 @@ const CredentialsReview: React.FC<CredentialsReviewProps> = ({setRequestResult})
     ? extractCredentialsReviewDataV2(
         deeplinkData,
         signedBy!,
-        userDataCredentials,
+        v2Credentials,
         currentDetailIndex,
         appOrDelegatedIdentity
       )
