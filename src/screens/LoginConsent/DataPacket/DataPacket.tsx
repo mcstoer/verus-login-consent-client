@@ -1,13 +1,11 @@
 import React, {useState} from 'react';
 import {useSelector} from 'react-redux';
-
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
-
-import {GenericRequest, DataPacketRequestOrdinalVDXFObject} from 'verus-typescript-primitives';
+import {DataPacketRequestOrdinalVDXFObject, GenericRequest} from 'verus-typescript-primitives';
 
 import CollapsibleListSection from '#/components/CollapsibleListSection';
 import NestedListItem from '#/components/NestedListItem';

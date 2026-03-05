@@ -1,7 +1,3 @@
-import {setError} from '#/redux/reducers/error/error.actions';
-import {RootState} from '#/redux/store';
-import {closePlugin} from '#/rpc/calls/closePlugin';
-import {VERUS_LOGIN_CONSENT_UI} from '#/utils/constants';
 import {createSlice, PayloadAction, ThunkAction} from '@reduxjs/toolkit';
 import {
   GenericResponse,
@@ -9,6 +5,11 @@ import {
   ResponseURI,
   ResponseURIJson,
 } from 'verus-typescript-primitives';
+
+import {setError} from '#/redux/reducers/error/error.actions';
+import {RootState} from '#/redux/store';
+import {closePlugin} from '#/rpc/calls/closePlugin';
+import {VERUS_LOGIN_CONSENT_UI} from '#/utils/constants';
 
 export interface RpcState {
   port: number | string | null;

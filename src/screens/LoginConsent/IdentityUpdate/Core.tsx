@@ -1,7 +1,5 @@
-import PageLayout from '#/components/PageLayout';
-import {useAppDispatch} from '#/redux/hooks';
-import {Identity} from '#/types/identity';
-import {RootState} from '#/redux/store';
+import React, {useEffect, useState} from 'react';
+import {useSelector} from 'react-redux';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import Box from '@mui/material/Box';
@@ -13,19 +11,22 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import Typography from '@mui/material/Typography';
-import React, {useEffect, useState} from 'react';
-import {useSelector} from 'react-redux';
 import {
   GenericRequest,
   IdentityUpdateRequestDetails,
   IdentityUpdateRequestOrdinalVDXFObject,
 } from 'verus-typescript-primitives';
+
+import PageLayout from '#/components/PageLayout';
 import {SnackbarAlert} from '#/components/SnackbarAlert';
+import {useAppDispatch} from '#/redux/hooks';
 import {
   navigateBackGenericRequest,
   navigateGenericRequest,
 } from '#/redux/reducers/navigation/navigationSlice';
+import {RootState} from '#/redux/store';
 import {getIdentity} from '#/rpc/calls/getIdentity';
+import {Identity} from '#/types/identity';
 import {convertFqnToDisplayFormat} from '#/utils/fullyqualifiedname';
 import {createIdentityDescriptor} from '#/utils/identity';
 

@@ -1,7 +1,3 @@
-import {AppDispatch, RootState} from '#/redux/store';
-import {encryptAppEncryptionResponse} from '#/rpc/calls/encryptAppEncryptionResponse';
-import {executeAppEncryptionRequest} from '#/rpc/calls/executeAppEncryptionRequest';
-import {Identity} from '#/types/identity';
 import {
   AppEncryptionRequestDetails,
   AppEncryptionRequestOrdinalVDXFObject,
@@ -13,6 +9,11 @@ import {
   GenericRequest,
   OrdinalVDXFObject,
 } from 'verus-typescript-primitives';
+
+import {AppDispatch, RootState} from '#/redux/store';
+import {encryptAppEncryptionResponse} from '#/rpc/calls/encryptAppEncryptionResponse';
+import {executeAppEncryptionRequest} from '#/rpc/calls/executeAppEncryptionRequest';
+import {Identity} from '#/types/identity';
 
 export async function prepareAppEncryptionDetail(
   ordinal: OrdinalVDXFObject,

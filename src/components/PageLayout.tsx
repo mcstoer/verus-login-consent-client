@@ -1,5 +1,6 @@
 import React from 'react';
-import {Box, Container, SxProps, Theme, Typography, CircularProgress} from '@mui/material';
+import {Box, CircularProgress, Container, SxProps, Theme, Typography} from '@mui/material';
+
 import {VerusIdLogo} from '#/images';
 
 interface PageLayoutProps {

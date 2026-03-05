@@ -1,9 +1,10 @@
-import rootReducer from './rootReducer';
 import {configureStore} from '@reduxjs/toolkit';
+
+import rootReducer from './rootReducer';
 
 const store = configureStore({
   reducer: rootReducer,
-  middleware: (getDefaultMiddleware) =>
+  middleware: getDefaultMiddleware =>
     getDefaultMiddleware({
       serializableCheck: {
         ignoredActions: ['deeplink/setDeeplinkData', 'genericResponse/SET_GENERIC_RESPONSE'],

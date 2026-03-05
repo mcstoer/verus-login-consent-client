@@ -5,10 +5,7 @@
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 import {GenericRequest, LoginConsentRequest, VerusPayInvoice} from 'verus-typescript-primitives';
 
-export type DeeplinkData =
-  | LoginConsentRequest
-  | VerusPayInvoice
-  | GenericRequest;
+export type DeeplinkData = LoginConsentRequest | VerusPayInvoice | GenericRequest;
 
 export interface DeeplinkState {
   id: string;

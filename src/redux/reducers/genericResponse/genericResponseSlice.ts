@@ -1,5 +1,6 @@
-import {RootState} from '#/redux/store';
 import {createEntityAdapter, createSlice} from '@reduxjs/toolkit';
+
+import {RootState} from '#/redux/store';
 
 interface ResponseDetail {
   index: number;
@@ -19,7 +20,9 @@ const responseDetailsSlice = createSlice({
   },
 });
 
-const responseDetailsSelectors = responseDetailsAdapter.getSelectors((state: RootState) => state.genericResponse);
+const responseDetailsSelectors = responseDetailsAdapter.getSelectors(
+  (state: RootState) => state.genericResponse
+);
 export const selectAllResponseDetails = responseDetailsSelectors.selectAll;
 
 export const {upsertResponseDetail, removeResponseDetail} = responseDetailsSlice.actions;

@@ -1,5 +1,6 @@
-import {AnyAction, ThunkAction} from '@reduxjs/toolkit';
 import {TypedUseSelectorHook, useDispatch, useSelector} from 'react-redux';
+import {AnyAction, ThunkAction} from '@reduxjs/toolkit';
+
 import type {AppDispatch, RootState} from './store';
 
 // Allows for thunks to be dispatched with the correct types

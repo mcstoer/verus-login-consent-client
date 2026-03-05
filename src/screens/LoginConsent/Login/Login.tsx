@@ -1,12 +1,11 @@
+import React, {useState} from 'react';
+import {useSelector} from 'react-redux';
 import Button from '@mui/material/Button';
 import Checkbox from '@mui/material/Checkbox';
 import FormControl from '@mui/material/FormControl';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import MenuItem from '@mui/material/MenuItem';
 import Select, {SelectChangeEvent} from '@mui/material/Select';
-import React, {useState} from 'react';
-import {useSelector} from 'react-redux';
-
 import {GenericRequest, LoginConsentRequest} from 'verus-typescript-primitives';
 
 import PageLayout from '#/components/PageLayout';
@@ -30,9 +29,9 @@ import {
   setExternalAction,
   setNavigationPath,
 } from '#/redux/reducers/navigation/navigationSlice';
-import {Identity} from '#/types/identity';
 import {RootState} from '#/redux/store';
 import {getCredentialsByScope} from '#/rpc/calls/getCredentials';
+import {Identity} from '#/types/identity';
 import {
   CONSENT_TO_SCOPE,
   CREDENTIALS_REVIEW,

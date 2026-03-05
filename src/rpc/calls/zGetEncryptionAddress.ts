@@ -1,5 +1,5 @@
-import {API_Z_GET_ENCRYPTION_ADDRESS, NATIVE, POST} from '#/utils/constants';
 import {getApiData} from '#/rpc/callCreator';
+import {API_Z_GET_ENCRYPTION_ADDRESS, NATIVE, POST} from '#/utils/constants';
 
 interface ApiResponse {
   msg: string;

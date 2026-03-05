@@ -1,9 +1,11 @@
+import BN from 'bn.js';
 import {GenericRequest, VERUSPAY_INVOICE_DETAILS_VDXF_ORDINAL} from 'verus-typescript-primitives';
-import {Identity} from '#/types/identity';
+
 import {RootState} from '#/redux/store';
 import {verifyGenericRequest} from '#/rpc/calls/verifyGenericRequest';
+import {Identity} from '#/types/identity';
+
 import {checkGenericRequest} from './genericRequest';
-import BN from 'bn.js';
 
 // TODO: Create a better structure for testing and redo these test cases to
 // thoroughly test the verifyGenericRequest function.

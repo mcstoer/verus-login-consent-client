@@ -1,6 +1,7 @@
 import {IdentityUpdateRequestDetails} from 'verus-typescript-primitives';
-import {API_EXECUTE_IDENTITY_UPDATE_REQUEST, NATIVE, POST} from '../../utils/constants';
-import {getApiData} from '../callCreator';
+
+import {getApiData} from '#/rpc/callCreator';
+import {API_EXECUTE_IDENTITY_UPDATE_REQUEST, NATIVE, POST} from '#/utils/constants';
 
 // executeIdentityUpdateRequest gets the desktop wallet to run update identity
 // and returns the transaction ID.

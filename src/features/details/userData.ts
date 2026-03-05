@@ -1,7 +1,3 @@
-import {detailAdded, selectDetailById} from '#/redux/reducers/genericRequest/userDataSlice';
-import {AppDispatch, RootState} from '#/redux/store';
-import {getCredentialsByScope} from '#/rpc/calls/getCredentials';
-import {Identity} from '#/types/identity';
 import {
   Credential,
   CredentialJson,
@@ -13,6 +9,11 @@ import {
   UserDataRequestOrdinalVDXFObject,
   VdxfUniValue,
 } from 'verus-typescript-primitives';
+
+import {detailAdded, selectDetailById} from '#/redux/reducers/genericRequest/userDataSlice';
+import {AppDispatch, RootState} from '#/redux/store';
+import {getCredentialsByScope} from '#/rpc/calls/getCredentials';
+import {Identity} from '#/types/identity';
 
 // Fetch the data from the identity and put it in the redux store.
 export async function prepareUserDataDetail(

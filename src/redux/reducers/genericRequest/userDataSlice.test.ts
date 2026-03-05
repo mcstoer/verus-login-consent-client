@@ -1,7 +1,9 @@
-import userDataReducer, {detailAdded, detailUpdated, selectDetailById} from './userDataSlice';
 import {CredentialJson} from 'verus-typescript-primitives';
+
+import {SET_ACTIVE_IDENTITY} from '#/redux/reducers/identity/identity.types';
 import {RootState} from '#/redux/store';
-import {SET_ACTIVE_IDENTITY} from '../identity/identity.types';
+
+import userDataReducer, {detailAdded, detailUpdated, selectDetailById} from './userDataSlice';
 
 describe('userDataSlice', () => {
   const mockCredentialJson: CredentialJson = {

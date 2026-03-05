@@ -1,6 +1,3 @@
-import {RootState} from '#/redux/store';
-import {signData} from '#/rpc/calls/signData';
-import {Identity} from '#/types/identity';
 import {
   DataDescriptor,
   DataPacketRequestOrdinalVDXFObject,
@@ -11,6 +8,11 @@ import {
   SignatureDataKey,
   VdxfUniValue,
 } from 'verus-typescript-primitives';
+
+import {RootState} from '#/redux/store';
+import {signData} from '#/rpc/calls/signData';
+import {Identity} from '#/types/identity';
+
 import {DetailPrepFunction} from './types';
 
 export const prepareDataPacketDetail: DetailPrepFunction = async ordinal => {

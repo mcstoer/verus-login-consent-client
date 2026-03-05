@@ -1,6 +1,7 @@
 import {AppEncryptionRequestDetails} from 'verus-typescript-primitives';
-import {API_EXECUTE_APP_ENCRYPTION_REQUEST, NATIVE, POST} from '../../utils/constants';
-import {getApiData} from '../callCreator';
+
+import {getApiData} from '#/rpc/callCreator';
+import {API_EXECUTE_APP_ENCRYPTION_REQUEST, NATIVE, POST} from '#/utils/constants';
 
 export interface AppEncryptionResult {
   incomingViewingKey: string;

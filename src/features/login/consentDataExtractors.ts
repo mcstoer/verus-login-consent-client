@@ -1,8 +1,3 @@
-import {Identity} from '#/types/identity';
-import {CREDENTIALS, SCOPES, SUPPORTED_CREDENTIALS} from '#/utils/constants';
-import {convertFqnToDisplayFormat} from '#/utils/fullyqualifiedname';
-import {unixToDate} from '#/utils/math';
-import {getSystemNameFromSystemId} from '#/utils/systems';
 import {
   AuthenticationRequestDetails,
   AuthenticationRequestOrdinalVDXFObject,
@@ -13,6 +8,12 @@ import {
   RedirectUri,
   ResponseURI,
 } from 'verus-typescript-primitives';
+
+import {Identity} from '#/types/identity';
+import {CREDENTIALS, SCOPES, SUPPORTED_CREDENTIALS} from '#/utils/constants';
+import {convertFqnToDisplayFormat} from '#/utils/fullyqualifiedname';
+import {unixToDate} from '#/utils/math';
+import {getSystemNameFromSystemId} from '#/utils/systems';
 
 export interface ConsentData {
   title: string;

@@ -1,7 +1,8 @@
-import {RootState} from '#/redux/store';
 import {createEntityAdapter, createSlice} from '@reduxjs/toolkit';
 import {CredentialJson} from 'verus-typescript-primitives';
-import {SET_ACTIVE_IDENTITY} from '../identity/identity.types';
+
+import {SET_ACTIVE_IDENTITY} from '#/redux/reducers/identity/identity.types';
+import {RootState} from '#/redux/store';
 
 interface UserData {
   index: number;

@@ -1,3 +1,10 @@
+import React, {useState} from 'react';
+import {useSelector} from 'react-redux';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Card from '@mui/material/Card';
+import {GenericRequest, IdentityUpdateRequestOrdinalVDXFObject} from 'verus-typescript-primitives';
+
 import ContentMultiMapRenderer from '#/components/ContentMultiMapRenderer';
 import PageLayout from '#/components/PageLayout';
 import {isLastDetail} from '#/features/details/detailNavigation';
@@ -7,12 +14,6 @@ import {
   navigateGenericRequest,
 } from '#/redux/reducers/navigation/navigationSlice';
 import {RootState} from '#/redux/store';
-import Button from '@mui/material/Button';
-import Box from '@mui/material/Box';
-import Card from '@mui/material/Card';
-import React, {useState} from 'react';
-import {useSelector} from 'react-redux';
-import {GenericRequest, IdentityUpdateRequestOrdinalVDXFObject} from 'verus-typescript-primitives';
 
 const IdentityUpdateContentMultiMap: React.FC = () => {
   const dispatch = useAppDispatch();

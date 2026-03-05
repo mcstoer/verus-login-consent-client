@@ -1,5 +1,6 @@
-import {AppDispatch, RootState} from '#/redux/store';
 import {GenericRequest, OrdinalVDXFObject} from 'verus-typescript-primitives';
+
+import {AppDispatch, RootState} from '#/redux/store';
 
 export type DetailResponse = OrdinalVDXFObject | null;
 

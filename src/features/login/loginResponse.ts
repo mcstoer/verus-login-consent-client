@@ -6,6 +6,7 @@ import {
   LoginConsentRequest,
   LoginConsentResponse,
 } from 'verus-typescript-primitives';
+
 import {signResponse} from '#/rpc/calls/signResponse';
 
 export async function createAndSignLoginResponse(

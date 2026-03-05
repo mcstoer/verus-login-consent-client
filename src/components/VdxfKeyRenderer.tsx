@@ -1,15 +1,16 @@
 import React from 'react';
+import Box from '@mui/material/Box';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
-import Box from '@mui/material/Box';
 import {
   Credential,
   DATA_TYPE_OBJECT_CREDENTIAL,
   IDENTITY_CREDENTIAL_PLAINLOGIN,
   VdxfUniType,
 } from 'verus-typescript-primitives';
-import {VDXF_ID_TO_READABLE} from '../utils/constants';
+
 import {PlainLoginCredential, UnknownCredential} from '#/components/Credential';
+import {VDXF_ID_TO_READABLE} from '#/utils/constants';
 
 interface VdxfKeyRendererProps {
   vdxfKey: string;

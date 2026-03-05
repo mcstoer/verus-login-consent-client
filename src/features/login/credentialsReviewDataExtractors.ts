@@ -1,14 +1,15 @@
-import {selectDetailById} from '#/redux/reducers/genericRequest/userDataSlice';
-import {RootState} from '#/redux/store';
-import {Identity} from '#/types/identity';
-import {CREDENTIALS, SUPPORTED_CREDENTIALS} from '#/utils/constants';
-import {convertFqnToDisplayFormat} from '#/utils/fullyqualifiedname';
 import {
   Credential,
   GenericRequest,
   LoginConsentRequest,
   UserDataRequestOrdinalVDXFObject,
 } from 'verus-typescript-primitives';
+
+import {selectDetailById} from '#/redux/reducers/genericRequest/userDataSlice';
+import {RootState} from '#/redux/store';
+import {Identity} from '#/types/identity';
+import {CREDENTIALS, SUPPORTED_CREDENTIALS} from '#/utils/constants';
+import {convertFqnToDisplayFormat} from '#/utils/fullyqualifiedname';
 
 export interface CredentialsReviewData {
   signerFqn: string;

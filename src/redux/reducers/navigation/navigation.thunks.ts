@@ -1,10 +1,11 @@
+import {GenericRequest} from 'verus-typescript-primitives';
+
 import {getDetailByIndex, getDetailMapEntry} from '#/features/details';
 import {AppThunk, AppThunkSync} from '#/redux/hooks';
 import {setError} from '#/redux/reducers/error/error.actions';
-import {AppDispatch, RootState} from '#/redux/store';
-import {GenericRequest} from 'verus-typescript-primitives';
-
 import {finalizeGenericRequest} from '#/redux/reducers/genericResponse/genericResponse.thunks';
+import {AppDispatch, RootState} from '#/redux/store';
+
 import {
   assertGenericRequest,
   generateAndStoreResponse,

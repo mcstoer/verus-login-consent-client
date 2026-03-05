@@ -1,6 +1,7 @@
 import {combineReducers} from '@reduxjs/toolkit';
-import userDataReducer from './userDataSlice';
+
 import appOrDelegatedIdReducer from './appOrDelegatedIdSlice';
+import userDataReducer from './userDataSlice';
 
 const genericRequestReducer = combineReducers({
   userData: userDataReducer,

@@ -1,6 +1,8 @@
+import {createSlice, PayloadAction} from '@reduxjs/toolkit';
+
 import {NavigationStackEntry} from '#/features/details/types';
 import {LOADING_DISPLAY} from '#/utils/constants';
-import {createSlice, PayloadAction} from '@reduxjs/toolkit';
+
 import {readNavigationPath} from './navigation.util';
 
 export interface NavigationState {

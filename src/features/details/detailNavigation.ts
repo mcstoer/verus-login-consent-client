@@ -1,3 +1,14 @@
+import {
+  APP_ENCRYPTION_REQUEST_VDXF_ORDINAL,
+  AUTHENTICATION_REQUEST_VDXF_ORDINAL,
+  DATA_PACKET_REQUEST_VDXF_ORDINAL,
+  GenericRequest,
+  IDENTITY_UPDATE_REQUEST_VDXF_ORDINAL,
+  OrdinalVDXFObject,
+  PROVISION_IDENTITY_DETAILS_VDXF_ORDINAL,
+  USER_DATA_REQUEST_VDXF_ORDINAL,
+} from 'verus-typescript-primitives';
+
 import {AppDispatch, RootState} from '#/redux/store';
 import {
   CREDENTIALS_REVIEW,
@@ -9,16 +20,7 @@ import {
   PROVISIONING_RESULT,
   SELECT_LOGIN_ID,
 } from '#/utils/constants';
-import {
-  APP_ENCRYPTION_REQUEST_VDXF_ORDINAL,
-  AUTHENTICATION_REQUEST_VDXF_ORDINAL,
-  DATA_PACKET_REQUEST_VDXF_ORDINAL,
-  GenericRequest,
-  IDENTITY_UPDATE_REQUEST_VDXF_ORDINAL,
-  OrdinalVDXFObject,
-  PROVISION_IDENTITY_DETAILS_VDXF_ORDINAL,
-  USER_DATA_REQUEST_VDXF_ORDINAL,
-} from 'verus-typescript-primitives';
+
 import {generateAppEncryptionResponse, prepareAppEncryptionDetail} from './appEncryption';
 import {generateAuthenticationResponse} from './authentication';
 import {generateDataPacketResponse, prepareDataPacketDetail} from './dataPacket';

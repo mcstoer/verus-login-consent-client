@@ -1,19 +1,17 @@
 import React, {useState} from 'react';
 import {useSelector} from 'react-redux';
-
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
-
 import {GenericRequest, LoginConsentRequest} from 'verus-typescript-primitives';
 
 import CollapsibleListSection from '#/components/CollapsibleListSection';
 import IdentityDetails from '#/components/Identity';
+import {LIST_ITEM_SLOTS} from '#/components/listItemSlots';
 import NestedListItem from '#/components/NestedListItem';
 import PageLayout from '#/components/PageLayout';
-import {LIST_ITEM_SLOTS} from '#/components/listItemSlots';
 import {extractConsentDataV1, extractConsentDataV2} from '#/features/login/consentDataExtractors';
 import {useAppDispatch} from '#/redux/hooks';
 import {checkAndUpdateIdentities} from '#/redux/reducers/identity/identity.actions';
@@ -22,8 +20,8 @@ import {
   setExternalAction,
   setNavigationPath,
 } from '#/redux/reducers/navigation/navigationSlice';
-import {Identity} from '#/types/identity';
 import {RootState} from '#/redux/store';
+import {Identity} from '#/types/identity';
 import {EXTERNAL_ACTION, EXTERNAL_CHAIN_START, SELECT_LOGIN_ID} from '#/utils/constants';
 import {unixToDate} from '#/utils/math';
 

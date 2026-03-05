@@ -1,6 +1,7 @@
 import {LoginConsentRequest} from 'verus-typescript-primitives';
-import {verifyLoginRequest} from '../../rpc/calls/verifyRequest';
-import {SUPPORTED_SCOPES, SUPPORTED_CREDENTIALS} from '../../utils/constants';
+
+import {verifyLoginRequest} from '#/rpc/calls/verifyRequest';
+import {SUPPORTED_CREDENTIALS, SUPPORTED_SCOPES} from '#/utils/constants';
 
 // Checks a login consent request for validity and throws errors for any issues found
 export const checkLoginConsentRequest = async (chainId: string, request: LoginConsentRequest) => {

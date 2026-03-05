@@ -1,13 +1,14 @@
-import {setActiveVerusId} from '#/redux/reducers/identity/identity.actions';
-import {AppDispatch, RootState} from '#/redux/store';
-import {executeIdentityUpdateRequest} from '#/rpc/calls/executeIdentityUpdateRequest';
-import {Identity} from '#/types/identity';
 import {
   GenericRequest,
   IdentityUpdateRequestOrdinalVDXFObject,
   IdentityUpdateResponseDetails,
   IdentityUpdateResponseOrdinalVDXFObject,
 } from 'verus-typescript-primitives';
+
+import {setActiveVerusId} from '#/redux/reducers/identity/identity.actions';
+import {AppDispatch, RootState} from '#/redux/store';
+import {executeIdentityUpdateRequest} from '#/rpc/calls/executeIdentityUpdateRequest';
+import {Identity} from '#/types/identity';
 
 export async function prepareIdentityUpdateDetail(
   ordinal: IdentityUpdateRequestOrdinalVDXFObject,

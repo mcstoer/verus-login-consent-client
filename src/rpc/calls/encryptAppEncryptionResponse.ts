@@ -1,6 +1,7 @@
 import {AppEncryptionResponseDetails, DataDescriptorJson} from 'verus-typescript-primitives';
-import {API_ENCRYPT_APP_ENCRYPTION_RESPONSE, NATIVE, POST} from '#/utils/constants';
+
 import {getApiData} from '#/rpc/callCreator';
+import {API_ENCRYPT_APP_ENCRYPTION_RESPONSE, NATIVE, POST} from '#/utils/constants';
 
 export const encryptAppEncryptionResponse = async (
   chainId: string,

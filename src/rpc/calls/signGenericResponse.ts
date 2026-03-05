@@ -1,6 +1,7 @@
-import {GenericResponse} from "verus-typescript-primitives";
-import {API_SIGN_GENERIC_RESPONSE, NATIVE, POST} from "#/utils/constants";
-import {getApiData} from "#/rpc/callCreator";
+import {GenericResponse} from 'verus-typescript-primitives';
+
+import {getApiData} from '#/rpc/callCreator';
+import {API_SIGN_GENERIC_RESPONSE, NATIVE, POST} from '#/utils/constants';
 
 export const signGenericResponse = async (
   chainId: string,
@@ -17,7 +18,7 @@ export const signGenericResponse = async (
       POST,
       true
     );
-    if (res.msg !== "success") throw new Error(res.result);
+    if (res.msg !== 'success') throw new Error(res.result);
     else {
       const resultResponse = new GenericResponse();
       resultResponse.fromBuffer(Buffer.from(res.result, 'hex'));

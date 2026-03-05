@@ -1,3 +1,7 @@
+import React from 'react';
+import {connect} from 'react-redux';
+import {GenericRequest, LoginConsentRequest} from 'verus-typescript-primitives';
+
 import {checkGenericRequest} from '#/features/genericRequest/genericRequest';
 import {checkLoginConsentRequest} from '#/features/login/loginConsentRequest';
 import {setChainMetadata} from '#/redux/reducers/chainMetadata/chainMetadata.actions';
@@ -31,9 +35,7 @@ import {
   VRSC_SYSTEM_ID,
   VRSCTEST_SYSTEM_ID,
 } from '#/utils/constants';
-import React from 'react';
-import {connect} from 'react-redux';
-import {GenericRequest, LoginConsentRequest} from 'verus-typescript-primitives';
+
 import {LoginConsentRender} from './LoginConsent.render';
 import {LoginConsentProps, LoginConsentState} from './types';
 

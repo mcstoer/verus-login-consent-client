@@ -1,6 +1,7 @@
 import {Credential} from 'verus-typescript-primitives';
-import {API_GET_CREDENTIALS_BY_SCOPE, NATIVE, POST} from '#/utils/constants';
+
 import {getApiData} from '#/rpc/callCreator';
+import {API_GET_CREDENTIALS_BY_SCOPE, NATIVE, POST} from '#/utils/constants';
 
 interface ApiResponse {
   msg: string;

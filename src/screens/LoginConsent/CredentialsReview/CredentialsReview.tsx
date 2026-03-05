@@ -1,3 +1,20 @@
+import React, {useState} from 'react';
+import {useSelector} from 'react-redux';
+import Alert from '@mui/material/Alert';
+import AlertTitle from '@mui/material/AlertTitle';
+import Button from '@mui/material/Button';
+import Card from '@mui/material/Card';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemText from '@mui/material/ListItemText';
+import {
+  Credential,
+  GenericRequest,
+  IDENTITY_CREDENTIAL_PLAINLOGIN,
+  LoginConsentRequest,
+  VerusPayInvoice,
+} from 'verus-typescript-primitives';
+
 import {PlainLoginCredential, UnknownCredential} from '#/components/Credential';
 import PageLayout from '#/components/PageLayout';
 import {isLastDetail} from '#/features/details/detailNavigation';
@@ -6,6 +23,7 @@ import {
   extractCredentialsReviewDataV2,
   selectUserDataCredentials,
 } from '#/features/login/credentialsReviewDataExtractors';
+import {createAndSignLoginResponse} from '#/features/login/loginResponse';
 import {useAppDispatch} from '#/redux/hooks';
 import {
   navigateBackGenericRequest,
@@ -14,23 +32,6 @@ import {
 } from '#/redux/reducers/navigation/navigationSlice';
 import {RootState} from '#/redux/store';
 import {REDIRECT, SELECT_LOGIN_ID} from '#/utils/constants';
-import {createAndSignLoginResponse} from '#/features/login/loginResponse';
-import Alert from '@mui/material/Alert';
-import AlertTitle from '@mui/material/AlertTitle';
-import Button from '@mui/material/Button';
-import Card from '@mui/material/Card';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemText from '@mui/material/ListItemText';
-import React, {useState} from 'react';
-import {useSelector} from 'react-redux';
-import {
-  Credential,
-  GenericRequest,
-  IDENTITY_CREDENTIAL_PLAINLOGIN,
-  LoginConsentRequest,
-  VerusPayInvoice,
-} from 'verus-typescript-primitives';
 
 interface CredentialsReviewProps {
   setRequestResult: (response: unknown, callback: () => void) => void;

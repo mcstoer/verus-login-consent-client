@@ -1,6 +1,3 @@
-import {Identity} from '#/types/identity';
-import {SUPPORTED_CREDENTIALS} from '#/utils/constants';
-import {getSystemNameFromSystemId} from '#/utils/systems';
 import {
   AuthenticationRequestOrdinalVDXFObject,
   GenericRequest,
@@ -9,6 +6,10 @@ import {
   LoginConsentRequest,
   RecipientConstraint,
 } from 'verus-typescript-primitives';
+
+import {Identity} from '#/types/identity';
+import {SUPPORTED_CREDENTIALS} from '#/utils/constants';
+import {getSystemNameFromSystemId} from '#/utils/systems';
 
 // The data for displaying the identity selection UI for login.
 export interface LoginData {

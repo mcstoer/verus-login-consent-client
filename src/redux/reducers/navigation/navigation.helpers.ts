@@ -1,3 +1,5 @@
+import {GenericRequest} from 'verus-typescript-primitives';
+
 import {generateDetailResponse} from '#/features/details';
 import {DeeplinkData} from '#/redux/reducers/deeplink/deeplinkSlice';
 import {
@@ -5,7 +7,7 @@ import {
   upsertResponseDetail,
 } from '#/redux/reducers/genericResponse/genericResponseSlice';
 import {AppDispatch, RootState} from '#/redux/store';
-import {GenericRequest} from 'verus-typescript-primitives';
+
 import {readNavigationPath} from './navigation.util';
 import {actions} from './navigationSlice';
 

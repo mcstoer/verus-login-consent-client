@@ -1,7 +1,8 @@
-import {Identity} from '#/types/identity';
 import {GenericRequest, VERUSPAY_INVOICE_DETAILS_VDXF_ORDINAL} from 'verus-typescript-primitives';
-import {RootState} from '../../redux/store';
-import {verifyGenericRequest} from '../../rpc/calls/verifyGenericRequest';
+
+import {RootState} from '#/redux/store';
+import {verifyGenericRequest} from '#/rpc/calls/verifyGenericRequest';
+import {Identity} from '#/types/identity';
 
 /*
  * Checks the validity of a generic request and throws errors for any issues found.

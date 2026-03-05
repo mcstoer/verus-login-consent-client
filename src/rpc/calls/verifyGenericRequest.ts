@@ -1,11 +1,9 @@
-import { GenericRequest } from "verus-typescript-primitives";
-import { API_VERIFY_GENERIC_REQUEST, NATIVE, POST } from "../../utils/constants";
-import { getApiData } from "../callCreator";
+import {GenericRequest} from 'verus-typescript-primitives';
 
-export const verifyGenericRequest = async (
-  chainId: string,
-  request: GenericRequest
-) => {
+import {API_VERIFY_GENERIC_REQUEST, NATIVE, POST} from '../../utils/constants';
+import {getApiData} from '../callCreator';
+
+export const verifyGenericRequest = async (chainId: string, request: GenericRequest) => {
   try {
     const res = await getApiData(
       NATIVE,
@@ -17,7 +15,7 @@ export const verifyGenericRequest = async (
       POST,
       true
     );
-    if (res.msg !== "success") throw new Error(res.result);
+    if (res.msg !== 'success') throw new Error(res.result);
     else return res.result;
   } catch (e) {
     console.error(e.message);

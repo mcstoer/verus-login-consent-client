@@ -1,3 +1,5 @@
+import React from 'react';
+
 import Loading from '#/components/Loading';
 import {setError} from '#/redux/reducers/error/error.actions';
 import {
@@ -14,7 +16,7 @@ import {
   REDIRECT,
   SELECT_LOGIN_ID,
 } from '#/utils/constants';
-import React from 'react';
+
 import Consent from './Consent/Consent';
 import CredentialsReview from './CredentialsReview/CredentialsReview';
 import DataPacket from './DataPacket/DataPacket';

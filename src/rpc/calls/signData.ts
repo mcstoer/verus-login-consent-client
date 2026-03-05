@@ -1,5 +1,5 @@
-import {API_SIGN_DATA, NATIVE, POST} from '#/utils/constants';
 import {getApiData} from '#/rpc/callCreator';
+import {API_SIGN_DATA, NATIVE, POST} from '#/utils/constants';
 
 interface ApiResponse {
   msg: string;

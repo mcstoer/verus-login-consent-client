@@ -1,6 +1,6 @@
 const SYSTEM_ID_TO_NAME: Record<string, string> = {
-  i5w5MuNik5NtLcYmNzcvaoixooEebB6MGV: "VRSC",
-  iJhCezBExJHvtyH3fGhNnt2NhU4Ztkf2yq: "VRSCTEST",
+  i5w5MuNik5NtLcYmNzcvaoixooEebB6MGV: 'VRSC',
+  iJhCezBExJHvtyH3fGhNnt2NhU4Ztkf2yq: 'VRSCTEST',
 };
 
 export const getSystemNameFromSystemId = (systemId: string): string => {

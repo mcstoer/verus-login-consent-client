@@ -6,6 +6,7 @@ import {
   VERUSPAY_INVOICE_VDXF_KEY,
   VerusPayInvoice,
 } from 'verus-typescript-primitives';
+
 import {DEVMODE, MOCK_IPC} from '#/env';
 import {setMainChain} from '#/redux/reducers/chainMetadata/chainMetadata.actions';
 import {setDeeplinkData} from '#/redux/reducers/deeplink/deeplinkSlice';
@@ -26,9 +27,10 @@ import {
   IPC_ORIGIN_DEV_LOCALHOST,
   IPC_ORIGIN_PRODUCTION,
   IPC_PUSH_MESSAGE,
-} from '../utils/constants';
-import type {IpcInitMessage, IpcMessage, IpcPushMessage} from './types';
+} from '#/utils/constants';
 import {RPC_PASSWORD, RPC_PORT} from '#/utils/mocks';
+
+import type {IpcInitMessage, IpcMessage, IpcPushMessage} from './types';
 
 const parseDeeplinkByType = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
