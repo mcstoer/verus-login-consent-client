@@ -1,5 +1,9 @@
+import {checkGenericRequest} from '#/features/genericRequest/genericRequest';
+import {checkLoginConsentRequest} from '#/features/login/loginConsentRequest';
 import {setChainMetadata} from '#/redux/reducers/chainMetadata/chainMetadata.actions';
+import {DeeplinkData} from '#/redux/reducers/deeplink/deeplinkSlice';
 import {setError} from '#/redux/reducers/error/error.actions';
+import {setAppOrDelegatedId} from '#/redux/reducers/genericRequest/appOrDelegatedIdSlice';
 import {
   checkAndUpdateAll,
   checkAndUpdateChainInfo,
@@ -10,9 +14,9 @@ import {
   setNavigationPath,
 } from '#/redux/reducers/navigation/navigationSlice';
 import {setOriginApp} from '#/redux/reducers/origin/origin.actions';
-import {completeRequest} from '#/redux/reducers/rpc/rpcSlice';
+import {completeRequest, CompleteRequestResult} from '#/redux/reducers/rpc/rpcSlice';
 import {setSignatureInfo} from '#/redux/reducers/signatureInfo/signatureInfo.actions';
-import {setAppOrDelegatedId} from '#/redux/reducers/genericRequest/appOrDelegatedIdSlice';
+import store, {RootState} from '#/redux/store';
 import {getBlock} from '#/rpc/calls/getBlock';
 import {getCurrency} from '#/rpc/calls/getCurrency';
 import {getIdentity} from '#/rpc/calls/getIdentity';
@@ -24,23 +28,17 @@ import {
   CONSENT_TO_SCOPE,
   EXTERNAL_ACTION,
   EXTERNAL_CHAIN_START,
+  VRSC_SYSTEM_ID,
+  VRSCTEST_SYSTEM_ID,
 } from '#/utils/constants';
-import {checkGenericRequest} from '#/features/genericRequest/genericRequest';
-import store from '#/redux/store';
-import {checkLoginConsentRequest} from '#/features/login/loginConsentRequest';
-import PropTypes from 'prop-types';
 import React from 'react';
 import {connect} from 'react-redux';
-import {
-  GENERIC_REQUEST_DEEPLINK_VDXF_KEY,
-  GenericRequest,
-  LOGIN_CONSENT_REQUEST_VDXF_KEY,
-  LoginConsentRequest,
-} from 'verus-typescript-primitives';
+import {GenericRequest, LoginConsentRequest} from 'verus-typescript-primitives';
 import {LoginConsentRender} from './LoginConsent.render';
+import {LoginConsentProps, LoginConsentState} from './types';
 
-class LoginConsent extends React.Component {
-  constructor(props) {
+export class LoginConsent extends React.Component<LoginConsentProps, LoginConsentState> {
+  constructor(props: LoginConsentProps) {
     super(props);
 
     this.state = {
@@ -54,7 +52,7 @@ class LoginConsent extends React.Component {
     this.checkRequest = this.checkRequest.bind(this);
   }
 
-  async componentDidUpdate(lastProps) {
+  async componentDidUpdate(lastProps: LoginConsentProps): Promise<void> {
     if (
       lastProps !== this.props &&
       ((lastProps.rpcPassword !== this.props.rpcPassword && this.props.originAppId != null) ||
@@ -74,13 +72,13 @@ class LoginConsent extends React.Component {
     }
   }
 
-  async handleRequest() {
+  async handleRequest(): Promise<void> {
     const request = this.props.deeplinkData;
     const mainChain = this.props.mainChain;
 
-    // Check if the main daemon is running.
+    // The main daemon must be running in order to check other chains.
     const chainActions = await checkAndUpdateChainInfo(mainChain);
-    chainActions.map(action => this.props.dispatch(action));
+    chainActions.map((action: unknown) => this.props.dispatch(action));
 
     // Add a small delay so that the Redux store is updated since
     // React 18 has concurrent rendering.
@@ -97,11 +95,18 @@ class LoginConsent extends React.Component {
       return;
     }
 
-    // Get information on the system of the request.
-    const currencyInfo = await getCurrency(mainChain, request.system_id);
+    // The GenericRequest doesn't support a system ID to allow chains other than VRSC or VRSCTEST,
+    // so use the flag to determine the chain.
+    let systemId: string;
+    if (request instanceof GenericRequest) {
+      systemId = request.isTestnet() ? VRSCTEST_SYSTEM_ID : VRSC_SYSTEM_ID;
+    } else {
+      systemId = request.system_id;
+    }
+
+    const currencyInfo = await getCurrency(mainChain, systemId);
     const chainId = currencyInfo.name.toUpperCase();
 
-    // Store chain metadata in dedicated reducer
     this.props.dispatch(
       setChainMetadata({
         chainName: currencyInfo.name,
@@ -110,34 +115,24 @@ class LoginConsent extends React.Component {
     );
 
     const actions = await checkAndUpdateAll(chainId);
-    actions.map(action => this.props.dispatch(action));
+    actions.map((action: unknown) => this.props.dispatch(action));
 
     if (this.canProcessRequest()) {
-      await this.checkRequest(this.props.deeplinkId, request);
+      await this.checkRequest(request);
 
-      switch (this.props.deeplinkId) {
-        case LOGIN_CONSENT_REQUEST_VDXF_KEY.vdxfid:
+      if (request instanceof LoginConsentRequest) {
+        this.props.dispatch(setNavigationPath(CONSENT_TO_SCOPE));
+      } else if (request instanceof GenericRequest) {
+        if (request.details.length > 0) {
+          // Initialize detail index to -1 to indicate no details have been processed yet.
+          this.props.dispatch(setCurrentDetailIndex(-1));
+          // CONSENT_TO_SCOPE acts as the review for the generic request.
           this.props.dispatch(setNavigationPath(CONSENT_TO_SCOPE));
-          break;
-
-        case GENERIC_REQUEST_DEEPLINK_VDXF_KEY.vdxfid: {
-          const genericRequest = new GenericRequest(request);
-
-          // Initialize detail processing - navigate to first detail
-          if (genericRequest.details.length > 0) {
-            // Initialize detail index to -1 to indicate no details have been processed yet.
-            this.props.dispatch(setCurrentDetailIndex(-1));
-            // CONSENT_TO_SCOPE acts as the review for the generic request.
-            this.props.dispatch(setNavigationPath(CONSENT_TO_SCOPE));
-          } else {
-            throw new Error('GenericRequest contains no details to process');
-          }
-
-          break;
+        } else {
+          throw new Error('GenericRequest contains no details to process');
         }
-
-        default:
-          throw new Error(`Unsupported deeplink type for navigation: ${this.props.deeplinkId}`);
+      } else {
+        throw new Error(`Unsupported deeplink type for navigation`);
       }
     } else {
       this.props.dispatch(setExternalAction(EXTERNAL_CHAIN_START));
@@ -145,107 +140,72 @@ class LoginConsent extends React.Component {
     }
   }
 
+  private async fetchAndStoreSignatureInfo(
+    chainId: string,
+    signingId: string,
+    signatureString: string
+  ): Promise<void> {
+    const signedBy = await getIdentity(chainId, signingId);
+
+    const sigInfo = await getSignatureInfo(
+      chainId,
+      signingId,
+      signatureString,
+      signedBy.identity.identityaddress
+    );
+    const sigBlockInfo = await getBlock(chainId, sigInfo.height.toString());
+
+    // Get the identities of the revocation and recovery i-addresses to display for anti-phishing.
+    const [signingRevocationIdentity, signingRecoveryIdentity] = await Promise.all([
+      getIdentity(chainId, signedBy.identity.revocationauthority),
+      getIdentity(chainId, signedBy.identity.recoveryauthority),
+    ]);
+
+    this.props.dispatch(
+      setSignatureInfo({
+        signedBy,
+        sigBlockInfo,
+        signingRevocationIdentity,
+        signingRecoveryIdentity,
+      })
+    );
+  }
+
   // Checks request for signature authenticity, and other things that would immediately disqualify
   // it. If any problems are found, an error is thrown.
-  async checkRequest(deeplinkId, req) {
+  async checkRequest(req: DeeplinkData): Promise<void> {
     try {
       const chainId = this.props.chainId;
-      let request;
-      let signingId;
-      let signatureString;
 
-      // Switch on the deeplink type to determine how to handle the request
-      switch (deeplinkId) {
-        case LOGIN_CONSENT_REQUEST_VDXF_KEY.vdxfid: {
-          request = new LoginConsentRequest(req);
-          await checkLoginConsentRequest(chainId, request);
-          signingId = request.signing_id;
-          signatureString = request.signature.signature;
+      if (req instanceof LoginConsentRequest) {
+        await checkLoginConsentRequest(chainId, req);
+        await this.fetchAndStoreSignatureInfo(chainId, req.signing_id, req.signature.signature);
+      } else if (req instanceof GenericRequest) {
+        await checkGenericRequest(chainId, req, store.getState);
+        if (req.isSigned()) {
+          const signingId = req.signature.identityID.toIAddress();
+          const signatureString = req.signature.signatureAsVch.toString('base64');
 
-          const signedBy = await getIdentity(chainId, signingId);
+          await this.fetchAndStoreSignatureInfo(chainId, signingId, signatureString);
 
-          // Get information on the signature for displaying later.
-          const sigInfo = await getSignatureInfo(
-            chainId,
-            signingId,
-            signatureString,
-            signedBy.identity.identityaddress
-          );
-          const sigBlockInfo = await getBlock(chainId, sigInfo.height.toString());
-
-          // Get the identities of the revocation and recovery i-addresses to display for anti-phishing.
-          const signingRevocationIdentity = await getIdentity(
-            chainId,
-            signedBy.identity.revocationauthority
-          );
-          const signingRecoveryIdentity = await getIdentity(
-            chainId,
-            signedBy.identity.recoveryauthority
-          );
-
-          // Store signature information in dedicated reducer
-          this.props.dispatch(
-            setSignatureInfo({
-              signedBy: signedBy,
-              sigBlockInfo: sigBlockInfo,
-              signingRevocationIdentity: signingRevocationIdentity,
-              signingRecoveryIdentity: signingRecoveryIdentity,
-            })
-          );
-          break;
-        }
-
-        case GENERIC_REQUEST_DEEPLINK_VDXF_KEY.vdxfid:
-          request = new GenericRequest(req);
-
-          await checkGenericRequest(chainId, request, store.getState);
-          if (request.isSigned()) {
-            signingId = request.signature.identityID.toIAddress();
-            signatureString = request.signature.signatureAsVch.toString('base64');
-            // TODO: Reduce duplication with the other requests
-            const signedBy = await getIdentity(chainId, signingId);
-
-            // Get information on the signature for displaying later.
-            const sigInfo = await getSignatureInfo(
+          if (req.hasAppOrDelegatedID()) {
+            const appOrDelegatedIdentity = await getIdentity(
               chainId,
-              signingId,
-              signatureString,
-              signedBy.identity.identityaddress
+              req.appOrDelegatedID.toIAddress()
             );
-            const sigBlockInfo = await getBlock(chainId, sigInfo.height.toString());
-
-            const signingRevocationIdentity = await getIdentity(chainId, signingId);
-            const signingRecoveryIdentity = await getIdentity(chainId, signingId);
-
-            this.props.dispatch(
-              setSignatureInfo({
-                signedBy: signedBy,
-                sigBlockInfo: sigBlockInfo,
-                signingRevocationIdentity: signingRevocationIdentity,
-                signingRecoveryIdentity: signingRecoveryIdentity,
-              })
-            );
-
-            if (request.hasAppOrDelegatedID()) {
-              const appOrDelegatedIdentity = await getIdentity(
-                chainId,
-                request.appOrDelegatedID.toIAddress()
-              );
-              this.props.dispatch(setAppOrDelegatedId(appOrDelegatedIdentity));
-            }
+            this.props.dispatch(setAppOrDelegatedId(appOrDelegatedIdentity));
           }
-          break;
-
-        default:
-          throw new Error(`Unsupported deeplink type: ${deeplinkId}`);
+        }
+      } else {
+        throw new Error(`Unsupported deeplink type`);
       }
     } catch (e) {
       console.error(e);
-      this.props.dispatch(setError(new Error(e.message)));
+      this.props.dispatch(setError(new Error((e as Error).message)));
     }
   }
 
-  getRequestResult(res, cb) {
+  getRequestResult(res: unknown, cb: () => void): void {
     this.setState(
       {
         requestResult: res,
@@ -254,7 +214,7 @@ class LoginConsent extends React.Component {
     );
   }
 
-  canProcessRequest() {
+  canProcessRequest(): boolean {
     return (
       this.props.apiErrors[API_GET_CHAIN_INFO] === null &&
       this.props.apiErrors[API_GET_IDENTITIES] === null &&
@@ -264,7 +224,7 @@ class LoginConsent extends React.Component {
     );
   }
 
-  async completeLoginConsent(result = null, error = null) {
+  async completeLoginConsent(result?: CompleteRequestResult, error?: Error): Promise<void> {
     this.props.dispatch(completeRequest(result, error));
   }
 
@@ -273,28 +233,7 @@ class LoginConsent extends React.Component {
   }
 }
 
-LoginConsent.propTypes = {
-  dispatch: PropTypes.func.isRequired,
-  path: PropTypes.string,
-  pathArray: PropTypes.array,
-  port: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  originAppId: PropTypes.string,
-  originApp: PropTypes.object,
-  originAppBuiltin: PropTypes.bool,
-  error: PropTypes.object,
-  rpcPassword: PropTypes.string,
-  windowId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  deeplinkData: PropTypes.object,
-  deeplinkId: PropTypes.string,
-  chainInfo: PropTypes.object,
-  apiErrors: PropTypes.object,
-  chainId: PropTypes.string,
-  chainName: PropTypes.string,
-  mainChain: PropTypes.string,
-  signatureInfo: PropTypes.object,
-};
-
-const mapStateToProps = state => {
+const mapStateToProps = (state: RootState): Omit<LoginConsentProps, 'dispatch'> => {
   return {
     path: state.navigation.path,
     pathArray: state.navigation.pathArray,

@@ -95,7 +95,7 @@ type MultiURIResultSerialized = {
   uris: ResponseURIJson[];
 };
 
-type CompleteRequestResult = SingleURIResult | MultiURIResult;
+export type CompleteRequestResult = SingleURIResult | MultiURIResult;
 
 type SerializedResult = SingleURIResult | MultiURIResultSerialized;
 
