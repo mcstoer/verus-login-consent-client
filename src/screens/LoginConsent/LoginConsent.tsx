@@ -70,7 +70,11 @@ export class LoginConsent extends React.Component<LoginConsentProps, LoginConsen
     }
 
     if (lastProps !== this.props && lastProps.deeplinkData !== this.props.deeplinkData) {
-      await this.handleRequest();
+      try {
+        await this.handleRequest();
+      } catch (e) {
+        this.props.dispatch(setError(e));
+      }
     }
   }
 
