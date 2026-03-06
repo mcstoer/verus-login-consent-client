@@ -1,5 +1,4 @@
 import {
-  AuthenticationRequestDetails,
   AuthenticationRequestOrdinalVDXFObject,
   GenericRequest,
   IdentityUpdateRequestOrdinalVDXFObject,
@@ -23,6 +22,11 @@ export interface ConsentData {
   expiryLabel?: string;
   constraintsLabels?: string[];
   responseURIsLabels?: string[];
+}
+
+export interface PreppedAuthDetail {
+  constraintsLabels: string[];
+  expiryLabel: string | null;
 }
 
 // extractConsentDataV1 extracts display data from a LoginConsentRequest for the consent screen.
@@ -62,12 +66,13 @@ export const extractConsentDataV1 = (
   };
 };
 
-const getExpiryLabel = (authReqDetail: AuthenticationRequestDetails) => {
+const getFallbackExpiryLabel = (ordinalWrapper: AuthenticationRequestOrdinalVDXFObject) => {
+  const authReqDetail = ordinalWrapper.data;
   if (!authReqDetail?.hasExpiryTime()) return null;
   return unixToDate(authReqDetail.expiryTime.toNumber());
 };
 
-const getConstraintLabel = (constraint: RecipientConstraint) => {
+const getFallbackConstraintLabel = (constraint: RecipientConstraint) => {
   const identityLabel = constraint.identity.address;
   let constraintLabel = identityLabel;
 
@@ -94,12 +99,15 @@ const getConstraintLabel = (constraint: RecipientConstraint) => {
   }
 };
 
-// extractConsentDataV2 extracts display data from a GenericRequestfor the consent screen.
+// extractConsentDataV2 extracts display data from a GenericRequest for the consent screen.
+// When preppedAuthDetail is provided (from the Redux store), resolved constraint labels
+// and expiry are used instead of falling back to raw address-based labels.
 export const extractConsentDataV2 = (
   request: GenericRequest,
   signedBy: Identity,
   currentDetailIndex: number,
-  appOrDelegatedId?: Identity | null
+  appOrDelegatedId?: Identity | null,
+  preppedAuthDetail?: PreppedAuthDetail | null
 ): ConsentData => {
   const signerFqn = convertFqnToDisplayFormat(signedBy.fullyqualifiedname);
   const systemId = request.signature?.systemID.toIAddress() || '';
@@ -112,21 +120,26 @@ export const extractConsentDataV2 = (
   const ordinalWrapper = request.details[currentDetailIndex];
 
   let expiryLabel: string;
-  let constraints: RecipientConstraint[] = [];
+  let constraintsLabels: string[] = [];
 
   let title = `${signerFqn} is requesting login with VerusID`;
 
   if (ordinalWrapper instanceof AuthenticationRequestOrdinalVDXFObject) {
-    const authRequestDetail = ordinalWrapper.data;
-    expiryLabel = getExpiryLabel(authRequestDetail);
-    constraints = authRequestDetail.recipientConstraints ?? [];
+    if (preppedAuthDetail) {
+      // Use the resolved labels from the prepped auth detail (friendly names resolved via RPC).
+      constraintsLabels = preppedAuthDetail.constraintsLabels;
+      expiryLabel = preppedAuthDetail.expiryLabel;
+    } else {
+      // Fall back to raw constraint labels when prepped data is not yet available.
+      expiryLabel = getFallbackExpiryLabel(ordinalWrapper);
+      const constraints = ordinalWrapper.data.recipientConstraints ?? [];
+      constraintsLabels = constraints.map(getFallbackConstraintLabel);
+    }
   } else if (ordinalWrapper instanceof IdentityUpdateRequestOrdinalVDXFObject) {
     title = `${signerFqn} is requesting to update ${ordinalWrapper.data.identity?.name}@`;
   }
 
   const responseURIs = request.responseURIs ?? [];
-
-  const constraintsLabels = constraints.map(getConstraintLabel);
   const responseURIsLabels = responseURIs.map((uri: ResponseURI) => uri.getUriString());
 
   if (request.hasAppOrDelegatedID() && appOrDelegatedId) {

@@ -2,6 +2,7 @@ import React from 'react';
 import {connect} from 'react-redux';
 import {GenericRequest, LoginConsentRequest} from 'verus-typescript-primitives';
 
+import {getDetailMapEntry} from '#/features/details';
 import {checkGenericRequest} from '#/features/genericRequest/genericRequest';
 import {checkLoginConsentRequest} from '#/features/login/loginConsentRequest';
 import {setChainMetadata} from '#/redux/reducers/chainMetadata/chainMetadata.actions';
@@ -19,8 +20,8 @@ import {
 } from '#/redux/reducers/navigation/navigationSlice';
 import {setOriginApp} from '#/redux/reducers/origin/origin.actions';
 import {completeRequest, CompleteRequestResult} from '#/redux/reducers/rpc/rpcSlice';
-import {setSignatureInfo} from '#/redux/reducers/signatureInfo/signatureInfo.actions';
-import store, {RootState} from '#/redux/store';
+import {setSignatureInfo} from '#/redux/reducers/signatureInfo/signatureInfoSlice';
+import store, {AppDispatch, RootState} from '#/redux/store';
 import {getBlock} from '#/rpc/calls/getBlock';
 import {getCurrency} from '#/rpc/calls/getCurrency';
 import {getIdentity} from '#/rpc/calls/getIdentity';
@@ -132,6 +133,17 @@ export class LoginConsent extends React.Component<LoginConsentProps, LoginConsen
         if (request.details.length > 0) {
           // Initialize detail index to -1 to indicate no details have been processed yet.
           this.props.dispatch(setCurrentDetailIndex(-1));
+
+          // Eagerly prep the first detail so Consent has its data (e.g. constraints).
+          const firstDetail = request.details[0];
+          const entry = getDetailMapEntry(firstDetail);
+          await entry.prepFunction(
+            firstDetail,
+            0,
+            this.props.dispatch as AppDispatch,
+            store.getState
+          );
+
           // CONSENT_TO_SCOPE acts as the review for the generic request.
           this.props.dispatch(setNavigationPath(CONSENT_TO_SCOPE));
         } else {

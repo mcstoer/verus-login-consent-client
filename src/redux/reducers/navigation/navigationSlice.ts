@@ -8,7 +8,7 @@ import {readNavigationPath} from './navigation.util';
 export interface NavigationState {
   path: string;
   pathArray: string[];
-  previousPath: string | undefined;
+  previousPath?: string;
   externalAction: string;
   currentDetailIndex: number;
   currentScreenIndex: number;

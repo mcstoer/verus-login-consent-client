@@ -22,7 +22,7 @@ import {
 } from '#/utils/constants';
 
 import {generateAppEncryptionResponse, prepareAppEncryptionDetail} from './appEncryption';
-import {generateAuthenticationResponse} from './authentication';
+import {generateAuthenticationResponse, prepareAuthenticationDetail} from './authentication';
 import {generateDataPacketResponse, prepareDataPacketDetail} from './dataPacket';
 import {generateIdentityUpdateResponse, prepareIdentityUpdateDetail} from './identityUpdate';
 import {DetailMapEntry, DetailPrepFunction, DetailResponse, DetailResponseGenerator} from './types';
@@ -47,7 +47,7 @@ const noOpResponseGenerator: DetailResponseGenerator = async () => null;
 const DETAIL_MAP: Record<string, DetailMapEntry> = {
   [AUTHENTICATION_REQUEST_VDXF_ORDINAL.toNumber()]: {
     type: 'standard',
-    prepFunction: noOpPrepFunction,
+    prepFunction: prepareAuthenticationDetail,
     screens: [SELECT_LOGIN_ID],
     responseGenerator: generateAuthenticationResponse,
   },

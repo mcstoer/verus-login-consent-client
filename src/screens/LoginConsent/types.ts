@@ -1,6 +1,6 @@
 import {DeeplinkData} from '#/redux/reducers/deeplink/deeplinkSlice';
 import {CompleteRequestResult} from '#/redux/reducers/rpc/rpcSlice';
-import {SignatureInfoState} from '#/redux/reducers/signatureInfo/signatureInfo.types';
+import {SignatureInfoState} from '#/redux/reducers/signatureInfo/signatureInfoSlice';
 
 export interface ChainInfo {
   longestchain: number;

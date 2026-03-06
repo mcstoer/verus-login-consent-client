@@ -14,6 +14,7 @@ import NestedListItem from '#/components/NestedListItem';
 import PageLayout from '#/components/PageLayout';
 import {extractConsentDataV1, extractConsentDataV2} from '#/features/login/consentDataExtractors';
 import {useAppDispatch} from '#/redux/hooks';
+import {selectDetailById} from '#/redux/reducers/genericRequest/authenticationSlice';
 import {checkAndUpdateIdentities} from '#/redux/reducers/identity/identity.actions';
 import {
   navigateGenericRequest,
@@ -43,6 +44,11 @@ const Consent: React.FC<ConsentProps> = props => {
     (state: RootState) => state.genericRequest.appOrDelegatedId.identity
   );
 
+  const firstDetailIndex = 0;
+  const preppedAuthDetail = useSelector((state: RootState) =>
+    selectDetailById(state, firstDetailIndex)
+  );
+
   const {sigBlockInfo, signedBy, signingRevocationIdentity, signingRecoveryIdentity} =
     signatureInfo;
   const {time} = sigBlockInfo;
@@ -57,7 +63,8 @@ const Consent: React.FC<ConsentProps> = props => {
         // we need to clamp this to 0 in order to get the first detail's info like
         // constraints.
         Math.max(0, currentDetailIndex),
-        appOrDelegatedIdentity
+        appOrDelegatedIdentity,
+        preppedAuthDetail
       )
     : extractConsentDataV1(deeplinkData as LoginConsentRequest, signedBy as Identity);
 

@@ -53,6 +53,20 @@ describe('consentDataExtractors', () => {
               address: 'iNtjYwzzo1NLjdjtn1KrnXnKJoK9cbhYPd',
             }),
           }),
+          new RecipientConstraint({
+            type: RecipientConstraint.REQUIRED_SYSTEM,
+            identity: new CompactIAddressObject({
+              type: CompactIAddressObject.TYPE_I_ADDRESS,
+              address: 'iJhCezBExJHvtyH3fGhNnt2NhU4Ztkf2yq',
+            }),
+          }),
+          new RecipientConstraint({
+            type: RecipientConstraint.REQUIRED_PARENT,
+            identity: new CompactIAddressObject({
+              type: CompactIAddressObject.TYPE_I_ADDRESS,
+              address: 'iLvocymhpjbsQUaeXaJyn1MVQKxyCpEV8T',
+            }),
+          }),
         ],
         responseURIs: [],
       } as unknown as AuthenticationRequestDetails;
@@ -68,24 +82,43 @@ describe('consentDataExtractors', () => {
           },
         },
         details: [mockOrdinalWrapper],
+        responseURIs: [],
+        hasAppOrDelegatedID: () => false,
       } as unknown as GenericRequest;
 
       const mockSignedBy = {
         fullyqualifiedname: 'testuser@',
       } as unknown as Identity;
 
-      const result = extractConsentDataV2(mockRequest, mockSignedBy, 0);
+      const mockPreppedAuthDetail = {
+        constraintsLabels: [
+          'Required identity: Mbnv.VRSCTEST@',
+          'Required system: VRSCTEST',
+          'Required parent: MJS.VRSCTEST@',
+        ],
+        expiryLabel: 'Wed, Dec 31, 1969, 16:00:00',
+      };
+
+      const result = extractConsentDataV2(
+        mockRequest,
+        mockSignedBy,
+        0,
+        null,
+        mockPreppedAuthDetail
+      );
 
       expect(result.signerFqn).toBe('testuser@');
       expect(result.permissionsLabels).toEqual([]);
       expect(result.systemId).toBe('iJhCezBExJHvtyH3fSUwhzybVMVcCL9Gjf');
       expect(result.constraintsLabels).toEqual([
-        'Required identity: iNtjYwzzo1NLjdjtn1KrnXnKJoK9cbhYPd',
+        'Required identity: Mbnv.VRSCTEST@',
+        'Required system: VRSCTEST',
+        'Required parent: MJS.VRSCTEST@',
       ]);
 
       // Make sure it has an auth detail and calculate these fields based on it
       expect(result.responseURIsLabels).toEqual([]);
-      expect(result.expiryLabel).toEqual('Wed, Dec 31, 1969, 16:00:00');
+      expect(result.expiryLabel).toBe('Wed, Dec 31, 1969, 16:00:00');
     });
   });
 });
