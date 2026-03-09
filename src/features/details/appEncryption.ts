@@ -22,7 +22,7 @@ export async function prepareAppEncryptionDetail(
   getState: () => RootState
 ): Promise<void> {
   if (!(ordinal instanceof AppEncryptionRequestOrdinalVDXFObject)) {
-    throw new Error('Detail is not an AppEncryptionRequestOrdinalVDXFObject.');
+    throw new Error('Ordinal is not an AppEncryptionRequestOrdinalVDXFObject.');
   }
 
   const detail: AppEncryptionRequestDetails = ordinal.data;

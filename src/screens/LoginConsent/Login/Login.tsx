@@ -28,6 +28,7 @@ import {
   navigateGenericRequest,
   setExternalAction,
   setNavigationPath,
+  startDetour,
 } from '#/redux/reducers/navigation/navigationSlice';
 import {RootState} from '#/redux/store';
 import {getCredentialsByScope} from '#/rpc/calls/getCredentials';
@@ -71,6 +72,7 @@ const Login = (props: LoginProps) => {
     hasRequestedCredentials = false,
     canProvision,
     filterIdentities,
+    provisioningDetailIndex,
   } = loginData;
 
   const filteredIdentities = filterIdentities(identities);
@@ -148,7 +150,11 @@ const Login = (props: LoginProps) => {
   };
 
   const tryProvision = (): void => {
-    dispatch(setNavigationPath(PROVISIONING_FORM));
+    if (isGenericRequest) {
+      dispatch(startDetour(provisioningDetailIndex));
+    } else {
+      dispatch(setNavigationPath(PROVISIONING_FORM));
+    }
   };
 
   const selectId = (address: string): void => {
@@ -254,7 +260,7 @@ const Login = (props: LoginProps) => {
           style={{
             width: 240,
             padding: 8,
-            marginTop: 'auto',
+            //marginTop: 'auto',
           }}
         >
           {'Request a new VerusID'}
