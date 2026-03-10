@@ -9,7 +9,7 @@ import genericResponseReducer from './reducers/genericResponse/genericResponseSl
 import {identity} from './reducers/identity/identity.reducer';
 import {navigation} from './reducers/navigation/navigationSlice';
 import {origin} from './reducers/origin/origin.reducer';
-import {provision} from './reducers/provision/provision.reducer';
+import {provision} from './reducers/provision/provisionSlice';
 import {rpc} from './reducers/rpc/rpcSlice';
 import {signatureInfo} from './reducers/signatureInfo/signatureInfoSlice';
 
