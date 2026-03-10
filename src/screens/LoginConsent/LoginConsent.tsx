@@ -160,6 +160,7 @@ export class LoginConsent extends React.Component<LoginConsentProps, LoginConsen
 
   private async fetchAndStoreSignatureInfo(
     chainId: string,
+    systemId: string,
     signingId: string,
     signatureString: string
   ): Promise<void> {
@@ -167,7 +168,7 @@ export class LoginConsent extends React.Component<LoginConsentProps, LoginConsen
 
     const sigInfo = await getSignatureInfo(
       chainId,
-      signingId,
+      systemId,
       signatureString,
       signedBy.identity.identityaddress
     );
@@ -197,14 +198,20 @@ export class LoginConsent extends React.Component<LoginConsentProps, LoginConsen
 
       if (req instanceof LoginConsentRequest) {
         await checkLoginConsentRequest(chainId, req);
-        await this.fetchAndStoreSignatureInfo(chainId, req.signing_id, req.signature.signature);
+        await this.fetchAndStoreSignatureInfo(
+          chainId,
+          req.system_id,
+          req.signing_id,
+          req.signature.signature
+        );
       } else if (req instanceof GenericRequest) {
         await checkGenericRequest(chainId, req, store.getState);
         if (req.isSigned()) {
           const signingId = req.signature.identityID.toIAddress();
           const signatureString = req.signature.signatureAsVch.toString('base64');
+          const systemId = req.isTestnet() ? VRSCTEST_SYSTEM_ID : VRSC_SYSTEM_ID;
 
-          await this.fetchAndStoreSignatureInfo(chainId, signingId, signatureString);
+          await this.fetchAndStoreSignatureInfo(chainId, systemId, signatureString, signingId);
 
           if (req.hasAppOrDelegatedID()) {
             const appOrDelegatedIdentity = await getIdentity(

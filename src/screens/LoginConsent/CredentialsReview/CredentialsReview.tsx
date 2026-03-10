@@ -25,6 +25,7 @@ import {
 } from '#/features/login/credentialsReviewDataExtractors';
 import {createAndSignLoginResponse} from '#/features/login/loginResponse';
 import {useAppDispatch} from '#/redux/hooks';
+import {setError} from '#/redux/reducers/error/error.actions';
 import {
   navigateBackGenericRequest,
   navigateGenericRequest,
@@ -58,7 +59,9 @@ const CredentialsReview: React.FC<CredentialsReviewProps> = ({setRequestResult})
   );
 
   if (deeplinkData instanceof VerusPayInvoice) {
-    throw new Error('Unable to handle a VerusPayInvoice for Credential Review');
+    const err = new Error('Unable to handle a VerusPayInvoice for Credential Review');
+    dispatch(setError(err));
+    return;
   }
 
   const isGenericRequest = deeplinkData instanceof GenericRequest;

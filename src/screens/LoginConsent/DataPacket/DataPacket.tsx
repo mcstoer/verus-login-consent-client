@@ -12,6 +12,7 @@ import NestedListItem from '#/components/NestedListItem';
 import PageLayout from '#/components/PageLayout';
 import {isLastDetail} from '#/features/details/detailNavigation';
 import {useAppDispatch} from '#/redux/hooks';
+import {setError} from '#/redux/reducers/error/error.actions';
 import {
   navigateBackGenericRequest,
   navigateGenericRequest,
@@ -26,13 +27,17 @@ const DataPacket: React.FC = () => {
   const currentDetailIndex = useSelector((state: RootState) => state.navigation.currentDetailIndex);
 
   if (!(deeplinkData instanceof GenericRequest)) {
-    throw new Error('Unable to handle data packets outside of generic requests.');
+    const err = new Error('Unable to handle data packets outside of generic requests.');
+    dispatch(setError(err));
+    return;
   }
 
   const ordinal = deeplinkData.details[currentDetailIndex];
 
   if (!(ordinal instanceof DataPacketRequestOrdinalVDXFObject)) {
-    throw new Error('Unable to handle non-data packet ordinal.');
+    const err = new Error('Unable to handle non-data packet ordinal.');
+    dispatch(setError(err));
+    return;
   }
 
   const dataPacketDetails = ordinal.data;

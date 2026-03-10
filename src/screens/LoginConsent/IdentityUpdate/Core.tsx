@@ -20,6 +20,7 @@ import {
 import PageLayout from '#/components/PageLayout';
 import {SnackbarAlert} from '#/components/SnackbarAlert';
 import {useAppDispatch} from '#/redux/hooks';
+import {setError} from '#/redux/reducers/error/error.actions';
 import {
   navigateBackGenericRequest,
   navigateGenericRequest,
@@ -220,13 +221,17 @@ const IdentityUpdateCore: React.FC = () => {
   const chainId = useSelector((state: RootState) => state.chainMetadata.chainId);
 
   if (!(deeplinkData instanceof GenericRequest)) {
-    throw new Error('Unable to handle identity updates outside of generic requests.');
+    const err = new Error('Unable to handle identity updates outside of generic requests.');
+    dispatch(setError(err));
+    return;
   }
 
   const ordinal = deeplinkData.details[currentDetailIndex];
 
   if (!(ordinal instanceof IdentityUpdateRequestOrdinalVDXFObject)) {
-    throw new Error('Unable to handle non-identity update detail.');
+    const err = new Error('Unable to handle non-identity update detail.');
+    dispatch(setError(err));
+    return;
   }
 
   const details = ordinal.data;

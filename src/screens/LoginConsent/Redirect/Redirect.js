@@ -1,13 +1,15 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
-import {RedirectRender} from './Redirect.render';
+import PropTypes from 'prop-types';
 import {
   LOGIN_CONSENT_REDIRECT_VDXF_KEY,
   LOGIN_CONSENT_RESPONSE_VDXF_KEY,
 } from 'verus-typescript-primitives';
-import {SELECT_LOGIN_ID} from '../../../utils/constants';
+
 import {setNavigationPath} from '../../../redux/reducers/navigation/navigationSlice';
+import {SELECT_LOGIN_ID} from '../../../utils/constants';
+
+import {RedirectRender} from './Redirect.render';
 
 class Redirect extends React.Component {
   constructor(props) {
@@ -30,7 +32,10 @@ class Redirect extends React.Component {
       };
     }
 
-    if (this.redirectinfo.vdxfkey === LOGIN_CONSENT_REDIRECT_VDXF_KEY.vdxfid) {
+    if (
+      this.redirectinfo != null &&
+      this.redirectinfo.type === LOGIN_CONSENT_REDIRECT_VDXF_KEY.vdxfid
+    ) {
       const url = new URL(this.redirectinfo.uri);
       this.extraInfo = ` and return to ${url.protocol}//${url.host}`;
     }

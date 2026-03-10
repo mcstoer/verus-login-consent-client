@@ -9,6 +9,7 @@ import ContentMultiMapRenderer from '#/components/ContentMultiMapRenderer';
 import PageLayout from '#/components/PageLayout';
 import {isLastDetail} from '#/features/details/detailNavigation';
 import {useAppDispatch} from '#/redux/hooks';
+import {setError} from '#/redux/reducers/error/error.actions';
 import {
   navigateBackGenericRequest,
   navigateGenericRequest,
@@ -23,13 +24,17 @@ const IdentityUpdateContentMultiMap: React.FC = () => {
   const currentDetailIndex = useSelector((state: RootState) => state.navigation.currentDetailIndex);
 
   if (!(deeplinkData instanceof GenericRequest)) {
-    throw new Error('Unable to handle identity updates outside of generic requests.');
+    const err = new Error('Unable to handle identity updates outside of generic requests.');
+    dispatch(setError(err));
+    return;
   }
 
   const ordinal = deeplinkData.details[currentDetailIndex];
 
   if (!(ordinal instanceof IdentityUpdateRequestOrdinalVDXFObject)) {
-    throw new Error('Unable to handle non-identity update detail.');
+    const err = new Error('Unable to handle non-identity update detail.');
+    dispatch(setError(err));
+    return;
   }
 
   const deeplinkDetails = ordinal.data;
