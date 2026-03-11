@@ -1,8 +1,8 @@
 import {
+  DATA_TYPE_OBJECT_CREDENTIAL,
+  IDENTITY_CREDENTIAL,
   IDENTITY_CREDENTIAL_PLAINLOGIN,
   IDENTITY_VIEW,
-  IDENTITY_CREDENTIAL,
-  DATA_TYPE_OBJECT_CREDENTIAL,
 } from 'verus-typescript-primitives';
 
 // App ID (fixed for reserve plugins)
@@ -31,6 +31,7 @@ export const API_GET_CREDENTIALS_BY_SCOPE = 'get_credentials_by_scope';
 export const API_GET_CURRENCY = 'get_currency';
 export const API_GET_IDENTITIES = 'get_identities';
 export const API_GET_IDENTITY = 'get_identity';
+export const API_GET_IDENTITY_CONTENT = 'get_identity_content';
 export const API_GET_SIGNATURE_INFO = 'get_signature_info';
 export const API_GET_VDXF_ID = 'get_vdxf_id';
 export const API_GET_CHAIN_INFO = 'get_info';

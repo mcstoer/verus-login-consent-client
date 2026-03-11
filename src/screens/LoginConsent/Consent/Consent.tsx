@@ -14,6 +14,7 @@ import NestedListItem from '#/components/NestedListItem';
 import PageLayout from '#/components/PageLayout';
 import {extractConsentDataV1, extractConsentDataV2} from '#/features/login/consentDataExtractors';
 import {useAppDispatch} from '#/redux/hooks';
+import {setError} from '#/redux/reducers/error/error.actions';
 import {selectDetailById} from '#/redux/reducers/genericRequest/authenticationSlice';
 import {checkAndUpdateIdentities} from '#/redux/reducers/identity/identity.actions';
 import {
@@ -22,7 +23,6 @@ import {
   setNavigationPath,
 } from '#/redux/reducers/navigation/navigationSlice';
 import {RootState} from '#/redux/store';
-import {Identity} from '#/types/identity';
 import {EXTERNAL_ACTION, EXTERNAL_CHAIN_START, SELECT_LOGIN_ID} from '#/utils/constants';
 import {unixToDate} from '#/utils/math';
 
@@ -55,10 +55,15 @@ const Consent: React.FC<ConsentProps> = props => {
 
   const isGenericRequest = deeplinkData instanceof GenericRequest;
 
+  if (signedBy == null) {
+    dispatch(setError(new Error('Missing signer identity for consent screen')));
+    return null;
+  }
+
   const consentData = isGenericRequest
     ? extractConsentDataV2(
         deeplinkData,
-        signedBy as Identity,
+        signedBy,
         // Since the detail index for showing the general generic request info is -1,
         // we need to clamp this to 0 in order to get the first detail's info like
         // constraints.
@@ -66,7 +71,7 @@ const Consent: React.FC<ConsentProps> = props => {
         appOrDelegatedIdentity,
         preppedAuthDetail
       )
-    : extractConsentDataV1(deeplinkData as LoginConsentRequest, signedBy as Identity);
+    : extractConsentDataV1(deeplinkData as LoginConsentRequest, signedBy);
 
   const {title, permissionsLabels, systemId, constraintsLabels, expiryLabel, responseURIsLabels} =
     consentData;

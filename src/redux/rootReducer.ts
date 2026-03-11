@@ -5,7 +5,7 @@ import {credentials} from './reducers/credentials/credentials.reducer';
 import {deeplink} from './reducers/deeplink/deeplinkSlice';
 import {error} from './reducers/error/error.reducer';
 import genericRequestReducer from './reducers/genericRequest';
-import genericResponseReducer from './reducers/genericResponse/genericResponseSlice';
+import {genericResponse} from './reducers/genericResponse/genericResponseSlice';
 import {identity} from './reducers/identity/identity.reducer';
 import {navigation} from './reducers/navigation/navigationSlice';
 import {origin} from './reducers/origin/origin.reducer';
@@ -24,7 +24,7 @@ const rootReducer = combineReducers({
   signatureInfo,
   chainMetadata,
   deeplink,
-  genericResponse: genericResponseReducer,
+  genericResponse,
   genericRequest: genericRequestReducer,
 });
 

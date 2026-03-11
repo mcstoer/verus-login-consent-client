@@ -26,4 +26,4 @@ const responseDetailsSelectors = responseDetailsAdapter.getSelectors(
 export const selectAllResponseDetails = responseDetailsSelectors.selectAll;
 
 export const {upsertResponseDetail, removeResponseDetail} = responseDetailsSlice.actions;
-export default responseDetailsSlice.reducer;
+export const genericResponse = responseDetailsSlice.reducer;

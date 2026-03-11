@@ -1,6 +1,11 @@
 import React from 'react';
 import {connect} from 'react-redux';
-import {GenericRequest, LoginConsentRequest} from 'verus-typescript-primitives';
+import {
+  DATA_TYPE_DEFINEDKEY,
+  DefinedKey,
+  GenericRequest,
+  LoginConsentRequest,
+} from 'verus-typescript-primitives';
 
 import {getDetailMapEntry} from '#/features/details';
 import {checkGenericRequest} from '#/features/genericRequest/genericRequest';
@@ -9,6 +14,7 @@ import {setChainMetadata} from '#/redux/reducers/chainMetadata/chainMetadata.act
 import {DeeplinkData} from '#/redux/reducers/deeplink/deeplinkSlice';
 import {setError} from '#/redux/reducers/error/error.actions';
 import {setAppOrDelegatedId} from '#/redux/reducers/genericRequest/appOrDelegatedIdSlice';
+import {setDefinedDataKeys} from '#/redux/reducers/genericRequest/definedDataKeysSlice';
 import {
   checkAndUpdateAll,
   checkAndUpdateChainInfo,
@@ -25,8 +31,10 @@ import store, {AppDispatch, RootState} from '#/redux/store';
 import {getBlock} from '#/rpc/calls/getBlock';
 import {getCurrency} from '#/rpc/calls/getCurrency';
 import {getIdentity} from '#/rpc/calls/getIdentity';
+import {getIdentityContent} from '#/rpc/calls/getIdentityContent';
 import {getPlugin} from '#/rpc/calls/getPlugin';
 import {getSignatureInfo} from '#/rpc/calls/getSignatureInfo';
+import {Identity} from '#/types/identity';
 import {
   API_GET_CHAIN_INFO,
   API_GET_IDENTITIES,
@@ -36,6 +44,7 @@ import {
   VRSC_SYSTEM_ID,
   VRSCTEST_SYSTEM_ID,
 } from '#/utils/constants';
+import {capitalizeString} from '#/utils/stringUtils';
 
 import {LoginConsentRender} from './LoginConsent.render';
 import {LoginConsentProps, LoginConsentState} from './types';
@@ -161,28 +170,26 @@ export class LoginConsent extends React.Component<LoginConsentProps, LoginConsen
   private async fetchAndStoreSignatureInfo(
     chainId: string,
     systemId: string,
-    signingId: string,
+    signingIdentity: Identity,
     signatureString: string
   ): Promise<void> {
-    const signedBy = await getIdentity(chainId, signingId);
-
     const sigInfo = await getSignatureInfo(
       chainId,
       systemId,
       signatureString,
-      signedBy.identity.identityaddress
+      signingIdentity.identity.identityaddress
     );
     const sigBlockInfo = await getBlock(chainId, sigInfo.height.toString());
 
     // Get the identities of the revocation and recovery i-addresses to display for anti-phishing.
     const [signingRevocationIdentity, signingRecoveryIdentity] = await Promise.all([
-      getIdentity(chainId, signedBy.identity.revocationauthority),
-      getIdentity(chainId, signedBy.identity.recoveryauthority),
+      getIdentity(chainId, signingIdentity.identity.revocationauthority),
+      getIdentity(chainId, signingIdentity.identity.recoveryauthority),
     ]);
 
     this.props.dispatch(
       setSignatureInfo({
-        signedBy,
+        signedBy: signingIdentity,
         sigBlockInfo,
         signingRevocationIdentity,
         signingRecoveryIdentity,
@@ -197,10 +204,11 @@ export class LoginConsent extends React.Component<LoginConsentProps, LoginConsen
 
     if (req instanceof LoginConsentRequest) {
       await checkLoginConsentRequest(chainId, req);
+      const signingIdentity = await getIdentity(chainId, req.signing_id);
       await this.fetchAndStoreSignatureInfo(
         chainId,
         req.system_id,
-        req.signing_id,
+        signingIdentity,
         req.signature.signature
       );
     } else if (req instanceof GenericRequest) {
@@ -210,15 +218,68 @@ export class LoginConsent extends React.Component<LoginConsentProps, LoginConsen
         const signatureString = req.signature.signatureAsVch.toString('base64');
         const systemId = req.isTestnet() ? VRSCTEST_SYSTEM_ID : VRSC_SYSTEM_ID;
 
-        await this.fetchAndStoreSignatureInfo(chainId, systemId, signingId, signatureString);
+        const signingIdentity = await getIdentityContent(chainId, signingId);
 
+        await this.fetchAndStoreSignatureInfo(chainId, systemId, signingIdentity, signatureString);
+
+        let definedKeyIdentity = signingIdentity;
         if (req.hasAppOrDelegatedID()) {
-          const appOrDelegatedIdentity = await getIdentity(
+          const appOrDelegatedIdentity = await getIdentityContent(
             chainId,
             req.appOrDelegatedID.toIAddress()
           );
+          definedKeyIdentity = appOrDelegatedIdentity;
           this.props.dispatch(setAppOrDelegatedId(appOrDelegatedIdentity));
         }
+
+        // Find the defined keys from the signing or AppOrDelegatedId.
+        const definedKeySource = definedKeyIdentity.identity;
+        const cmmDataKeys: Record<string, {vdxfuri: string; nsid: string; label: string}> = {};
+        if (
+          definedKeySource.contentmultimap &&
+          definedKeySource.contentmultimap[DATA_TYPE_DEFINEDKEY.vdxfid]
+        ) {
+          const definedKeyContent = definedKeySource.contentmultimap[
+            DATA_TYPE_DEFINEDKEY.vdxfid
+          ] as string | string[];
+
+          let definedKeyBufs: string[] = [];
+
+          if (Array.isArray(definedKeyContent)) {
+            definedKeyBufs = definedKeyContent;
+          } else {
+            definedKeyBufs = [definedKeyContent];
+          }
+
+          for (const definedKeyHex of definedKeyBufs) {
+            try {
+              const definedKey = new DefinedKey();
+              definedKey.fromBuffer(Buffer.from(definedKeyHex, 'hex'));
+
+              const iAddr = definedKey.getIAddr();
+              const ns = definedKey.getNameSpaceID();
+
+              if (ns !== definedKeySource.identityaddress) {
+                throw new Error(
+                  `Found defined key ${definedKey.vdxfuri} with namespace ${ns} not matching signer ID.`
+                );
+              } else {
+                const splitUri = definedKey.vdxfuri.split('::');
+                const label = splitUri.length > 1 ? splitUri[1] : splitUri[0];
+
+                cmmDataKeys[iAddr] = {
+                  vdxfuri: definedKey.vdxfuri,
+                  nsid: ns,
+                  label: capitalizeString(label.split('.').join(' ')),
+                };
+              }
+            } catch (e) {
+              console.warn(e);
+            }
+          }
+        }
+
+        this.props.dispatch(setDefinedDataKeys(cmmDataKeys));
       }
     } else {
       throw new Error(`Unsupported deeplink type`);

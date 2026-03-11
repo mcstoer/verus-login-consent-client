@@ -1,4 +1,5 @@
 import React from 'react';
+import {useSelector} from 'react-redux';
 import Box from '@mui/material/Box';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
@@ -6,7 +7,9 @@ import ListItemText from '@mui/material/ListItemText';
 import Typography from '@mui/material/Typography';
 import {ContentMultiMapPrimitive, VdxfUniValue} from 'verus-typescript-primitives';
 
+import {RootState} from '#/redux/store';
 import {VDXF_ID_TO_READABLE} from '#/utils/constants';
+import {capitalizeString} from '#/utils/stringUtils';
 
 import VdxfKeyRenderer from './VdxfKeyRenderer';
 
@@ -17,8 +20,14 @@ interface ContentMultiMapRendererProps {
 const ContentMultiMapRenderer: React.FC<ContentMultiMapRendererProps> = ({
   contentMultiMapEntries,
 }) => {
+  const definedDataKeys = useSelector(
+    (state: RootState) => state.genericRequest.definedDataKeys.keys
+  );
+
   const getReadableName = (vdxfId: string): string => {
-    return VDXF_ID_TO_READABLE[vdxfId] || vdxfId;
+    const staticLabel = VDXF_ID_TO_READABLE[vdxfId];
+    if (staticLabel != null) return capitalizeString(staticLabel);
+    return definedDataKeys?.[vdxfId]?.label ?? vdxfId;
   };
 
   const renderPrimitiveValue = (
