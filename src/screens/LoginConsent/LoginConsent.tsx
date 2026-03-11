@@ -193,40 +193,35 @@ export class LoginConsent extends React.Component<LoginConsentProps, LoginConsen
   // Checks request for signature authenticity, and other things that would immediately disqualify
   // it. If any problems are found, an error is thrown.
   async checkRequest(req: DeeplinkData): Promise<void> {
-    try {
-      const chainId = this.props.chainId;
+    const chainId = this.props.chainId;
 
-      if (req instanceof LoginConsentRequest) {
-        await checkLoginConsentRequest(chainId, req);
-        await this.fetchAndStoreSignatureInfo(
-          chainId,
-          req.system_id,
-          req.signing_id,
-          req.signature.signature
-        );
-      } else if (req instanceof GenericRequest) {
-        await checkGenericRequest(chainId, req, store.getState);
-        if (req.isSigned()) {
-          const signingId = req.signature.identityID.toIAddress();
-          const signatureString = req.signature.signatureAsVch.toString('base64');
-          const systemId = req.isTestnet() ? VRSCTEST_SYSTEM_ID : VRSC_SYSTEM_ID;
+    if (req instanceof LoginConsentRequest) {
+      await checkLoginConsentRequest(chainId, req);
+      await this.fetchAndStoreSignatureInfo(
+        chainId,
+        req.system_id,
+        req.signing_id,
+        req.signature.signature
+      );
+    } else if (req instanceof GenericRequest) {
+      await checkGenericRequest(chainId, req, store.getState);
+      if (req.isSigned()) {
+        const signingId = req.signature.identityID.toIAddress();
+        const signatureString = req.signature.signatureAsVch.toString('base64');
+        const systemId = req.isTestnet() ? VRSCTEST_SYSTEM_ID : VRSC_SYSTEM_ID;
 
-          await this.fetchAndStoreSignatureInfo(chainId, systemId, signingId, signatureString);
+        await this.fetchAndStoreSignatureInfo(chainId, systemId, signingId, signatureString);
 
-          if (req.hasAppOrDelegatedID()) {
-            const appOrDelegatedIdentity = await getIdentity(
-              chainId,
-              req.appOrDelegatedID.toIAddress()
-            );
-            this.props.dispatch(setAppOrDelegatedId(appOrDelegatedIdentity));
-          }
+        if (req.hasAppOrDelegatedID()) {
+          const appOrDelegatedIdentity = await getIdentity(
+            chainId,
+            req.appOrDelegatedID.toIAddress()
+          );
+          this.props.dispatch(setAppOrDelegatedId(appOrDelegatedIdentity));
         }
-      } else {
-        throw new Error(`Unsupported deeplink type`);
       }
-    } catch (e) {
-      console.error(e);
-      this.props.dispatch(setError(e));
+    } else {
+      throw new Error(`Unsupported deeplink type`);
     }
   }
 

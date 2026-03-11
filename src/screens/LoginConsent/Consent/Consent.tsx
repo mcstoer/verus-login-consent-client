@@ -51,7 +51,7 @@ const Consent: React.FC<ConsentProps> = props => {
 
   const {sigBlockInfo, signedBy, signingRevocationIdentity, signingRecoveryIdentity} =
     signatureInfo;
-  const {time} = sigBlockInfo;
+  const time = sigBlockInfo?.time;
 
   const isGenericRequest = deeplinkData instanceof GenericRequest;
 
