@@ -71,7 +71,7 @@ const getAllowedSystems = (recipientConstraints: RecipientConstraint[]) => {
   return recipientConstraints.reduce((acc, constraint) => {
     if (constraint.type === RecipientConstraint.REQUIRED_SYSTEM) {
       try {
-        acc.add(getSystemNameFromSystemId(constraint.identity.toIAddress()));
+        acc.add(constraint.identity.toIAddress());
       } catch {
         // Skip invalid systems
       }

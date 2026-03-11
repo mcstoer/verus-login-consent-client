@@ -66,8 +66,10 @@ export async function prepareUserDataDetail(
     }
 
     dispatch(detailAdded({index, data: credentialsJSON}));
-  } catch (error) {
-    console.error('Error fetching credentials:', error);
+  } catch (e) {
+    const message = e instanceof Error ? e.message : String(e);
+    // There may be no matching credentials for the given scope and keys.
+    throw new Error('Error fetching credentials: ' + message);
   }
 }
 

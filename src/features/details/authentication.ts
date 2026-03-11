@@ -14,7 +14,7 @@ import {unixToDate} from '#/utils/math';
 import {getConstraintLabel, resolveConstraintFriendlyNames} from './constraintUtils';
 
 function getExpiryLabel(authRequestDetail: AuthenticationRequestDetails): string | null {
-  if (authRequestDetail.hasExpiryTime()) return null;
+  if (!authRequestDetail.hasExpiryTime()) return null;
   return unixToDate(authRequestDetail.expiryTime.toNumber());
 }
 

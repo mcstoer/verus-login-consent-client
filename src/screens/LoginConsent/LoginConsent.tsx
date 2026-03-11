@@ -211,7 +211,7 @@ export class LoginConsent extends React.Component<LoginConsentProps, LoginConsen
           const signatureString = req.signature.signatureAsVch.toString('base64');
           const systemId = req.isTestnet() ? VRSCTEST_SYSTEM_ID : VRSC_SYSTEM_ID;
 
-          await this.fetchAndStoreSignatureInfo(chainId, systemId, signatureString, signingId);
+          await this.fetchAndStoreSignatureInfo(chainId, systemId, signingId, signatureString);
 
           if (req.hasAppOrDelegatedID()) {
             const appOrDelegatedIdentity = await getIdentity(
@@ -226,7 +226,7 @@ export class LoginConsent extends React.Component<LoginConsentProps, LoginConsen
       }
     } catch (e) {
       console.error(e);
-      this.props.dispatch(setError(new Error((e as Error).message)));
+      this.props.dispatch(setError(e));
     }
   }
 

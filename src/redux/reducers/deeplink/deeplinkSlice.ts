@@ -9,12 +9,12 @@ export type DeeplinkData = LoginConsentRequest | VerusPayInvoice | GenericReques
 
 export interface DeeplinkState {
   id: string;
-  data: DeeplinkData;
+  data: DeeplinkData | null;
 }
 
 const initialState: DeeplinkState = {
   id: '',
-  data: undefined,
+  data: null,
 };
 
 const deeplinkSlice = createSlice({
