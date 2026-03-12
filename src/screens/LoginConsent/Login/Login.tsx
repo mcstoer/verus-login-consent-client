@@ -1,5 +1,6 @@
 import React, {useState} from 'react';
 import {useSelector} from 'react-redux';
+import {Alert, AlertTitle} from '@mui/material';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Checkbox from '@mui/material/Checkbox';
@@ -75,6 +76,7 @@ const Login = (props: LoginProps) => {
   } = loginData;
 
   const filteredIdentities = filterIdentities(identities);
+  const hasIdentities = filteredIdentities.length > 0;
 
   const [includeCredentials, setIncludeCredentials] = useState(hasRequestedCredentials);
 
@@ -190,18 +192,20 @@ const Login = (props: LoginProps) => {
           >
             {'Back'}
           </Button>
-          <Button
-            variant="contained"
-            color={continueButtonColor}
-            disabled={loading || activeIdentity == null}
-            onClick={() => tryLogin()}
-            style={{
-              width: 120,
-              padding: 8,
-            }}
-          >
-            {continueButtonText}
-          </Button>
+          {hasIdentities && (
+            <Button
+              variant="contained"
+              color={continueButtonColor}
+              disabled={loading || activeIdentity == null}
+              onClick={() => tryLogin()}
+              style={{
+                width: 120,
+                padding: 8,
+              }}
+            >
+              {continueButtonText}
+            </Button>
+          )}
         </>
       }
     >
@@ -214,47 +218,53 @@ const Login = (props: LoginProps) => {
           justifyContent: 'center',
         }}
       >
-        <FormControl style={{maxWidth: 560, width: '100%'}}>
-          <Select
-            value={activeIdentity == null ? '' : activeIdentity.identity.identityaddress}
-            displayEmpty
-            inputProps={{'aria-label': 'Select a VerusID'}}
-            style={{
-              textAlign: 'start',
-              paddingTop: 2,
-            }}
-            onChange={(e: SelectChangeEvent<string>) => {
-              return selectId(e.target.value);
-            }}
-          >
-            <MenuItem value="">
-              <em>Select a VerusID</em>
-            </MenuItem>
-            {filteredIdentities.map((id: Identity, index: number) => {
-              return (
-                <MenuItem
-                  key={index}
-                  value={id.identity.identityaddress}
-                >{`${id.identity.name}@`}</MenuItem>
-              );
-            })}
-          </Select>
-          <div style={{display: 'flex', justifyContent: 'center'}}>
-            {hasRequestedCredentials && (
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={includeCredentials}
-                    onChange={e => setIncludeCredentials(e.target.checked)}
-                    color="primary"
-                  />
-                }
-                label="Include Credentials"
-                style={{marginTop: 8}}
-              />
-            )}
-          </div>
-        </FormControl>
+        {hasIdentities ? (
+          <FormControl style={{maxWidth: 560, width: '100%'}}>
+            <Select
+              value={activeIdentity == null ? '' : activeIdentity.identity.identityaddress}
+              displayEmpty
+              inputProps={{'aria-label': 'Select a VerusID'}}
+              style={{
+                textAlign: 'start',
+                paddingTop: 2,
+              }}
+              onChange={(e: SelectChangeEvent<string>) => {
+                return selectId(e.target.value);
+              }}
+            >
+              <MenuItem value="">
+                <em>Select a VerusID</em>
+              </MenuItem>
+              {filteredIdentities.map((id: Identity, index: number) => {
+                return (
+                  <MenuItem
+                    key={index}
+                    value={id.identity.identityaddress}
+                  >{`${id.identity.name}@`}</MenuItem>
+                );
+              })}
+            </Select>
+            <div style={{display: 'flex', justifyContent: 'center'}}>
+              {hasRequestedCredentials && (
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={includeCredentials}
+                      onChange={e => setIncludeCredentials(e.target.checked)}
+                      color="primary"
+                    />
+                  }
+                  label="Include Credentials"
+                  style={{marginTop: 8}}
+                />
+              )}
+            </div>
+          </FormControl>
+        ) : (
+          <Alert severity="warning" sx={{mt: 2, width: '90%', textAlign: 'left'}}>
+            <AlertTitle>None of your identities qualify for this request.</AlertTitle>
+          </Alert>
+        )}
       </Box>
       {canProvision && (
         <Box
