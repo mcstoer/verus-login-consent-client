@@ -40,8 +40,8 @@ const IdentityUpdateContentMultiMap: React.FC = () => {
   const deeplinkDetails = ordinal.data;
   const name = deeplinkDetails?.identity?.name || '';
 
-  const contentMultiMapEntries = deeplinkDetails?.identity?.content_multimap?.kv_content
-    ? Array.from(deeplinkDetails.identity.content_multimap.kv_content.entries())
+  const contentMultiMapEntries = deeplinkDetails?.identity?.content_multimap?.kvContent
+    ? Array.from(deeplinkDetails.identity.content_multimap.kvContent.entries())
     : [];
 
   const isLastDetailInRequest = isLastDetail(deeplinkData, currentDetailIndex);

@@ -28,7 +28,10 @@ export const checkGenericRequest = async (
     ) {
       throw new Error('The request is not signed.');
     }
-    // Possibly throw error for appOrDelegatedId
+
+    if (request.hasAppOrDelegatedID()) {
+      throw new Error('The request has an app or delegated ID and must be signed.');
+    }
   } else {
     // Verify the signature of the generic request.
     const verificationResult = await verifyGenericRequest(chainId, request);

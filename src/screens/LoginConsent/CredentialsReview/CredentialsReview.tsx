@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {useSelector} from 'react-redux';
 import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
@@ -58,10 +58,16 @@ const CredentialsReview: React.FC<CredentialsReviewProps> = ({setRequestResult})
     selectUserDataCredentials(state, currentDetailIndex)
   );
 
-  if (deeplinkData instanceof VerusPayInvoice) {
-    const err = new Error('Unable to handle a VerusPayInvoice for Credential Review');
-    dispatch(setError(err));
-    return;
+  const isVerusPayInvoice = deeplinkData instanceof VerusPayInvoice;
+
+  useEffect(() => {
+    if (isVerusPayInvoice) {
+      dispatch(setError(new Error('Unable to handle a VerusPayInvoice for Credential Review')));
+    }
+  }, [isVerusPayInvoice, dispatch]);
+
+  if (isVerusPayInvoice) {
+    return null;
   }
 
   const isGenericRequest = deeplinkData instanceof GenericRequest;

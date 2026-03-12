@@ -5,7 +5,11 @@ import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 import Typography from '@mui/material/Typography';
-import {ContentMultiMapPrimitive, VdxfUniValue} from 'verus-typescript-primitives';
+import {
+  CompactIAddressObject,
+  ContentMultiMapPrimitive,
+  VdxfUniValue,
+} from 'verus-typescript-primitives';
 
 import {RootState} from '#/redux/store';
 import {VDXF_ID_TO_READABLE} from '#/utils/constants';
@@ -14,7 +18,7 @@ import {capitalizeString} from '#/utils/stringUtils';
 import VdxfKeyRenderer from './VdxfKeyRenderer';
 
 interface ContentMultiMapRendererProps {
-  contentMultiMapEntries: Array<[string, ContentMultiMapPrimitive[]]>;
+  contentMultiMapEntries: Array<[CompactIAddressObject, ContentMultiMapPrimitive[]]>;
 }
 
 const ContentMultiMapRenderer: React.FC<ContentMultiMapRendererProps> = ({
@@ -116,29 +120,32 @@ const ContentMultiMapRenderer: React.FC<ContentMultiMapRendererProps> = ({
 
   return (
     <List>
-      {contentMultiMapEntries.map(([key, values], entryIndex) => (
-        <Box key={entryIndex}>
-          <ListItem divider>
-            <ListItemText
-              primary={getReadableName(key)}
-              secondary={key}
-              slotProps={{
-                primary: {variant: 'body1', fontWeight: 'bold'},
-                secondary: {
-                  color: 'text.secondary',
-                  variant: 'body2',
-                  sx: {wordBreak: 'break-all', fontSize: '0.75rem'},
-                },
-              }}
-            />
-          </ListItem>
-          {values && values.length > 0 && (
-            <Box sx={{backgroundColor: 'grey.50'}}>
-              {values.map((primitive, valueIndex) => renderPrimitiveValue(primitive, valueIndex))}
-            </Box>
-          )}
-        </Box>
-      ))}
+      {contentMultiMapEntries.map(([key, values], entryIndex) => {
+        const keyAddress = key.toAddress();
+        return (
+          <Box key={entryIndex}>
+            <ListItem divider>
+              <ListItemText
+                primary={getReadableName(keyAddress)}
+                secondary={keyAddress}
+                slotProps={{
+                  primary: {variant: 'body1', fontWeight: 'bold'},
+                  secondary: {
+                    color: 'text.secondary',
+                    variant: 'body2',
+                    sx: {wordBreak: 'break-all', fontSize: '0.75rem'},
+                  },
+                }}
+              />
+            </ListItem>
+            {values && values.length > 0 && (
+              <Box sx={{backgroundColor: 'grey.50'}}>
+                {values.map((primitive, valueIndex) => renderPrimitiveValue(primitive, valueIndex))}
+              </Box>
+            )}
+          </Box>
+        );
+      })}
     </List>
   );
 };

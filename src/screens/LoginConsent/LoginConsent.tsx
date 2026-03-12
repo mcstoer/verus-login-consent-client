@@ -223,7 +223,7 @@ export class LoginConsent extends React.Component<LoginConsentProps, LoginConsen
         await this.fetchAndStoreSignatureInfo(chainId, systemId, signingIdentity, signatureString);
 
         let definedKeyIdentity = signingIdentity;
-        if (req.hasAppOrDelegatedID()) {
+        if (req.hasAppOrDelegatedID() && req.appOrDelegatedID.toAddress() !== signingId) {
           const appOrDelegatedIdentity = await getIdentityContent(
             chainId,
             req.appOrDelegatedID.toIAddress()

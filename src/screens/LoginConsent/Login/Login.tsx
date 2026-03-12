@@ -1,5 +1,6 @@
 import React, {useState} from 'react';
 import {useSelector} from 'react-redux';
+import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Checkbox from '@mui/material/Checkbox';
 import FormControl from '@mui/material/FormControl';
@@ -204,61 +205,81 @@ const Login = (props: LoginProps) => {
         </>
       }
     >
-      <FormControl style={{maxWidth: 560, width: '100%'}}>
-        <Select
-          value={activeIdentity == null ? '' : activeIdentity.identity.identityaddress}
-          displayEmpty
-          inputProps={{'aria-label': 'Select a VerusID'}}
-          style={{
-            textAlign: 'start',
-            paddingTop: 2,
-          }}
-          onChange={(e: SelectChangeEvent<string>) => {
-            return selectId(e.target.value);
-          }}
-        >
-          <MenuItem value="">
-            <em>Select a VerusID</em>
-          </MenuItem>
-          {filteredIdentities.map((id: Identity, index: number) => {
-            return (
-              <MenuItem
-                key={index}
-                value={id.identity.identityaddress}
-              >{`${id.identity.name}@`}</MenuItem>
-            );
-          })}
-        </Select>
-        <div style={{display: 'flex', justifyContent: 'center'}}>
-          {hasRequestedCredentials && (
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={includeCredentials}
-                  onChange={e => setIncludeCredentials(e.target.checked)}
-                  color="primary"
-                />
-              }
-              label="Include Credentials"
-              style={{marginTop: 8}}
-            />
-          )}
-        </div>
-      </FormControl>
+      <Box
+        sx={{
+          width: '100%',
+          display: 'flex',
+          flex: 1,
+          alignItems: 'flex-start',
+          justifyContent: 'center',
+        }}
+      >
+        <FormControl style={{maxWidth: 560, width: '100%'}}>
+          <Select
+            value={activeIdentity == null ? '' : activeIdentity.identity.identityaddress}
+            displayEmpty
+            inputProps={{'aria-label': 'Select a VerusID'}}
+            style={{
+              textAlign: 'start',
+              paddingTop: 2,
+            }}
+            onChange={(e: SelectChangeEvent<string>) => {
+              return selectId(e.target.value);
+            }}
+          >
+            <MenuItem value="">
+              <em>Select a VerusID</em>
+            </MenuItem>
+            {filteredIdentities.map((id: Identity, index: number) => {
+              return (
+                <MenuItem
+                  key={index}
+                  value={id.identity.identityaddress}
+                >{`${id.identity.name}@`}</MenuItem>
+              );
+            })}
+          </Select>
+          <div style={{display: 'flex', justifyContent: 'center'}}>
+            {hasRequestedCredentials && (
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={includeCredentials}
+                    onChange={e => setIncludeCredentials(e.target.checked)}
+                    color="primary"
+                  />
+                }
+                label="Include Credentials"
+                style={{marginTop: 8}}
+              />
+            )}
+          </div>
+        </FormControl>
+      </Box>
       {canProvision && (
-        <Button
-          variant="contained"
-          color="primary"
-          disabled={loading}
-          onClick={() => tryProvision()}
-          style={{
-            width: 240,
-            padding: 8,
-            marginTop: 'auto',
+        <Box
+          sx={{
+            width: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'flex-start',
+            flex: 1,
           }}
         >
-          {'Request a new VerusID'}
-        </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            disabled={loading}
+            onClick={() => tryProvision()}
+            style={{
+              width: 240,
+              padding: 8,
+            }}
+          >
+            {'Request a new VerusID'}
+          </Button>
+        </Box>
       )}
     </PageLayout>
   );

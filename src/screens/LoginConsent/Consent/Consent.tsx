@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {useSelector} from 'react-redux';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
@@ -55,8 +55,15 @@ const Consent: React.FC<ConsentProps> = props => {
 
   const isGenericRequest = deeplinkData instanceof GenericRequest;
 
-  if (signedBy == null) {
-    dispatch(setError(new Error('Missing signer identity for consent screen')));
+  const signedByMissing = signedBy == null;
+
+  useEffect(() => {
+    if (signedByMissing) {
+      dispatch(setError(new Error('Missing signer identity for consent screen')));
+    }
+  }, [signedByMissing, dispatch]);
+
+  if (signedByMissing) {
     return null;
   }
 
@@ -175,7 +182,7 @@ const Consent: React.FC<ConsentProps> = props => {
           </ListItem>
 
           {permissionsLabels && permissionsLabels.length > 0 && (
-            <CollapsibleListSection title="Permissions Requested" collapseHint={false}>
+            <CollapsibleListSection title="Permissions Requested" divider collapseHint={false}>
               {permissionsLabels.map((permission, index) => (
                 <NestedListItem key={index} primary={`${permission}`} />
               ))}

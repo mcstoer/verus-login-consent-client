@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {useSelector} from 'react-redux';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
@@ -26,18 +26,20 @@ const DataPacket: React.FC = () => {
   const deeplinkData = useSelector((state: RootState) => state.deeplink.data);
   const currentDetailIndex = useSelector((state: RootState) => state.navigation.currentDetailIndex);
 
-  if (!(deeplinkData instanceof GenericRequest)) {
-    const err = new Error('Unable to handle data packets outside of generic requests.');
-    dispatch(setError(err));
-    return;
-  }
+  const isValidDeeplink = deeplinkData instanceof GenericRequest;
+  const ordinal = isValidDeeplink ? deeplinkData.details[currentDetailIndex] : null;
+  const isValidOrdinal = ordinal instanceof DataPacketRequestOrdinalVDXFObject;
 
-  const ordinal = deeplinkData.details[currentDetailIndex];
+  useEffect(() => {
+    if (!isValidDeeplink) {
+      dispatch(setError(new Error('Unable to handle data packets outside of generic requests.')));
+    } else if (!isValidOrdinal) {
+      dispatch(setError(new Error('Unable to handle non-data packet ordinal.')));
+    }
+  }, [isValidDeeplink, isValidOrdinal, dispatch]);
 
-  if (!(ordinal instanceof DataPacketRequestOrdinalVDXFObject)) {
-    const err = new Error('Unable to handle non-data packet ordinal.');
-    dispatch(setError(err));
-    return;
+  if (!isValidDeeplink || !isValidOrdinal) {
+    return null;
   }
 
   const dataPacketDetails = ordinal.data;
@@ -153,6 +155,7 @@ const DataPacket: React.FC = () => {
                 }
                 divider
                 collapseHint={false}
+                initiallyExpanded
               >
                 {dataDescriptor.label && (
                   <NestedListItem
