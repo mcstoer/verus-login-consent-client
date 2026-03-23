@@ -8,7 +8,8 @@ import Typography from '@mui/material/Typography';
 import {
   CompactIAddressObject,
   ContentMultiMapPrimitive,
-  VdxfUniValue,
+  FqnVdxfUniValue,
+  VdxfUniType,
 } from 'verus-typescript-primitives';
 
 import {RootState} from '#/redux/store';
@@ -56,17 +57,14 @@ const ContentMultiMapRenderer: React.FC<ContentMultiMapRendererProps> = ({
           />
         </ListItem>
       );
-    } else if (primitive instanceof VdxfUniValue) {
-      // Each element in the values array contains exactly one key-value pair
-      const vdxfEntries = primitive.values
-        ? primitive.values.filter(value => Object.keys(value)[0] !== '')
-        : [];
+    } else if (primitive instanceof FqnVdxfUniValue) {
+      const vdxfEntries = Array.from(primitive.entries()).map(
+        ([key, value]): [string, VdxfUniType] => [key.toAddress(), value]
+      );
       return (
         <Box key={index}>
           {vdxfEntries.length > 0 ? (
-            vdxfEntries.map((entry, vdxfIndex) => {
-              const vdxfKey = Object.keys(entry)[0];
-              const vdxfValue = Object.values(entry)[0];
+            vdxfEntries.map(([vdxfKey, vdxfValue], vdxfIndex) => {
               return (
                 <VdxfKeyRenderer
                   key={`${index}-${vdxfIndex}`}

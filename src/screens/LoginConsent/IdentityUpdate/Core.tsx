@@ -55,8 +55,8 @@ const processIdentityChanges = async (
     return changes;
   }
 
-  if (identityChanges.primary_addresses?.length > 0) {
-    const newPrimaryAddresses = identityChanges.primary_addresses
+  if (identityChanges.primaryAddresses?.length > 0) {
+    const newPrimaryAddresses = identityChanges.primaryAddresses
       .map(addr => addr.toAddress())
       .sort()
       .join('\n');
@@ -73,8 +73,8 @@ const processIdentityChanges = async (
     }
   }
 
-  if (identityChanges.min_sigs) {
-    const newMinSigs = identityChanges.min_sigs.toString();
+  if (identityChanges.minSigs) {
+    const newMinSigs = identityChanges.minSigs.toString();
     const oldMinSigs = currentIdentity.minimumsignatures
       ? currentIdentity.minimumsignatures.toString()
       : '';
@@ -88,13 +88,13 @@ const processIdentityChanges = async (
     }
   }
 
-  if (identityChanges.revocation_authority) {
-    if (identityChanges.revocation_authority.toAddress() !== currentIdentity.revocationauthority) {
-      let newRevocationAuthorityDisplay = identityChanges.revocation_authority.toAddress();
+  if (identityChanges.revocationAuthority) {
+    if (identityChanges.revocationAuthority.toAddress() !== currentIdentity.revocationauthority) {
+      let newRevocationAuthorityDisplay = identityChanges.revocationAuthority.toAddress();
       try {
         const newRevocationIdentity = await getIdentity(
           chainId,
-          identityChanges.revocation_authority.toAddress()
+          identityChanges.revocationAuthority.toAddress()
         );
         if (newRevocationIdentity?.identity?.name) {
           const fqn = newRevocationIdentity.fullyqualifiedname
@@ -132,13 +132,13 @@ const processIdentityChanges = async (
     }
   }
 
-  if (identityChanges.recovery_authority) {
-    if (identityChanges.recovery_authority.toAddress() !== currentIdentity.recoveryauthority) {
-      let newRecoveryAuthorityDisplay = identityChanges.recovery_authority.toAddress();
+  if (identityChanges.recoveryAuthority) {
+    if (identityChanges.recoveryAuthority.toAddress() !== currentIdentity.recoveryauthority) {
+      let newRecoveryAuthorityDisplay = identityChanges.recoveryAuthority.toAddress();
       try {
         const newRecoveryIdentity = await getIdentity(
           chainId,
-          identityChanges.recovery_authority.toAddress()
+          identityChanges.recoveryAuthority.toAddress()
         );
         if (newRecoveryIdentity?.identity?.name) {
           const fqn = newRecoveryIdentity.fullyqualifiedname
@@ -173,8 +173,8 @@ const processIdentityChanges = async (
     }
   }
 
-  if (identityChanges.private_addresses?.length > 0) {
-    const newPrivateAddresses = identityChanges.private_addresses
+  if (identityChanges.privateAddresses?.length > 0) {
+    const newPrivateAddresses = identityChanges.privateAddresses
       .map(addr => addr.toAddressString())
       .join('\n');
     // @ts-expect-error The IdentityDefintion doesn't exactly match the expected result from the daemon but it is close enough
@@ -189,8 +189,8 @@ const processIdentityChanges = async (
     }
   }
 
-  if (identityChanges.unlock_after != null) {
-    const newTimelock = identityChanges.unlock_after.toString();
+  if (identityChanges.unlockAfter != null) {
+    const newTimelock = identityChanges.unlockAfter.toString();
     const oldTimelock = currentIdentity.timelock != null ? currentIdentity.timelock.toString() : '';
 
     if (newTimelock !== oldTimelock) {

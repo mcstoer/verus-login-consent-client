@@ -8414,7 +8414,7 @@ vary@^1, vary@~1.1.2:
 
 "verus-typescript-primitives@git+https://github.com/VerusCoin/verus-typescript-primitives.git":
   version "1.0.0"
-  resolved "git+https://github.com/VerusCoin/verus-typescript-primitives.git#f9633091ba7fc03c4fbe2657d901a81cac2d45e1"
+  resolved "git+https://github.com/VerusCoin/verus-typescript-primitives.git#54dc62aecec3337e3b5672cb061a51445c3c8acd"
   dependencies:
     base64url "3.0.1"
     bech32 "2.0.0"
