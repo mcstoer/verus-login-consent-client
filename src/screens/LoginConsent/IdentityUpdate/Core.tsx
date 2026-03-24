@@ -294,7 +294,7 @@ const IdentityUpdateCore: React.FC = () => {
 
   return (
     <PageLayout
-      title={`Review changes to ${name}`}
+      title={`Review changes to ${name + '@'}`}
       loading={loading}
       contentStyle={{
         display: 'flex',

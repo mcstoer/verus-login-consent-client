@@ -68,7 +68,7 @@ const IdentityUpdateContentMultiMap: React.FC = () => {
 
   return (
     <PageLayout
-      title={`Review content additions to ${name}`}
+      title={`Review content additions to ${name + '@'}`}
       loading={loading}
       contentStyle={{
         display: 'flex',
