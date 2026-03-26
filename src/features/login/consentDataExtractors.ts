@@ -3,7 +3,6 @@ import {
   GenericRequest,
   IdentityUpdateRequestOrdinalVDXFObject,
   LoginConsentRequest,
-  RecipientConstraint,
   RedirectUri,
   ResponseURI,
 } from 'verus-typescript-primitives';
@@ -11,8 +10,6 @@ import {
 import {Identity} from '#/types/identity';
 import {CREDENTIALS, SCOPES, SUPPORTED_CREDENTIALS} from '#/utils/constants';
 import {convertFqnToDisplayFormat} from '#/utils/fullyqualifiedname';
-import {unixToDate} from '#/utils/math';
-import {getSystemNameFromSystemId} from '#/utils/systems';
 
 export interface ConsentData {
   title: string;
@@ -29,7 +26,9 @@ export interface PreppedAuthDetail {
   expiryLabel: string | null;
 }
 
-// extractConsentDataV1 extracts display data from a LoginConsentRequest for the consent screen.
+/*
+ * extractConsentDataV1 extracts display data from a LoginConsentRequest for the consent screen.
+ */
 export const extractConsentDataV1 = (
   request: LoginConsentRequest,
   signedBy: Identity
@@ -66,42 +65,9 @@ export const extractConsentDataV1 = (
   };
 };
 
-const getFallbackExpiryLabel = (ordinalWrapper: AuthenticationRequestOrdinalVDXFObject) => {
-  const authReqDetail = ordinalWrapper.data;
-  if (!authReqDetail?.hasExpiryTime()) return null;
-  return unixToDate(authReqDetail.expiryTime.toNumber());
-};
-
-const getFallbackConstraintLabel = (constraint: RecipientConstraint) => {
-  const identityLabel = constraint.identity.address;
-  let constraintLabel = identityLabel;
-
-  try {
-    constraintLabel = constraint.identity.toIAddress();
-  } catch {
-    constraintLabel = identityLabel;
-  }
-
-  if (constraint.type === RecipientConstraint.REQUIRED_SYSTEM) {
-    const systemName = getSystemNameFromSystemId(constraintLabel);
-    if (systemName) constraintLabel = systemName;
-  }
-
-  switch (constraint.type) {
-    case RecipientConstraint.REQUIRED_ID:
-      return `Required identity: ${constraintLabel}`;
-    case RecipientConstraint.REQUIRED_SYSTEM:
-      return `Required system: ${constraintLabel}`;
-    case RecipientConstraint.REQUIRED_PARENT:
-      return `Required parent: ${constraintLabel}`;
-    default:
-      return `Constraint: ${constraintLabel}`;
-  }
-};
-
-// extractConsentDataV2 extracts display data from a GenericRequest for the consent screen.
-// When preppedAuthDetail is provided (from the Redux store), resolved constraint labels
-// and expiry are used instead of falling back to raw address-based labels.
+/*
+ * extractConsentDataV2 extracts display data from a GenericRequest for the consent screen.
+ */
 export const extractConsentDataV2 = (
   request: GenericRequest,
   signedBy: Identity,
@@ -126,14 +92,8 @@ export const extractConsentDataV2 = (
 
   if (ordinalWrapper instanceof AuthenticationRequestOrdinalVDXFObject) {
     if (preppedAuthDetail) {
-      // Use the resolved labels from the prepped auth detail (friendly names resolved via RPC).
       constraintsLabels = preppedAuthDetail.constraintsLabels;
       expiryLabel = preppedAuthDetail.expiryLabel;
-    } else {
-      // Fall back to raw constraint labels when prepped data is not yet available.
-      expiryLabel = getFallbackExpiryLabel(ordinalWrapper);
-      const constraints = ordinalWrapper.data.recipientConstraints ?? [];
-      constraintsLabels = constraints.map(getFallbackConstraintLabel);
     }
   } else if (ordinalWrapper instanceof IdentityUpdateRequestOrdinalVDXFObject) {
     title = `${signerFqn} is requesting to update ${ordinalWrapper.data.identity?.name}@`;

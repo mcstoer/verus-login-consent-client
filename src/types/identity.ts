@@ -5,9 +5,3 @@ export interface Identity {
   identity: IdentityDefinition;
   [key: string]: unknown;
 }
-
-export interface BlockInfo {
-  time: number;
-  height: number;
-  [key: string]: unknown;
-}

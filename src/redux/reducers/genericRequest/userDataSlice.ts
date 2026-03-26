@@ -6,7 +6,7 @@ import {RootState} from '#/redux/store';
 
 interface UserData {
   index: number;
-  data: CredentialJson[]; // Store the data as JSON.
+  data: CredentialJson[]; // Store the data as JSON to meet Redux best practices.
 }
 
 const userDataAdapter = createEntityAdapter<UserData>({

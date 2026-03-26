@@ -139,6 +139,9 @@ export const KOMODO_DAEMON = 'komodod';
 export const ZCASH_CONF_NAME = 'zcash';
 export const KOMODO_CONF_NAME = 'komodo';
 
+// Verification
+export const LOGIN_CONSENT_SIG_TIME_DIFF_THRESHOLD = 3600;
+
 // System IDs
 export const VRSC_SYSTEM_ID = 'i5w5MuNik5NtLcYmNzcvaoixooEebB6MGV';
 export const VRSCTEST_SYSTEM_ID = 'iJhCezBExJHvtyH3fGhNnt2NhU4Ztkf2yq';

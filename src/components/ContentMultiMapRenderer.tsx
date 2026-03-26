@@ -40,7 +40,7 @@ const ContentMultiMapRenderer: React.FC<ContentMultiMapRendererProps> = ({
     index: number
   ): React.ReactElement => {
     if (Buffer.isBuffer(primitive)) {
-      // Convert Buffers to hex string
+      // Convert Buffers to hex string for display.
       return (
         <ListItem key={index} dense sx={{pl: 4}}>
           <ListItemText
@@ -88,7 +88,7 @@ const ContentMultiMapRenderer: React.FC<ContentMultiMapRendererProps> = ({
         </Box>
       );
     } else {
-      // Fallback for unknown types
+      // Fallback for unknown types.
       return (
         <ListItem key={index} dense sx={{pl: 4}}>
           <ListItemText

@@ -16,45 +16,28 @@ module.exports = (_, argv) => {
   const isProduction = mode === 'production';
 
   // Common plugins
-
-  /*
-  * The CommonsChunkPlugin is an opt-in feature that creates a separate file (known as a chunk),
-  * consisting of common modules shared between multiple entry points.
-  * By separating common modules from bundles,
-  * the resulting chunked file can be loaded once initially,
-  * and stored in cache for later use.
-  * This results in pagespeed optimizations as the browser can quickly serve the shared code from cache,
-  * rather than being forced to load a larger bundle whenever a new page is visited.
-  */
   const plugins = [
-    /*
-    * The DefinePlugin allows you to create global constants which can be configured at compile time.
-    * This can be useful for allowing different behaviour between development builds and release builds.
-    * For example, you might use a global constant to determine whether logging takes place;
-    * perhaps you perform logging in your development build but not in the release build.
-    * That's the sort of scenario the DefinePlugin facilitates.
-    */
     new webpack.DefinePlugin({}),
     new HtmlWebpackPlugin({
-      template: path.join(wwwPath, "index.html"),
+      template: path.join(wwwPath, 'index.html'),
       path: buildPath,
-      filename: "index.html",
+      filename: 'index.html',
     }),
     new MiniCssExtractPlugin({
-      filename: "style.css",
+      filename: 'style.css',
     }),
     new webpack.ProvidePlugin({
-      React: "react",
+      React: 'react',
     }),
     new webpack.ProvidePlugin({
       process: 'process/browser.js',
-      Buffer: ['buffer', 'Buffer']
+      Buffer: ['buffer', 'Buffer'],
     }),
     new ForkTsCheckerWebpackPlugin({
       typescript: {
-        configFile: path.resolve(__dirname, 'tsconfig.json')
+        configFile: path.resolve(__dirname, 'tsconfig.json'),
       },
-      async: true
+      async: true,
     }),
   ];
 
@@ -66,23 +49,21 @@ module.exports = (_, argv) => {
       use: {
         loader: 'babel-loader',
         options: {
-          presets: [
-            '@babel/preset-env',
-            '@babel/preset-react',
-            '@babel/preset-typescript'
-          ]
-        }
-      }
+          presets: ['@babel/preset-env', '@babel/preset-react', '@babel/preset-typescript'],
+        },
+      },
     },
     {
       test: /\.woff(2)?(\?v=[0-9]\.[0-9]\.[0-9])?$/,
-      use: [{
-        loader: 'url-loader',
-        options: {
-          limit: 10000,
-          mimetype: 'application/font-woff'
-        }
-      }]
+      use: [
+        {
+          loader: 'url-loader',
+          options: {
+            limit: 10000,
+            mimetype: 'application/font-woff',
+          },
+        },
+      ],
     },
     {
       test: /\.(ttf|eot|svg|png)(\?v=[0-9]\.[0-9]\.[0-9])?$/,
@@ -101,33 +82,21 @@ module.exports = (_, argv) => {
       new webpack.LoaderOptionsPlugin({
         minimize: true,
         debug: false,
-      }),
+      })
     );
 
     // Production rules
-    rules.push(
-      {
-        test: /\.(sa|sc|c)ss$/,
-        use: [
-          MiniCssExtractPlugin.loader,
-          'css-loader',
-          'sass-loader',
-        ],
-      },
-    );
+    rules.push({
+      test: /\.(sa|sc|c)ss$/,
+      use: [MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader'],
+    });
   } else {
     // Development rules
-    rules.push(
-      {
-        exclude: /node_modules/,
-        test: /\.(sa|sc|c)ss$/,
-        use: [
-          'style-loader',
-          'css-loader',
-          'sass-loader?sourceMap',
-        ],
-      },
-    );
+    rules.push({
+      exclude: /node_modules/,
+      test: /\.(sa|sc|c)ss$/,
+      use: ['style-loader', 'css-loader', 'sass-loader?sourceMap'],
+    });
   }
 
   return {
@@ -139,7 +108,7 @@ module.exports = (_, argv) => {
     },
     output: {
       path: buildPath,
-      filename: "app.js"
+      filename: 'app.js',
     },
     module: {
       rules,
@@ -151,43 +120,45 @@ module.exports = (_, argv) => {
         crypto: require.resolve('crypto-browserify'),
         util: require.resolve('util'),
         assert: require.resolve('assert'),
-        vm: require.resolve('vm-browserify')
+        vm: require.resolve('vm-browserify'),
       },
-      extensions: ['.ts', '.tsx', '.js', '.jsx', '.webpack-loader.js', '.web-loader.js', '.loader.js'],
-      modules: [
-        path.resolve(__dirname, 'node_modules'),
-        'node_modules',
-        jsSourcePath,
+      extensions: [
+        '.ts',
+        '.tsx',
+        '.js',
+        '.jsx',
+        '.webpack-loader.js',
+        '.web-loader.js',
+        '.loader.js',
       ],
+      modules: [path.resolve(__dirname, 'node_modules'), 'node_modules', jsSourcePath],
       alias: {
-        '#': path.resolve(__dirname, 'src')
-      }
+        '#': path.resolve(__dirname, 'src'),
+      },
     },
     plugins,
     devServer: {
       port: 3001,
       static: {
-        directory: isProduction ? './build' : './src'
+        directory: isProduction ? './build' : './src',
       },
       client: {
-        overlay: true
-      }
+        overlay: true,
+      },
     },
     optimization: {
       moduleIds: 'named',
       chunkIds: 'named',
       emitOnErrors: true,
       minimize: isProduction,
-      minimizer: [
-        new TerserPlugin()
-      ]
+      minimizer: [new TerserPlugin()],
     },
     stats: {
       children: false,
       colors: true,
       modules: false,
       entrypoints: false,
-      chunks: false
+      chunks: false,
     },
-  }
+  };
 };

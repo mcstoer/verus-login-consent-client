@@ -3,7 +3,6 @@ export const SET_MAIN_CHAIN = 'SET_MAIN_CHAIN' as const;
 
 export type ChainMetadataActionTypes = typeof SET_CHAIN_METADATA | typeof SET_MAIN_CHAIN;
 
-// Action interfaces
 export interface SetChainMetadataAction {
   type: typeof SET_CHAIN_METADATA;
   payload: {
@@ -19,7 +18,6 @@ export interface SetMainChainAction {
 
 export type ChainMetadataAction = SetChainMetadataAction | SetMainChainAction;
 
-// State interface
 export interface ChainMetadataState {
   chainId: string;
   chainName: string;

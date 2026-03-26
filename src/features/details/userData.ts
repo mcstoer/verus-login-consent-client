@@ -49,12 +49,13 @@ export async function prepareUserDataDetail(
     throw new Error('Invalid user data detail.');
   }
 
-  // Only handle credentials for now, since there is no guidelines for other types.
+  // Only handle credentials for now, since there are no guidelines for other types.
   const credentialsJSON: CredentialJson[] = [];
 
   const vdxfkeys = detail.searchDataKey.flatMap(obj => Object.keys(obj));
 
-  // If the request has invalid appOrDelegatedID, then an error should have be already thrown.
+  // This is safe since if the request has invalid appOrDelegatedID,
+  // then an error should have already been thrown.
   const scope = request.appOrDelegatedID ? request.appOrDelegatedID.toIAddress() : scopeAddress;
 
   try {

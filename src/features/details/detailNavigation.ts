@@ -37,10 +37,10 @@ const noOpResponseGenerator: DetailResponseGenerator = async () => null;
  *
  * Each entry defines:
  * - `type`: How the detail participates in the navigation flow
- *   - `standard` – has one or more UI screens
- *   - `headless` – no UI; prep + response run automatically
- *   - `detour` – has UI but interrupts the normal flow (e.g. provisioning)
- * - `prepFunction`: Runs before the first screen is shown (or before response generation for headless)
+ *   - `standard`: has one or more UI screens
+ *   - `headless`: no UI, prep and response run automatically
+ *   - `detour`: has UI, interrupts the normal flow (e.g. provisioning)
+ * - `prepFunction`: Runs before the first screen is shown, or for headless, before response generation
  * - `screens`: Ordered array of screen path constants the user navigates through
  * - `responseGenerator`: Produces the response detail once the user completes all screens
  */
@@ -122,9 +122,6 @@ export const getStartPathForDetail = (detail: OrdinalVDXFObject): string | null 
   return entry.screens.length > 0 ? entry.screens[0] : null;
 };
 
-/**
- * Runs the preparation function for a detail, if one exists.
- */
 export const runDetailPrepFunction = async (
   detail: OrdinalVDXFObject,
   detailIndex: number,
@@ -155,7 +152,6 @@ export async function generateDetailResponse(
   return entry.responseGenerator(request, detailIndex, getState);
 }
 
-/** Validates that a detail index is within bounds. */
 export const validateDetailTransition = (
   currentDetailIndex: number,
   totalDetails: number

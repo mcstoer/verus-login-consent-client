@@ -10,7 +10,7 @@ export const verifyGenericRequest = async (chainId: string, request: GenericRequ
       API_VERIFY_GENERIC_REQUEST,
       {
         chainTicker: chainId,
-        request: request.toQrString(),
+        request: request.toBuffer().toString('hex'),
       },
       POST,
       true

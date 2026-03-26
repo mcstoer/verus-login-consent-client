@@ -25,7 +25,6 @@ export const selectUserDataCredentials = (
   currentDetailIndex: number
 ): Credential[] => {
   const detail = selectDetailById(state, currentDetailIndex);
-  console.log('retrieved detail state', detail);
   if (!detail || !detail.data || !Array.isArray(detail.data)) {
     return [];
   }

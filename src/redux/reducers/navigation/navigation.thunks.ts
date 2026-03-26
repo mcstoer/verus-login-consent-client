@@ -65,7 +65,9 @@ async function processNextDetail(
   }
 }
 
-/** Thunk for navigating through each detail in the generic request */
+/**
+ * Thunk for navigating through each detail in the generic request
+ */
 export function navigateGenericRequest(): AppThunk {
   return async function (dispatch, getState) {
     try {
@@ -132,7 +134,9 @@ export function navigateGenericRequest(): AppThunk {
   };
 }
 
-/** Thunk for navigating backwards according to the path taken by navigateGenericRequest(). */
+/*
+ * Thunk for navigating backwards according to the path taken by navigateGenericRequest().
+ */
 export function navigateBackGenericRequest(): AppThunkSync {
   return function (dispatch, getState) {
     try {
@@ -173,7 +177,9 @@ export function navigateBackGenericRequest(): AppThunkSync {
   };
 }
 
-/** Enters the detour flow for a detour detail at `detourDetailIndex`. */
+/*
+ * Enters the detour flow for a detour detail at `detourDetailIndex`.
+ */
 export function startDetour(detourDetailIndex: number): AppThunk {
   return async function (dispatch, getState) {
     try {

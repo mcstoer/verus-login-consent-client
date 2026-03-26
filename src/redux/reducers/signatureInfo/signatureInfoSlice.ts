@@ -1,6 +1,7 @@
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
+import {BlockInfo} from 'verus-typescript-primitives/dist/block/BlockInfo';
 
-import {BlockInfo, Identity} from '#/types/identity';
+import {Identity} from '#/types/identity';
 
 export interface SignatureInfoState {
   signedBy: Identity | null;

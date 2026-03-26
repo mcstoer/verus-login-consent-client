@@ -1,11 +1,13 @@
 import React from 'react';
 import {connect} from 'react-redux';
+import BigNumber from 'bignumber.js';
 import {
   DATA_TYPE_DEFINEDKEY,
   DefinedKey,
   GenericRequest,
   LoginConsentRequest,
 } from 'verus-typescript-primitives';
+import {BlockInfo} from 'verus-typescript-primitives/dist/block/BlockInfo';
 
 import {getDetailMapEntry} from '#/features/details';
 import {checkGenericRequest} from '#/features/genericRequest/genericRequest';
@@ -41,6 +43,7 @@ import {
   CONSENT_TO_SCOPE,
   EXTERNAL_ACTION,
   EXTERNAL_CHAIN_START,
+  LOGIN_CONSENT_SIG_TIME_DIFF_THRESHOLD,
   VRSC_SYSTEM_ID,
   VRSCTEST_SYSTEM_ID,
 } from '#/utils/constants';
@@ -143,7 +146,9 @@ export class LoginConsent extends React.Component<LoginConsentProps, LoginConsen
           // Initialize detail index to -1 to indicate no details have been processed yet.
           this.props.dispatch(setCurrentDetailIndex(-1));
 
-          // Eagerly prep the first detail so Consent has its data (e.g. constraints).
+          // Eagerly prepare the first detail so Consent has its data (e.g. constraints).
+          // This combined with the authentication detail's positional constraints ensures that
+          // it is prepared before the user is shown the consent screen.
           const firstDetail = request.details[0];
           const entry = getDetailMapEntry(firstDetail);
           await entry.prepFunction(
@@ -171,7 +176,8 @@ export class LoginConsent extends React.Component<LoginConsentProps, LoginConsen
     chainId: string,
     systemId: string,
     signingIdentity: Identity,
-    signatureString: string
+    signatureString: string,
+    createdAt?: number
   ): Promise<void> {
     const sigInfo = await getSignatureInfo(
       chainId,
@@ -179,7 +185,26 @@ export class LoginConsent extends React.Component<LoginConsentProps, LoginConsen
       signatureString,
       signingIdentity.identity.identityaddress
     );
-    const sigBlockInfo = await getBlock(chainId, sigInfo.height.toString());
+    if (createdAt === undefined) {
+      throw new Error(`No created timestamp found for signed request.`);
+    }
+
+    const sigBlockInfo = (await getBlock(chainId, sigInfo.height.toString())) as BlockInfo;
+
+    if (!sigBlockInfo) {
+      throw new Error(`Signature block information not found for signed request.`);
+    }
+
+    const blockTime = sigBlockInfo.time;
+
+    if (
+      BigNumber(blockTime)
+        .minus(createdAt)
+        .abs()
+        .isGreaterThan(LOGIN_CONSENT_SIG_TIME_DIFF_THRESHOLD)
+    ) {
+      throw new Error(`Request signing time exceeds the valid threshold.`);
+    }
 
     // Get the identities of the revocation and recovery i-addresses to display for anti-phishing.
     const [signingRevocationIdentity, signingRecoveryIdentity] = await Promise.all([
@@ -209,7 +234,8 @@ export class LoginConsent extends React.Component<LoginConsentProps, LoginConsen
         chainId,
         req.system_id,
         signingIdentity,
-        req.signature.signature
+        req.signature.signature,
+        req.challenge.created_at
       );
     } else if (req instanceof GenericRequest) {
       await checkGenericRequest(chainId, req, store.getState);
@@ -220,7 +246,13 @@ export class LoginConsent extends React.Component<LoginConsentProps, LoginConsen
 
         const signingIdentity = await getIdentityContent(chainId, signingId);
 
-        await this.fetchAndStoreSignatureInfo(chainId, systemId, signingIdentity, signatureString);
+        await this.fetchAndStoreSignatureInfo(
+          chainId,
+          systemId,
+          signingIdentity,
+          signatureString,
+          req.createdAt?.toNumber()
+        );
 
         let definedKeyIdentity = signingIdentity;
         if (req.hasAppOrDelegatedID() && req.appOrDelegatedID.toAddress() !== signingId) {

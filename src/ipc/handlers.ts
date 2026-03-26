@@ -3,7 +3,6 @@ import {
   GenericRequest,
   LOGIN_CONSENT_REQUEST_VDXF_KEY,
   LoginConsentRequest,
-  VERUSPAY_INVOICE_VDXF_KEY,
   VerusPayInvoice,
 } from 'verus-typescript-primitives';
 
@@ -44,13 +43,10 @@ const parseDeeplinkByType = (
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       return new LoginConsentRequest(deeplinkRawData as any);
 
-    case VERUSPAY_INVOICE_VDXF_KEY.vdxfid:
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return VerusPayInvoice.fromJson(deeplinkRawData as any);
-
     case GENERIC_REQUEST_DEEPLINK_VDXF_KEY.vdxfid: {
-      // The generic request is sent as the QR string to be base64 encoded.
-      const req = GenericRequest.fromQrString(deeplinkRawData);
+      // The generic request is sent as the hex string of the buffer.
+      const req = new GenericRequest();
+      req.fromBuffer(Buffer.from(deeplinkRawData, 'hex'));
       return req;
     }
     default:

@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {useSelector} from 'react-redux';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -23,18 +23,22 @@ const IdentityUpdateContentMultiMap: React.FC = () => {
   const deeplinkData = useSelector((state: RootState) => state.deeplink.data);
   const currentDetailIndex = useSelector((state: RootState) => state.navigation.currentDetailIndex);
 
-  if (!(deeplinkData instanceof GenericRequest)) {
-    const err = new Error('Unable to handle identity updates outside of generic requests.');
-    dispatch(setError(err));
-    return;
-  }
+  const isValidDeeplink = deeplinkData instanceof GenericRequest;
+  const ordinal = isValidDeeplink ? deeplinkData.details[currentDetailIndex] : null;
+  const isValidOrdinal = ordinal instanceof IdentityUpdateRequestOrdinalVDXFObject;
 
-  const ordinal = deeplinkData.details[currentDetailIndex];
+  useEffect(() => {
+    if (!isValidDeeplink) {
+      dispatch(
+        setError(new Error('Unable to handle identity updates outside of generic requests.'))
+      );
+    } else if (!isValidOrdinal) {
+      dispatch(setError(new Error('Unable to handle non-identity update detail.')));
+    }
+  }, [isValidDeeplink, isValidOrdinal, dispatch]);
 
-  if (!(ordinal instanceof IdentityUpdateRequestOrdinalVDXFObject)) {
-    const err = new Error('Unable to handle non-identity update detail.');
-    dispatch(setError(err));
-    return;
+  if (!isValidDeeplink || !isValidOrdinal) {
+    return null;
   }
 
   const deeplinkDetails = ordinal.data;
