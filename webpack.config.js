@@ -127,6 +127,7 @@ module.exports = (_, argv) => {
         '.tsx',
         '.js',
         '.jsx',
+        '.json',
         '.webpack-loader.js',
         '.web-loader.js',
         '.loader.js',
