@@ -10,7 +10,7 @@ import {
 } from 'verus-typescript-primitives';
 
 import {RootState} from '#/redux/store';
-import {signData} from '#/rpc/calls/signData';
+import {signData, SignDataParams} from '#/rpc/calls/signData';
 import {Identity} from '#/types/identity';
 
 import {DetailPrepFunction} from './types';
@@ -48,17 +48,16 @@ export async function generateDataPacketResponse(
   const values = [];
 
   for (const signableObject of dataPacketDetail.signableObjects) {
-    let messageToSign: string;
-    if (signableObject.mimeType?.startsWith('text/')) {
-      messageToSign = signableObject.objectdata.toString('utf-8');
+    const signParams: SignDataParams = {
+      address: signingIdentity.identity.identityaddress,
+    };
+    if (typeof signableObject === 'string') {
+      signParams.message = signableObject;
     } else {
-      messageToSign = signableObject.objectdata.toString('hex');
+      signParams.messagehex = signableObject.objectdata.toString('hex');
     }
     try {
-      const signatureResult = await signData(chainId, {
-        address: signingIdentity.identity.identityaddress,
-        message: messageToSign,
-      });
+      const signatureResult = await signData(chainId, signParams);
 
       const signatureData = SignatureData.fromJson(signatureResult.signaturedata);
 

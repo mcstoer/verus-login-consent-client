@@ -67,11 +67,11 @@ const IdentityDetails: React.FC<IdentityDetailsProps> = ({
       value: systemDescriptor || '-',
       visible: !!systemDescriptor,
     },
-    {
-      label: 'Primary Address #1',
-      value: (identity?.identity?.primaryaddresses?.[0] as string) || '-',
-      visible: !!identity?.identity?.primaryaddresses?.[0],
-    },
+    ...(identity?.identity?.primaryaddresses ?? []).map((address, index) => ({
+      label: `Primary Address #${index + 1}`,
+      value: (address as string) || '-',
+      visible: !!address,
+    })),
   ];
 
   return (

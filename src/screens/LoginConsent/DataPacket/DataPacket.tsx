@@ -51,6 +51,51 @@ const DataPacket: React.FC = () => {
     return objectdata.toString('hex');
   };
 
+  const renderSignableObjects = (): React.ReactNode[] => {
+    let messageCount = 0;
+    let objectCount = 0;
+    return dataPacketDetails.signableObjects.map((object, index) => {
+      if (typeof object === 'string') {
+        messageCount += 1;
+        return (
+          <CollapsibleListSection
+            key={index}
+            title={`Message #${messageCount}`}
+            divider
+            collapseHint={false}
+            initiallyExpanded
+          >
+            <NestedListItem primary="Data" secondary={object} variant="standard" />
+          </CollapsibleListSection>
+        );
+      }
+      objectCount += 1;
+      return (
+        <CollapsibleListSection
+          key={index}
+          title={`Object #${objectCount}` + (object.label ? `: ${object.label}` : '')}
+          divider
+          collapseHint={false}
+          initiallyExpanded
+        >
+          {object.label && (
+            <NestedListItem primary="Label" secondary={object.label} variant="standard" />
+          )}
+          {object.mimeType && (
+            <NestedListItem primary="MIME Type" secondary={object.mimeType} variant="standard" />
+          )}
+          {object.objectdata && (
+            <NestedListItem
+              primary="Data"
+              secondary={getDisplayData(object.objectdata, object.mimeType)}
+              variant="standard"
+            />
+          )}
+        </CollapsibleListSection>
+      );
+    });
+  };
+
   const isLastDetailInRequest = isLastDetail(deeplinkData, currentDetailIndex);
   const continueButtonText = isLastDetailInRequest ? 'Finish' : 'Continue';
   const continueButtonColor = isLastDetailInRequest ? 'primary' : 'success';
@@ -147,39 +192,7 @@ const DataPacket: React.FC = () => {
 
           {dataPacketDetails.signableObjects &&
             dataPacketDetails.signableObjects.length > 0 &&
-            dataPacketDetails.signableObjects.map((dataDescriptor, index) => (
-              <CollapsibleListSection
-                key={index}
-                title={
-                  `Object #${index + 1}` + (dataDescriptor.label ? `: ${dataDescriptor.label}` : '')
-                }
-                divider
-                collapseHint={false}
-                initiallyExpanded
-              >
-                {dataDescriptor.label && (
-                  <NestedListItem
-                    primary="Label"
-                    secondary={dataDescriptor.label}
-                    variant="standard"
-                  />
-                )}
-                {dataDescriptor.mimeType && (
-                  <NestedListItem
-                    primary="MIME Type"
-                    secondary={dataDescriptor.mimeType}
-                    variant="standard"
-                  />
-                )}
-                {dataDescriptor.objectdata && (
-                  <NestedListItem
-                    primary="Data"
-                    secondary={getDisplayData(dataDescriptor.objectdata, dataDescriptor.mimeType)}
-                    variant="standard"
-                  />
-                )}
-              </CollapsibleListSection>
-            ))}
+            renderSignableObjects()}
         </List>
       </Card>
     </PageLayout>

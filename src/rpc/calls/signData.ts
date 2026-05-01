@@ -6,9 +6,11 @@ interface ApiResponse {
   result: SignDataResult;
 }
 
-interface SignDataParams {
+export interface SignDataParams {
   address: string;
   message?: string;
+  messagehex?: string;
+  datahash?: string;
 }
 
 export interface SignatureDataInfo {
