@@ -13,8 +13,7 @@ import {
 } from 'verus-typescript-primitives';
 
 import {RootState} from '#/redux/store';
-import {VDXF_ID_TO_READABLE} from '#/utils/constants';
-import {capitalizeString} from '#/utils/stringUtils';
+import {getVDXFKeyLabel} from '#/utils/vdxfTypeLabels';
 
 import VdxfKeyRenderer from './VdxfKeyRenderer';
 
@@ -30,8 +29,10 @@ const ContentMultiMapRenderer: React.FC<ContentMultiMapRendererProps> = ({
   );
 
   const getReadableName = (vdxfId: string): string => {
-    const staticLabel = VDXF_ID_TO_READABLE[vdxfId];
-    if (staticLabel != null) return capitalizeString(staticLabel);
+    const staticLabel = getVDXFKeyLabel(vdxfId, true);
+    if (staticLabel) {
+      return staticLabel;
+    }
     return definedDataKeys?.[vdxfId]?.label ?? vdxfId;
   };
 

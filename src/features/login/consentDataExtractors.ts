@@ -8,8 +8,9 @@ import {
 } from 'verus-typescript-primitives';
 
 import {Identity} from '#/types/identity';
-import {CREDENTIALS, SCOPES, SUPPORTED_CREDENTIALS} from '#/utils/constants';
+import {SCOPES, SUPPORTED_CREDENTIALS} from '#/utils/constants';
 import {convertFqnToDisplayFormat} from '#/utils/fullyqualifiedname';
+import {getVDXFKeyLabel} from '#/utils/vdxfTypeLabels';
 
 export interface ConsentData {
   title: string;
@@ -43,13 +44,8 @@ export const extractConsentDataV1 = (
     for (const permission of requestedPermissions) {
       if (SCOPES[permission.vdxfkey]) {
         permissionsDescriptions.push(SCOPES[permission.vdxfkey].description);
-      } else if (
-        SUPPORTED_CREDENTIALS.includes(permission.vdxfkey) &&
-        CREDENTIALS[permission.vdxfkey]
-      ) {
-        permissionsDescriptions.push(
-          'Get ' + CREDENTIALS[permission.vdxfkey].description + ' credential'
-        );
+      } else if (SUPPORTED_CREDENTIALS.includes(permission.vdxfkey)) {
+        permissionsDescriptions.push('Get ' + getVDXFKeyLabel(permission.vdxfkey) + ' credential');
       }
     }
   }

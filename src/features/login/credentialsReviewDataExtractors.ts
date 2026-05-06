@@ -8,8 +8,9 @@ import {
 import {selectDetailById} from '#/redux/reducers/genericRequest/userDataSlice';
 import {RootState} from '#/redux/store';
 import {Identity} from '#/types/identity';
-import {CREDENTIALS, SUPPORTED_CREDENTIALS} from '#/utils/constants';
+import {SUPPORTED_CREDENTIALS} from '#/utils/constants';
 import {convertFqnToDisplayFormat} from '#/utils/fullyqualifiedname';
+import {getVDXFKeyLabel} from '#/utils/vdxfTypeLabels';
 
 export interface CredentialsReviewData {
   signerFqn: string;
@@ -42,9 +43,7 @@ export const processCredentialsReviewData = (
     key => !fetchedCredentialKeys.includes(key)
   );
 
-  const missingCredentialLabels = missingCredentialKeys.map(key =>
-    CREDENTIALS[key] ? CREDENTIALS[key].description : key
-  );
+  const missingCredentialLabels = missingCredentialKeys.map(key => getVDXFKeyLabel(key));
 
   return {
     signerFqn,

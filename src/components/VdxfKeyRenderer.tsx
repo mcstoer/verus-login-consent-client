@@ -10,7 +10,7 @@ import {
 } from 'verus-typescript-primitives';
 
 import {PlainLoginCredential, UnknownCredential} from '#/components/Credential';
-import {VDXF_ID_TO_READABLE} from '#/utils/constants';
+import {getVDXFKeyLabel} from '#/utils/vdxfTypeLabels';
 
 interface VdxfKeyRendererProps {
   vdxfKey: string;
@@ -26,7 +26,7 @@ const VdxfKeyRenderer: React.FC<VdxfKeyRendererProps> = ({
   vdxfIndex,
 }) => {
   const getReadableName = (vdxfId: string): string => {
-    return VDXF_ID_TO_READABLE[vdxfId] || vdxfId;
+    return getVDXFKeyLabel(vdxfId);
   };
 
   const getJsonDisplay = (value: VdxfUniType): React.JSX.Element => {
