@@ -1,12 +1,13 @@
-export const createIdentityDescriptor = (
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  identity: any,
-  fqn?: string
-): string => {
+import {Identity} from '#/types/identity';
+
+import {convertFqnToDisplayFormat} from './fullyqualifiedname';
+
+export const createIdentityDescriptor = (identity: Identity, overrideFqn?: string): string => {
   if (!identity) return '-';
 
-  const name = fqn || identity.friendlyname || 'Unknown';
+  const fqn = overrideFqn || identity.fullyqualifiedname;
+  const displayFqn = convertFqnToDisplayFormat(fqn);
   const address = identity.identity?.identityaddress || 'Unknown';
 
-  return `${name} (${address})`;
+  return `${displayFqn} (${address})`;
 };
