@@ -94,8 +94,6 @@ export async function generateUserDataResponse(
     return null;
   }
 
-  // Write the array of serializable objects to a single buffer.
-  // The keys are comma-separated and should be used to deserialize the data.
   const storedData = userData.data.map(credential => Credential.fromJson(credential));
 
   const values = storedData.map(credential => {
