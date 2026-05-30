@@ -24,9 +24,9 @@
     "@reduxjs/toolkit": "1.9.7",
     "assert": "2.1.0",
     "axios": "1.16.0",
-    "base64url": "https://github.com/VerusCoin/base64url.git",
+    "base64url": "https://github.com/VerusCoin/base64url.git#3217a593e0e665078aa4a71c9f887f8d2e5424fb",
     "bignumber.js": "9.1.2",
-    "blake2b": "https://github.com/VerusCoin/blake2b.git",
+    "blake2b": "https://github.com/VerusCoin/blake2b.git#578dc12b7b68a3ce76d1e1add1402b28a5890a6b",
     "bn.js": "5.2.3",
     "buffer": "6.0.3",
     "crypto-browserify": "3.12.1",
@@ -39,8 +39,8 @@
     "react-router-dom": "6.30.2",
     "stream-browserify": "3.0.0",
     "util": "0.12.5",
-    "verus-typescript-primitives": "git+https://github.com/VerusCoin/verus-typescript-primitives.git",
-    "verusid-ts-client": "git+https://github.com/VerusCoin/verusid-ts-client",
+    "verus-typescript-primitives": "git+https://github.com/VerusCoin/verus-typescript-primitives.git#7f0fd7ff7a27aefd66c85fbc7dc14862779548da",
+    "verusid-ts-client": "git+https://github.com/VerusCoin/verusid-ts-client#6b14d0ce53bd57e4f3b5df4509fe2cd92d03fc5e",
     "vm-browserify": "1.1.2"
   },
   "devDependencies": {
