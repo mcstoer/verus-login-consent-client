@@ -10,17 +10,12 @@ import {
   OrdinalVDXFObject,
 } from 'verus-typescript-primitives';
 
-import {AppDispatch, RootState} from '#/redux/store';
+import {RootState} from '#/redux/store';
 import {encryptAppEncryptionResponse} from '#/rpc/calls/encryptAppEncryptionResponse';
 import {executeAppEncryptionRequest} from '#/rpc/calls/executeAppEncryptionRequest';
 import {Identity} from '#/types/identity';
 
-export async function prepareAppEncryptionDetail(
-  ordinal: OrdinalVDXFObject,
-  _detailIndex: number,
-  _dispatch: AppDispatch,
-  getState: () => RootState
-): Promise<void> {
+export async function prepareAppEncryptionDetail(ordinal: OrdinalVDXFObject): Promise<void> {
   if (!(ordinal instanceof AppEncryptionRequestOrdinalVDXFObject)) {
     throw new Error('Detail is not an AppEncryptionRequestOrdinalVDXFObject.');
   }
@@ -29,13 +24,6 @@ export async function prepareAppEncryptionDetail(
 
   if (!detail.isValid()) {
     throw new Error('Invalid app encryption request detail.');
-  }
-
-  const state = getState();
-  const activeIdentity = state.identity.activeIdentity as Identity | null;
-
-  if (!activeIdentity) {
-    throw new Error('No active identity available for app encryption.');
   }
 }
 
@@ -56,7 +44,12 @@ export async function generateAppEncryptionResponse(
   const chainId = state.chainMetadata.chainId;
   const signingIdentity = state.signatureInfo.signedBy;
 
-  const fromID = signingIdentity.identity.identityaddress;
+  const activeIdentity = state.identity.activeIdentity as Identity | null;
+  if (!activeIdentity) {
+    throw new Error('No active identity available for app encryption.');
+  }
+
+  const fromID = activeIdentity.identity.identityaddress;
 
   let toID: string;
 
