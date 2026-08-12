@@ -113,6 +113,8 @@ export const ADDCOIN_DELAY = 500;
 export const IPC_ORIGIN_DEV = 'http://127.0.0.1:3001';
 export const IPC_ORIGIN_DEV_LOCALHOST = 'http://localhost:3001';
 export const IPC_ORIGIN_PRODUCTION = 'file://';
+// Electron 42+ makes file:// origins appear as "null" in production.
+export const IPC_ORIGIN_PRODUCTION_OPAQUE = 'null';
 export const IPC_INIT_MESSAGE = 'init';
 export const IPC_PUSH_MESSAGE = 'push';
 export const IPC_LOGIN_CONSENT_REQUEST_METHOD = 'VERUS_LOGIN_CONSENT_REQUEST';
