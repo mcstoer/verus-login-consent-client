@@ -25,6 +25,7 @@ import {
   IPC_ORIGIN_DEV,
   IPC_ORIGIN_DEV_LOCALHOST,
   IPC_ORIGIN_PRODUCTION,
+  IPC_ORIGIN_PRODUCTION_OPAQUE,
   IPC_PUSH_MESSAGE,
 } from '#/utils/constants';
 import {RPC_PASSWORD, RPC_PORT} from '#/utils/mocks';
@@ -100,7 +101,9 @@ export const handleIpc = async (event: MessageEvent): Promise<void> => {
   try {
     if (
       typeof event.data === 'string' &&
-      ((!DEVMODE && event.origin === IPC_ORIGIN_PRODUCTION) ||
+      ((!DEVMODE &&
+        (event.origin === IPC_ORIGIN_PRODUCTION ||
+          event.origin === IPC_ORIGIN_PRODUCTION_OPAQUE)) ||
         (DEVMODE && event.origin === IPC_ORIGIN_DEV) ||
         (DEVMODE && event.origin === IPC_ORIGIN_DEV_LOCALHOST))
     ) {

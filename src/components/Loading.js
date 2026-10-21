@@ -1,11 +1,11 @@
 /**
- * This container shows a loading animation while the plugin is waiting on 
- * an initialization ipc call 
+ * This container shows a loading animation while the plugin is waiting on
+ * an initialization ipc call
  */
 
 import React from 'react';
-import CircularProgress from '@mui/material/CircularProgress';
 import Box from '@mui/material/Box';
+import CircularProgress from '@mui/material/CircularProgress';
 
 class Loading extends React.Component {
   constructor(props) {
@@ -16,19 +16,19 @@ class Loading extends React.Component {
     return (
       <div
         style={{
-          height: "100%",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
         }}
       >
-        <Box sx={{ display: 'flex' }}>
-          <CircularProgress />
+        <Box sx={{display: 'flex'}}>
+          <CircularProgress disableShrink />
         </Box>
       </div>
     );
   }
 }
 
-export default Loading
+export default Loading;
